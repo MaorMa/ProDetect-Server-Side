@@ -192,3 +192,121 @@ C:\Personal\RRSV2\RRS-SERVER-master\RRS_API\obj\Debug\RRS_API.csproj.CoreCompile
 C:\Personal\RRSV2\RRS-SERVER-master\RRS_API\obj\Debug\RRS_API.csproj.CopyComplete
 C:\Personal\RRSV2\RRS-SERVER-master\RRS_API\obj\Debug\RRS_API.dll
 C:\Personal\RRSV2\RRS-SERVER-master\RRS_API\obj\Debug\RRS_API.pdb
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\ApplicationInsights.config
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\roslyn\csc.exe
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\roslyn\System.Collections.Immutable.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\roslyn\System.Reflection.Metadata.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\roslyn\vbc.exe
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\roslyn\VBCSCompiler.exe
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\roslyn\VBCSCompiler.exe.config
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\RRS_API.dll.config
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\RRS_API.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\RRS_API.pdb
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\IronOcr.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\IronOcr.Hebrew.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.AI.Agent.Intercept.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.AI.DependencyCollector.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.AI.PerfCounterCollector.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.AI.ServerTelemetryChannel.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.AI.Web.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.AI.WindowsServer.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.ApplicationInsights.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Newtonsoft.Json.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\System.Net.Http.Formatting.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\System.Web.Cors.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\System.Web.Http.Cors.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\System.Web.Http.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\System.Web.Http.WebHost.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\IronOcr.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\IronOcr.Hebrew.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.AI.DependencyCollector.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.AI.ServerTelemetryChannel.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.AI.Web.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.AI.WindowsServer.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.ApplicationInsights.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\System.Net.Http.Formatting.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\System.Web.Http.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\System.Web.Http.Cors.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Newtonsoft.Json.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\System.Web.Http.WebHost.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\obj\Debug\RRS_API.csprojResolveAssemblyReference.cache
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\obj\Debug\RRS_API.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\obj\Debug\RRS_API.pdb
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Emgu.CV.UI.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Emgu.CV.UI.GL.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Emgu.CV.World.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\OpenTK.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\OpenTK.GLControl.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Emgu.CV.UI.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Emgu.CV.UI.GL.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Emgu.CV.World.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\OpenTK.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\OpenTK.GLControl.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\ApplicationInsights.config
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\roslyn\csc.exe
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\roslyn\System.Collections.Immutable.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\roslyn\System.Reflection.Metadata.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\roslyn\vbc.exe
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\roslyn\VBCSCompiler.exe
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\roslyn\VBCSCompiler.exe.config
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\RRS_API.dll.config
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\RRS_API.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\RRS_API.pdb
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Emgu.CV.UI.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Emgu.CV.UI.GL.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Emgu.CV.World.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\IronOcr.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\IronOcr.Hebrew.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Microsoft.AI.Agent.Intercept.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Microsoft.AI.DependencyCollector.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Microsoft.AI.PerfCounterCollector.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Microsoft.AI.ServerTelemetryChannel.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Microsoft.AI.Web.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Microsoft.AI.WindowsServer.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Microsoft.ApplicationInsights.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Newtonsoft.Json.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\OpenTK.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\OpenTK.GLControl.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\System.Net.Http.Formatting.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\System.Web.Cors.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\System.Web.Http.Cors.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\System.Web.Http.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\System.Web.Http.WebHost.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Emgu.CV.UI.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Emgu.CV.UI.GL.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Emgu.CV.World.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\IronOcr.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\IronOcr.Hebrew.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Microsoft.AI.DependencyCollector.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Microsoft.AI.ServerTelemetryChannel.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Microsoft.AI.Web.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Microsoft.AI.WindowsServer.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Microsoft.ApplicationInsights.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\OpenTK.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\OpenTK.GLControl.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\System.Net.Http.Formatting.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\System.Web.Http.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\System.Web.Http.Cors.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\Newtonsoft.Json.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\bin\System.Web.Http.WebHost.xml
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\obj\Debug\RRS_API.csprojAssemblyReference.cache
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\obj\Debug\RRS_API.csproj.CoreCompileInputs.cache
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\obj\Debug\RRS_API.csproj.CopyComplete
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\obj\Debug\RRS_API.dll
+C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\obj\Debug\RRS_API.pdb

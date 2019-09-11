@@ -8,30 +8,30 @@ namespace OcrProject.Parser
     /*
      * This class responsible for parsing the converted file (conveted by ocr engine)
      */
-    class textParser
+    class TextParser
     {
         //fields
         //String= receipt name, String=Product ID, List=metaData (for multi products with same name\id)
-        private Dictionary<String, Dictionary<String, List<metaData>>> receiptAndIdsMetaData;
+        private Dictionary<String, Dictionary<String, List<MetaData>>> receiptAndIdsMetaData;
         private String date;
 
         //C'tor
-        public textParser()
+        public TextParser()
         {
-            this.receiptAndIdsMetaData = new Dictionary<String, Dictionary<String, List<metaData>>>();
+            this.receiptAndIdsMetaData = new Dictionary<String, Dictionary<String, List<MetaData>>>();
         }
 
         //parsing function
         //get all numbers from text and insert to catalogID
-        public void parsing(receipt receipt)
+        public void parsing(Receipt receipt)
         {
             date = "No Date";
-            string[] lines = receipt.getRows();
-            for (int i = 0; i < lines.Length; i++)
+            List<String> lines = receipt.getRows();
+            for (int i = 0; i < lines.Count; i++)
             {
                 String sID = lines[i];
                 String nextsID;
-                if (i + 1 < lines.Length)
+                if (i + 1 < lines.Count)
                     nextsID = lines[i + 1];
                 else
                     nextsID = "";
@@ -44,9 +44,9 @@ namespace OcrProject.Parser
             return this.date;
         }
 
-        private void addSid(String firstLine, String secondLine, receipt receipt)
+        private void addSid(String firstLine, String secondLine, Receipt receipt)
         {
-            Dictionary<String, List<metaData>> receiptsIdToMetadata = receipt.getIdToMetadata();
+            Dictionary<String, List<MetaData>> receiptsIdToMetadata = receipt.getIdToMetadata();
             bool dateFlag = false;
             String[] firstLineSeperate = firstLine.Split(' ');
             String weight = "";
@@ -69,12 +69,12 @@ namespace OcrProject.Parser
                 {
                     if (!receipt.getIdToMetadata().ContainsKey(s))
                     {
-                        receiptsIdToMetadata.Add(s, new List<metaData>());
-                        receiptsIdToMetadata[s].Add(new metaData("", weight, ""));
+                        receiptsIdToMetadata.Add(s, new List<MetaData>());
+                        receiptsIdToMetadata[s].Add(new MetaData(s, "", weight, "",0));
                     }
                     else
                     {
-                        receiptsIdToMetadata[s].Add(new metaData("", weight, ""));
+                        receiptsIdToMetadata[s].Add(new MetaData(s, "", weight, "",0));
                     }
                 }
                 else if (!dateFlag && s.Contains('/'))//if date
@@ -175,7 +175,7 @@ namespace OcrProject.Parser
             return smallest.ToString();
         }
 
-        public List<receipt> getAllRecieptsData(List<receipt> receipts)
+        public List<Receipt> getAllRecieptsData(List<Receipt> receipts)
         {
             foreach (var receipt in receipts)
             {

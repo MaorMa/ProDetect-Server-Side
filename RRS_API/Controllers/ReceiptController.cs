@@ -37,16 +37,46 @@ namespace RRS_API.Controllers
                     Image image = Image.FromStream(destination);
                     imgNameAndImg.Add(fileKey, image);
                 }
-                new System.Threading.Tasks.Task(() =>{
+                new System.Threading.Tasks.Task(() =>
+                {
                     this.mg.processPhotos(selectedFamilyID, selectedMarket, imgNameAndImg);
                 }).Start();
                 return Request.CreateResponse(HttpStatusCode.Created);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return Request.CreateResponse(HttpStatusCode.InternalServerError);
             }
+        }
 
+        [Route("GetTotalUploadsDetails")]
+        [HttpGet]
+        public HttpResponseMessage GetTotalUploadsDetails()
+        {
+            try
+            {
+                string result = mg.GetTotalUploadsDetails();
+                return Request.CreateResponse(HttpStatusCode.Created, result);
+            }
+            catch (Exception)
+            {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        [Route("GetAllRecognizedData")]
+        [HttpGet]
+        public HttpResponseMessage GetAllRecognizedData()
+        {
+            try
+            {
+                string result = mg.GetAllRecognizedData();
+                return Request.CreateResponse(HttpStatusCode.Created, result);
+            }
+            catch (Exception)
+            {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
+            }
         }
     }
 }

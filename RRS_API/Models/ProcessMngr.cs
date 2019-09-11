@@ -219,7 +219,7 @@ namespace RRS_API.Controllers
          */
         public string GetTotalUploadsDetails()
         {
-            List<string> results = AzureConnection.SelectQuery("SELECT * FROM FamilyUploads");
+            List<string> results = AzureConnection.SelectQuery("SELECT * FROM FamilyUploads WHERE ReceiptStatus = 0");
             List<FamilyUploads> toReturn = new List<FamilyUploads>();
 
             foreach (string record in results)
@@ -364,32 +364,24 @@ namespace RRS_API.Controllers
          * first we delete all products of given receipt
          * then we add all products of updated receipt
          */
-        public void UpdateReceiptData(List<KeyValuePair<string, List<ReceiptToReturn>>> familyToReceipts)
+        public void UpdateReceiptData(ReceiptToReturn receiptToUpdate)
         {
             try
-            {
-                // families - >  receipts -> products
-                foreach (KeyValuePair<string, List<ReceiptToReturn>> keyValue in familyToReceipts)
+            {           
+                string receiptID = receiptToUpdate.receiptID;
+                List<MetaData> sortedProducts = receiptToUpdate.products.ToList();
+
+                //delete -> insert -> updateStatus
+                AzureConnection.deleteReceiptData(receiptID);
+                foreach (MetaData product in sortedProducts)
                 {
-                    foreach (ReceiptToReturn ReceiptToReturn in keyValue.Value)
-                    {
-                        string receiptID = ReceiptToReturn.receiptID;
-                        List<MetaData> sortedProducts = ReceiptToReturn.products.ToList();
-
-                        //delete -> insert -> updateStatus
-                        AzureConnection.deleteReceiptData(receiptID);
-                        AzureConnection.updateStatus(receiptID);
-                        foreach (MetaData product in sortedProducts)
-                        {
-                            string productID = product.getsID();
-                            string productDescription = product.getDescription();
-                            string productQuantity = product.getQuantity();
-                            string productPrice = product.getPrice();
-                            AzureConnection.insertReceiptData(receiptID, productID, productDescription, productQuantity, productPrice, 0);
-                        }
-
-                    }
+                    string productID = product.getsID();
+                    string productDescription = product.getDescription();
+                    string productQuantity = product.getQuantity();
+                    string productPrice = product.getPrice();
+                    AzureConnection.insertReceiptData(receiptID, productID, productDescription, productQuantity, productPrice, 0);
                 }
+                AzureConnection.updateStatus(receiptID);
             }
             catch (Exception exception)
             {

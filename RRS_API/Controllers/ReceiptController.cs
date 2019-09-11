@@ -80,9 +80,9 @@ namespace RRS_API.Controllers
             }
         }
 
-        [Route("UpdateReceiptData")]
+        [Route("UpdateReceiptData/{familyID}")]
         [HttpPut]
-        public HttpResponseMessage UpdateReceiptData([FromBody] List<KeyValuePair<string, List<ReceiptToReturn>>> receiptsToUpdate)
+        public HttpResponseMessage UpdateReceiptData([FromBody] ReceiptToReturn receiptToUpdate)
         {
             try
             {

@@ -64,6 +64,7 @@ namespace RRS_API.Controllers
             //iterate over all the receipts
             foreach (Receipt receipt in receipts)
             {
+                receipt.setMarketID(selectedMarket);
                 List<ocrWord> wordsToDraw = new List<ocrWord>();
                 double averageX = 0, averageY = 0, numOfWords = 0;
 
@@ -143,7 +144,7 @@ namespace RRS_API.Controllers
         {
             try
             {
-                this.insertToFamiliyUploads(selectedFamilyID, receipt.getName(), receipt.getOriginalImage(), 0);
+                this.insertToFamiliyUploads(selectedFamilyID, receipt.getName(), receipt.getMarketID(), receipt.getOriginalImage(), 0);
                 foreach (KeyValuePair<string, List<MetaData>> data in receipt.getIdToMetadata())
                 {
                     string id = data.Key;
@@ -165,7 +166,7 @@ namespace RRS_API.Controllers
         /*
          * 
          */
-        private void insertToFamiliyUploads(string selectedFamilyID, string imageName, Image markedImage, int status)
+        private void insertToFamiliyUploads(string selectedFamilyID, string imageName,string marketID, Image markedImage, int status)
         {
             //string familyPath = MarkedImagesPath + selectedFamilyID;
             //try to update FamilyUploads
@@ -187,7 +188,7 @@ namespace RRS_API.Controllers
                     ImageConverter converter = new ImageConverter();
                     byte[] imageBytes = (byte[])converter.ConvertTo(b, typeof(byte[]));
                     string base64String = Convert.ToBase64String(imageBytes);
-                    AzureConnection.updateFamilyUploads(selectedFamilyID, imageName, status);
+                    AzureConnection.updateFamilyUploads(selectedFamilyID, marketID, imageName, status);
                     //AzureConnection.updateFamilyUploads(selectedFamilyID, imageName, familyPath, status);
                 }
             }
@@ -255,7 +256,7 @@ namespace RRS_API.Controllers
          */
         public string GetAllRecognizedData()
         {
-            string query = "SELECT fu.FamilyID, fu.ReceiptID, rd.ProductID,rd.Description, rd.Quantity,rd.Price, rd.YCoordinate FROM FamilyUploads as fu JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID and fu.ReceiptStatus = 0";
+            string query = "SELECT fu.FamilyID, fu.ReceiptID, fu.MarketID, rd.ProductID, rd.Description, rd.Quantity,rd.Price, rd.YCoordinate FROM FamilyUploads as fu JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID and fu.ReceiptStatus = 0";
             List<string> results = AzureConnection.SelectQuery(query);
             Dictionary<string, Dictionary<string, ReceiptToReturn>> allInfo = new Dictionary<string, Dictionary<string, ReceiptToReturn>>();
             foreach (string record in results)
@@ -263,11 +264,12 @@ namespace RRS_API.Controllers
                 string[] recordSplit = record.Split(',');
                 string FamilyID = recordSplit[0];
                 string receiptID = recordSplit[1];
-                string productID = recordSplit[2];
-                string description = recordSplit[3];
-                string quantity = recordSplit[4];
-                string price = recordSplit[5];
-                double yCoordinate = Convert.ToDouble(recordSplit[6]);
+                string marketID = recordSplit[2];
+                string productID = recordSplit[3];
+                string description = recordSplit[4];
+                string quantity = recordSplit[5];
+                string price = recordSplit[6];
+                double yCoordinate = Convert.ToDouble(recordSplit[7]);
                 if (allInfo.ContainsKey(FamilyID))//Family ID exists
                 {
                     if (allInfo[FamilyID].ContainsKey(receiptID))//Receipt exists for family ID
@@ -282,7 +284,7 @@ namespace RRS_API.Controllers
                                 byte[] imageBytes = m.ToArray();
                                 //Convert byte[] to Base64 String
                                 string base64String = Convert.ToBase64String(imageBytes);
-                                allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, base64String));
+                                allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, marketID, base64String));
                                 allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, yCoordinate);
                             }
                         }
@@ -299,7 +301,7 @@ namespace RRS_API.Controllers
                             //Convert byte[] to Base64 String
                             string base64String = Convert.ToBase64String(imageBytes);
                             allInfo.Add(FamilyID, new Dictionary<string, ReceiptToReturn>());
-                            allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, base64String));
+                            allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID,marketID, base64String));
                             allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, yCoordinate);
                         }
                     }
@@ -342,8 +344,11 @@ namespace RRS_API.Controllers
                 parameters.Param[0] = new EncoderParameter(Encoder.ColorDepth, 24); //8, 16, 24, 32 (base on your format)
                 image.Save(stream, jpgCodec, parameters);
             }
+
+            string path = MarkedImagesPath + "\\" + selectedFamilyID;
+            System.IO.Directory.CreateDirectory(path);
             Bitmap bm = new Bitmap(stream);
-            bm.Save(MarkedImagesPath + "\\" + selectedFamilyID + "\\" + receipt.getName());
+            bm.Save(path + "\\" + receipt.getName());
         }
 
         //move to FilesHandler class
@@ -353,6 +358,24 @@ namespace RRS_API.Controllers
             image.Save(stream, format);
             stream.Position = 0;
             return stream;
+        }
+
+        /*
+         * first we delete all products of given receipt
+         * then we add all products of updated receipt
+         */ 
+        private void UpdateReceiptData(string receiptID)
+        {
+            //delete -> insert -> updateStatus
+            AzureConnection.deleteReceiptData(receiptID);
+            //AzureConnection.insertReceiptData(receiptID);
+            AzureConnection.updateStatus(receiptID);
+        }
+
+        public List<string> GetProductInfo(string productID,string MarketID)
+        {
+            string query = "SELECT * FROM "  + MarketID + " where sID='" + productID + "'"; 
+            return AzureConnection.SelectQuery(query);
         }
     }
 }

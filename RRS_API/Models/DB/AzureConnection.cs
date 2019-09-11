@@ -86,23 +86,7 @@ namespace RRS_API.Models
          * change status from 0 to 1 
          * 0 - means need to be approved , 1 - means already approved 
          */
-        public void updateStatus(String familyID, String receiptID)
-        {
-            throw new NotImplementedException();
-        }
-
-        /*
-         * if researcher make changes 
-         */
-        public void updateReceiptData(string selectedFamilyID, Dictionary<string, List<MetaData>>.ValueCollection values)
-        {
-            throw new NotImplementedException();
-        }
-
-        /*
-         * insert data for a given family
-         */
-        public void updateFamilyUploads(string selectedFamilyID, string imageName, int status)
+        public void updateStatus(String receiptID)
         {
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
@@ -114,13 +98,11 @@ namespace RRS_API.Models
                 {
                     command.Connection = connection;
                     command.CommandType = CommandType.Text;
-                    command.CommandText = "INSERT into FamilyUploads(FamilyID, ReceiptID, ReceiptStatus) VALUES(@FamilyID, @ReceiptID, @ReceiptStatus)";
-                    command.Parameters.AddWithValue("@FamilyID", selectedFamilyID);
-                    command.Parameters.AddWithValue("@ReceiptID", imageName);
-                    command.Parameters.AddWithValue("@ReceiptStatus", status);
+                    command.CommandText = "UPDATE FamilyUploads SET ReceiptStatus = 1 Where ReceiptID = @receiptID";
+                    command.Parameters.AddWithValue("@ReceiptID", receiptID);
                     try
                     {
-                        int recordsAffected = command.ExecuteNonQuery();
+                        command.ExecuteNonQuery();
                     }
                     catch (SqlException sqlException)
                     {
@@ -134,7 +116,51 @@ namespace RRS_API.Models
             }
         }
 
-        public void insertReceiptData(string receiptID, string productID, string productDescription, string productQuantity, string productPrice,double yCoordinate)
+        /*
+         * if researcher make changes 
+         */
+        public void updateReceiptData(string selectedFamilyID, Dictionary<string, List<MetaData>>.ValueCollection values)
+        {
+            throw new NotImplementedException();
+        }
+
+        /*
+         * insert data for a given family
+         */
+        public void updateFamilyUploads(string selectedFamilyID, string MarketID, string imageName, int status)
+        {
+            using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+            {
+                if (!(connection.State == System.Data.ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = "INSERT into FamilyUploads(FamilyID, MarketID, ReceiptID, ReceiptStatus) VALUES(@FamilyID, @MarketID, @ReceiptID, @ReceiptStatus)";
+                    command.Parameters.AddWithValue("@FamilyID", selectedFamilyID);
+                    command.Parameters.AddWithValue("@MarketID", MarketID);
+                    command.Parameters.AddWithValue("@ReceiptID", imageName);
+                    command.Parameters.AddWithValue("@ReceiptStatus", status);
+                    try
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    catch (SqlException sqlException)
+                    {
+                        throw sqlException;
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+        }
+
+        public void insertReceiptData(string receiptID, string productID, string productDescription, string productQuantity, string productPrice, double yCoordinate)
         {
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
@@ -155,7 +181,7 @@ namespace RRS_API.Models
                     command.Parameters.AddWithValue("@YCoordinate", yCoordinate.ToString());
                     try
                     {
-                        int recordsAffected = command.ExecuteNonQuery();
+                        command.ExecuteNonQuery();
                     }
                     catch (SqlException sqlException)
                     {
@@ -168,5 +194,40 @@ namespace RRS_API.Models
                 }
             }
         }
+
+
+        /*
+         * delete products of given receipt
+         */
+        public void deleteReceiptData(string receiptID)
+        {
+            using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+            {
+                if (!(connection.State == System.Data.ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = "DELETE FROM ReceiptData WHERE ReceiptID = @ReceiptID";
+                    command.Parameters.AddWithValue("@ReceiptID", receiptID);
+                    try
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    catch (SqlException sqlException)
+                    {
+                        throw sqlException;
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+        }
+
     }
 }

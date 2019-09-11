@@ -16,8 +16,9 @@ public class Receipt
     private List<String> rows;
     public Image ManipulatedImage;
     public Image OriginalImage;
+    public string marketID;
 
-    public Receipt(int width, int height, String name, Image ManipulatedImage, Image OriginalImage)
+    public Receipt(int width, int height, string name, Image ManipulatedImage, Image OriginalImage)
     {
         this.width = width;
         this.height = height;
@@ -28,6 +29,17 @@ public class Receipt
         this.OriginalImage = OriginalImage;
         this.rows = new List<string>();
     }
+
+    public string getMarketID()
+    {
+        return this.marketID;
+    }
+
+    public void setMarketID(string marketID)
+    {
+        this.marketID = marketID;
+    }
+
 
     public void setxAverage(int average)
     {

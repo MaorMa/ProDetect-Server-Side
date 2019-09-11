@@ -78,5 +78,36 @@ namespace RRS_API.Controllers
                 return Request.CreateResponse(HttpStatusCode.InternalServerError);
             }
         }
+
+        [Route("UpdateReceiptData")]
+        [HttpPost]
+        public HttpResponseMessage UpdateReceiptData()
+        {
+            try
+            {
+                //string result = mg.UpdateReceiptData();
+                return Request.CreateResponse(HttpStatusCode.Created);
+            }
+            catch (Exception)
+            {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        [Route("GetProductInfo/{marketID}/{productID}")]
+        [HttpGet]
+        public HttpResponseMessage GetProductInfo(string marketID, string productID)
+        {
+
+            try
+            {
+                List<string> result = mg.GetProductInfo(productID,marketID);
+                return Request.CreateResponse(HttpStatusCode.OK, result);
+            }
+            catch (Exception)
+            {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
+            }
+        }
     }
 }

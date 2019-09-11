@@ -375,17 +375,17 @@ namespace RRS_API.Controllers
                     {
                         string receiptID = ReceiptToReturn.receiptID;
                         List<MetaData> sortedProducts = ReceiptToReturn.products.ToList();
+
+                        //delete -> insert -> updateStatus
                         AzureConnection.deleteReceiptData(receiptID);
+                        AzureConnection.updateStatus(receiptID);
                         foreach (MetaData product in sortedProducts)
                         {
                             string productID = product.getsID();
                             string productDescription = product.getDescription();
                             string productQuantity = product.getQuantity();
                             string productPrice = product.getPrice();
-                            //delete -> insert -> updateStatus
                             AzureConnection.insertReceiptData(receiptID, productID, productDescription, productQuantity, productPrice, 0);
-                            AzureConnection.updateStatus(receiptID);
-                            ReceiptToReturn.updateProducts(sortedProducts);
                         }
 
                     }

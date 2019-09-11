@@ -80,13 +80,13 @@ namespace RRS_API.Controllers
             }
         }
 
-        [Route("UpdateReceiptData/{familyID}")]
+        [Route("UpdateReceiptData")]
         [HttpPut]
         public HttpResponseMessage UpdateReceiptData([FromBody] ReceiptToReturn receiptToUpdate)
         {
             try
             {
-                mg.UpdateReceiptData(receiptsToUpdate);
+                mg.UpdateReceiptData(receiptToUpdate);
                 return Request.CreateResponse(HttpStatusCode.OK);
             }
             catch (Exception)

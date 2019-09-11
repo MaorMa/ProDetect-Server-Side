@@ -166,7 +166,7 @@ namespace RRS_API.Controllers
         /*
          * 
          */
-        private void insertToFamiliyUploads(string selectedFamilyID, string imageName,string marketID, Image markedImage, int status)
+        private void insertToFamiliyUploads(string selectedFamilyID, string imageName, string marketID, Image markedImage, int status)
         {
             //string familyPath = MarkedImagesPath + selectedFamilyID;
             //try to update FamilyUploads
@@ -301,7 +301,7 @@ namespace RRS_API.Controllers
                             //Convert byte[] to Base64 String
                             string base64String = Convert.ToBase64String(imageBytes);
                             allInfo.Add(FamilyID, new Dictionary<string, ReceiptToReturn>());
-                            allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID,marketID, base64String));
+                            allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, marketID, base64String));
                             allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, yCoordinate);
                         }
                     }
@@ -363,15 +363,33 @@ namespace RRS_API.Controllers
         /*
          * first we delete all products of given receipt
          * then we add all products of updated receipt
-         */ 
-        public void UpdateReceiptData(string receiptID, string productID, string productDescription, string productQuantity, string productPrice)
+         */
+        public void UpdateReceiptData(List<KeyValuePair<string, List<ReceiptToReturn>>> familyToReceipts)
         {
             try
             {
-                //delete -> insert -> updateStatus
-                AzureConnection.deleteReceiptData(receiptID);
-                AzureConnection.insertReceiptData(receiptID, productID, productDescription, productQuantity, productPrice,0);
-                AzureConnection.updateStatus(receiptID);
+                // families - >  receipts -> products
+                foreach (KeyValuePair<string, List<ReceiptToReturn>> keyValue in familyToReceipts)
+                {
+                    foreach (ReceiptToReturn ReceiptToReturn in keyValue.Value)
+                    {
+                        string receiptID = ReceiptToReturn.receiptID;
+                        List<MetaData> sortedProducts = ReceiptToReturn.products.ToList();
+                        AzureConnection.deleteReceiptData(receiptID);
+                        foreach (MetaData product in sortedProducts)
+                        {
+                            string productID = product.getsID();
+                            string productDescription = product.getDescription();
+                            string productQuantity = product.getQuantity();
+                            string productPrice = product.getPrice();
+                            //delete -> insert -> updateStatus
+                            AzureConnection.insertReceiptData(receiptID, productID, productDescription, productQuantity, productPrice, 0);
+                            AzureConnection.updateStatus(receiptID);
+                            ReceiptToReturn.updateProducts(sortedProducts);
+                        }
+
+                    }
+                }
             }
             catch (Exception exception)
             {
@@ -379,9 +397,9 @@ namespace RRS_API.Controllers
             }
         }
 
-        public List<string> GetProductInfo(string productID,string MarketID)
+        public List<string> GetProductInfo(string productID, string MarketID)
         {
-            string query = "SELECT * FROM "  + MarketID + " where sID='" + productID + "'"; 
+            string query = "SELECT * FROM " + MarketID + " where sID='" + productID + "'";
             return AzureConnection.SelectQuery(query);
         }
     }

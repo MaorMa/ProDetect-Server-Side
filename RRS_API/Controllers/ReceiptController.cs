@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RRS_API.Models;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -81,11 +82,11 @@ namespace RRS_API.Controllers
 
         [Route("UpdateReceiptData")]
         [HttpPut]
-        public HttpResponseMessage UpdateReceiptData([FromBody] Object receipt)
+        public HttpResponseMessage UpdateReceiptData([FromBody] List<KeyValuePair<string, List<ReceiptToReturn>>> receiptsToUpdate)
         {
             try
             {
-                //mg.UpdateReceiptData(receiptID, productID, productDescription, productQuantity, productPrice);
+                mg.UpdateReceiptData(receiptsToUpdate);
                 return Request.CreateResponse(HttpStatusCode.OK);
             }
             catch (Exception)
@@ -98,10 +99,10 @@ namespace RRS_API.Controllers
         [HttpGet]
         public HttpResponseMessage GetProductInfo(string marketID, string productID)
         {
-
+            //need to fix sid - 729000....
             try
             {
-                List<string> result = mg.GetProductInfo(productID,marketID);
+                List<string> result = mg.GetProductInfo(productID, marketID);
                 return Request.CreateResponse(HttpStatusCode.OK, result);
             }
             catch (Exception)

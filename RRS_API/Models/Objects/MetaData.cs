@@ -66,5 +66,10 @@ namespace ImageRecognition.Objects
         {
             this.yCoordinate = ycoordiante;
         }
+
+        public string getsID()
+        {
+            return this.sID;
+        }
     }
 }

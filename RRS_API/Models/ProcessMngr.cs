@@ -364,12 +364,19 @@ namespace RRS_API.Controllers
          * first we delete all products of given receipt
          * then we add all products of updated receipt
          */ 
-        private void UpdateReceiptData(string receiptID)
+        public void UpdateReceiptData(string receiptID, string productID, string productDescription, string productQuantity, string productPrice)
         {
-            //delete -> insert -> updateStatus
-            AzureConnection.deleteReceiptData(receiptID);
-            //AzureConnection.insertReceiptData(receiptID);
-            AzureConnection.updateStatus(receiptID);
+            try
+            {
+                //delete -> insert -> updateStatus
+                AzureConnection.deleteReceiptData(receiptID);
+                AzureConnection.insertReceiptData(receiptID, productID, productDescription, productQuantity, productPrice,0);
+                AzureConnection.updateStatus(receiptID);
+            }
+            catch (Exception exception)
+            {
+                throw exception;
+            }
         }
 
         public List<string> GetProductInfo(string productID,string MarketID)

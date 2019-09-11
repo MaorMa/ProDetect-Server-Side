@@ -117,14 +117,6 @@ namespace RRS_API.Models
         }
 
         /*
-         * if researcher make changes 
-         */
-        public void updateReceiptData(string selectedFamilyID, Dictionary<string, List<MetaData>>.ValueCollection values)
-        {
-            throw new NotImplementedException();
-        }
-
-        /*
          * insert data for a given family
          */
         public void updateFamilyUploads(string selectedFamilyID, string MarketID, string imageName, int status)

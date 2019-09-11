@@ -79,14 +79,14 @@ namespace RRS_API.Controllers
             }
         }
 
-        [Route("UpdateReceiptData")]
+        [Route("UpdateReceiptData/{receiptID}/{productID}/{productDescription}/{productQuantity}/{productPrice}")]
         [HttpPost]
-        public HttpResponseMessage UpdateReceiptData()
+        public HttpResponseMessage UpdateReceiptData(string receiptID, string productID, string productDescription,string productQuantity, string productPrice)
         {
             try
             {
-                //string result = mg.UpdateReceiptData();
-                return Request.CreateResponse(HttpStatusCode.Created);
+                mg.UpdateReceiptData(receiptID, productID, productDescription, productQuantity, productPrice);
+                return Request.CreateResponse(HttpStatusCode.OK);
             }
             catch (Exception)
             {

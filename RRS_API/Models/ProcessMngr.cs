@@ -151,7 +151,7 @@ namespace RRS_API.Controllers
         {
             try
             {
-                AzureConnection.updateStatus(receipt.getName(),"0");
+                AzureConnection.updateStatus(receipt.getName(), "0");
                 foreach (KeyValuePair<string, List<MetaData>> data in receipt.getIdToMetadata())
                 {
                     string id = data.Key;
@@ -397,7 +397,7 @@ namespace RRS_API.Controllers
                     string productPrice = product.getPrice();
                     AzureConnection.insertReceiptData(receiptID, productID, productDescription, productQuantity, productPrice, 0);
                 }
-                AzureConnection.updateStatus(receiptID,"1");
+                AzureConnection.updateStatus(receiptID, "1");
             }
             catch (Exception exception)
             {

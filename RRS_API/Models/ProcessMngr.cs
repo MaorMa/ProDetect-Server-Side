@@ -207,7 +207,7 @@ namespace RRS_API.Controllers
          */
         public string GetTotalUploadsDetails()
         {
-            List<string> results = AzureConnection.SelectQuery("SELECT * FROM FamilyUploads WHERE ReceiptStatus = 0");
+            List<string> results = AzureConnection.SelectQuery("SELECT * FROM FamilyUploads WHERE NOT ReceiptStatus = 1");
             List<FamilyUploads> toReturn = new List<FamilyUploads>();
 
             foreach (string record in results)

@@ -86,7 +86,7 @@ namespace RRS_API.Models
          * change status from 0 to 1 
          * 0 - means need to be approved , 1 - means already approved 
          */
-        public void updateStatus(String receiptID)
+        public void updateStatus(String receiptID, string status)
         {
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
@@ -98,7 +98,7 @@ namespace RRS_API.Models
                 {
                     command.Connection = connection;
                     command.CommandType = CommandType.Text;
-                    command.CommandText = "UPDATE FamilyUploads SET ReceiptStatus = 1 Where ReceiptID = @receiptID";
+                    command.CommandText = "UPDATE FamilyUploads SET ReceiptStatus = " + status + " Where ReceiptID = @receiptID";
                     command.Parameters.AddWithValue("@ReceiptID", receiptID);
                     try
                     {

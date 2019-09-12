@@ -119,7 +119,7 @@ namespace RRS_API.Models
         /*
          * insert data for a given family
          */
-        public void updateFamilyUploads(string selectedFamilyID, string MarketID, string imageName, int status)
+        public void updateFamilyUploads(string selectedFamilyID, string MarketID, string imageName, int status, string UploadTime)
         {
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
@@ -131,11 +131,12 @@ namespace RRS_API.Models
                 {
                     command.Connection = connection;
                     command.CommandType = CommandType.Text;
-                    command.CommandText = "INSERT into FamilyUploads(FamilyID, MarketID, ReceiptID, ReceiptStatus) VALUES(@FamilyID, @MarketID, @ReceiptID, @ReceiptStatus)";
+                    command.CommandText = "INSERT into FamilyUploads(FamilyID, MarketID, ReceiptID, ReceiptStatus, UploadTime) VALUES(@FamilyID, @MarketID, @ReceiptID, @ReceiptStatus,@UploadTime)";
                     command.Parameters.AddWithValue("@FamilyID", selectedFamilyID);
                     command.Parameters.AddWithValue("@MarketID", MarketID);
                     command.Parameters.AddWithValue("@ReceiptID", imageName);
                     command.Parameters.AddWithValue("@ReceiptStatus", status);
+                    command.Parameters.AddWithValue("@UploadTime", UploadTime);
                     try
                     {
                         command.ExecuteNonQuery();

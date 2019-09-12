@@ -28,14 +28,16 @@ namespace RRS_API.Controllers
          */
         public void processPhotos(string selectedFamilyID, string selectedMarket, Dictionary<string, Image> imgNameAndImg)
         {
+            DateTime UploadTime = DateTime.Now;
             setSelectedFamilyID(selectedFamilyID);
+            Dictionary<string, Image> withoutMultiplicity = detectMultiplicty(imgNameAndImg);
             //first set status to "-1" = in progress
-            foreach (KeyValuePair<string, Image> pair in imgNameAndImg)
+            foreach (KeyValuePair<string, Image> pair in withoutMultiplicity)
             {
-                insertToFamiliyUploads(selectedFamilyID, pair.Key, selectedMarket, -1);
+                insertToFamiliyUploads(selectedFamilyID, pair.Key, selectedMarket, -1, UploadTime.ToString());
             }
             //before we start using ocr engine , we need to approve the image not ploaded before            
-            List<Receipt> receipts = ocrResult.fromImagesToText(detectMultiplicty(imgNameAndImg));
+            List<Receipt> receipts = ocrResult.fromImagesToText(withoutMultiplicity);
             receipts = TextParser.getAllRecieptsData(receipts);
             getSidAndDesc(receipts, selectedMarket);
         }
@@ -171,14 +173,14 @@ namespace RRS_API.Controllers
         /*
          * 
          */
-        private void insertToFamiliyUploads(string selectedFamilyID, string imageName, string marketID, int status)
+        private void insertToFamiliyUploads(string selectedFamilyID, string imageName, string marketID, int status, string UploadTime)
         {
             //string familyPath = MarkedImagesPath + selectedFamilyID;
             //try to update FamilyUploads
             //get exception if receipt allready been uploaded
             try
             {
-                AzureConnection.updateFamilyUploads(selectedFamilyID, marketID, imageName, status);
+                AzureConnection.updateFamilyUploads(selectedFamilyID, marketID, imageName, status, UploadTime);
             }
             catch (Exception) { }
         }
@@ -246,7 +248,7 @@ namespace RRS_API.Controllers
         {
             string queryStatusWorking = "SELECT * FROM FamilyUploads WHERE ReceiptStatus = -1";
             List<string> resultsStatusWorking = AzureConnection.SelectQuery(queryStatusWorking);
-            string query = "SELECT fu.FamilyID, fu.ReceiptID, fu.MarketID, fu.ReceiptStatus, rd.ProductID, rd.Description, rd.Quantity,rd.Price, rd.YCoordinate FROM FamilyUploads as fu JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID and fu.ReceiptStatus = 0";
+            string query = "SELECT fu.FamilyID, fu.ReceiptID, fu.MarketID, fu.UploadTime, fu.ReceiptStatus, rd.ProductID, rd.Description, rd.Quantity,rd.Price, rd.YCoordinate FROM FamilyUploads as fu JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID and fu.ReceiptStatus = 0";
             List<string> results = AzureConnection.SelectQuery(query);
             Dictionary<string, Dictionary<string, ReceiptToReturn>> allInfo = new Dictionary<string, Dictionary<string, ReceiptToReturn>>();
             foreach (string record in results)
@@ -255,12 +257,13 @@ namespace RRS_API.Controllers
                 string FamilyID = recordSplit[0];
                 string receiptID = recordSplit[1];
                 string marketID = recordSplit[2];
-                string receiptStatus = recordSplit[3];
-                string productID = recordSplit[4];
-                string description = recordSplit[5];
-                string quantity = recordSplit[6];
-                string price = recordSplit[7];
-                double yCoordinate = Convert.ToDouble(recordSplit[7]);
+                string uploadTime = recordSplit[3];
+                string receiptStatus = recordSplit[4];
+                string productID = recordSplit[5];
+                string description = recordSplit[6];
+                string quantity = recordSplit[7];
+                string price = recordSplit[8];
+                double yCoordinate = Convert.ToDouble(recordSplit[9]);
                 if (allInfo.ContainsKey(FamilyID))//Family ID exists
                 {
                     if (allInfo[FamilyID].ContainsKey(receiptID))//Receipt exists for family ID
@@ -275,7 +278,7 @@ namespace RRS_API.Controllers
                                 byte[] imageBytes = m.ToArray();
                                 //Convert byte[] to Base64 String
                                 string base64String = Convert.ToBase64String(imageBytes);
-                                allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, marketID, base64String, receiptStatus));
+                                allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, marketID, base64String, receiptStatus, uploadTime));
                                 allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, yCoordinate);
                             }
                         }
@@ -292,7 +295,7 @@ namespace RRS_API.Controllers
                             //Convert byte[] to Base64 String
                             string base64String = Convert.ToBase64String(imageBytes);
                             allInfo.Add(FamilyID, new Dictionary<string, ReceiptToReturn>());
-                            allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, marketID, base64String, receiptStatus));
+                            allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, marketID, base64String, receiptStatus, uploadTime));
                             allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, yCoordinate);
                         }
                     }
@@ -306,14 +309,15 @@ namespace RRS_API.Controllers
                 string marketID = recordSplit[1];
                 string receiptID = recordSplit[2];
                 string receiptStatus = recordSplit[3];
+                string uploadTime = recordSplit[4];
                 if (allInfo.ContainsKey(FamilyID))//Family ID exists
                 {
-                    allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, marketID, "", receiptStatus));
+                    allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, marketID, "", receiptStatus, uploadTime));
                 }
                 else
                 {
                     allInfo.Add(FamilyID, new Dictionary<string, ReceiptToReturn>());
-                    allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, marketID, "", receiptStatus));
+                    allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, marketID, "", receiptStatus, uploadTime));
                 }
             }
 

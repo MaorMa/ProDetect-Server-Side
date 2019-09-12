@@ -13,17 +13,19 @@ namespace RRS_API.Models
         public string marketID { get; set; }
         public string image { get; set; }
         public string status { get; set; }
+        public string uploadTime { get; set; }
 
         public List<MetaData> products { get; set; }
 
 
-        public ReceiptToReturn(string receiptID, string marketID, string image, string status)
+        public ReceiptToReturn(string receiptID, string marketID, string image, string status,string uploadTime)
         {
             this.receiptID = receiptID;
             this.marketID = marketID;
             this.image = image;
             this.products = new List<MetaData>();
             this.status = status;
+            this.uploadTime = uploadTime;
         }
 
         public void updateProducts(List<MetaData> products)

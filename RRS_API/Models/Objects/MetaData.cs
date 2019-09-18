@@ -47,7 +47,7 @@ namespace ImageRecognition.Objects
          * Setters
          */
 
-         public void setDescription(String description)
+        public void setDescription(String description)
         {
             this.description = description;
         }

@@ -14,9 +14,9 @@ public class Receipt
     private Dictionary<String, List<ocrWord>> words;
     private Dictionary<String, List<MetaData>> idToMetadata;
     private List<String> rows;
-    public Image ManipulatedImage;
-    public Image OriginalImage;
-    public string marketID;
+    private Image ManipulatedImage;
+    private Image OriginalImage;
+    private string marketID;
 
     public Receipt(int width, int height, string name, Image ManipulatedImage, Image OriginalImage)
     {

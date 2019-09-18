@@ -32,7 +32,7 @@ namespace RRS_API.Models
                 //draw red rectangle
                 lowerYBound = averageY - (0.75 * averageY);
                 upperYBound = averageY + (0.75 * averageY);
-                xRuleDeviation = Math.Abs(word.getX() + word.getWidth() - (averageX)) > 450;
+                xRuleDeviation = Math.Abs(word.getX() + word.getWidth() - (averageX)) > 350;
                 yRuleDeviation = false;
                 if (word.getY() < lowerYBound || word.getY() > upperYBound)
                 {

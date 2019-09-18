@@ -89,7 +89,7 @@ namespace Server
             ocrResults = ocr.Read(imgInNewResolution);
             if (ocrResults.Pages.Count > 0)
             {
-                Receipt receipt = new Receipt(ocrResults.Pages[0].Width, ocrResults.Pages[0].Height, imgName, imgInNewResolution,img);//create receipt object with sizes and name
+                Receipt receipt = new Receipt(ocrResults.Pages[0].Width, ocrResults.Pages[0].Height, imgName, imgInNewResolution, img);//create receipt object with sizes and name
                 detectWords(ocrResults, imgInNewResolution, receipt);
 
                 var mode1 = new Task(() =>
@@ -125,7 +125,7 @@ namespace Server
                 mode2.Wait();
                 mode3.Wait();
                 mode4.Wait();
-                
+
                 //add receipt after trying all m modes
                 this.receipts.Add(receipt);
             }

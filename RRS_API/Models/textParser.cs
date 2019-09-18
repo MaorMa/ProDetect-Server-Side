@@ -6,7 +6,7 @@ using System.Linq;
 namespace OcrProject.Parser
 {
     /*
-     * This class responsible for parsing the converted file (conveted by ocr engine)
+     * This class responsible for parsing the converted image
      */
     class TextParser
     {

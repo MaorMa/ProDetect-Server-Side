@@ -23,7 +23,6 @@ namespace RRS_API.Models
             modes.Add(convertToGrayscaleV2(Bitimage));
             modes.Add(convertToBW(Bitimage));
             modes.Add(Sharpen(Bitimage));
-
         }
 
         /*
@@ -76,7 +75,7 @@ namespace RRS_API.Models
         }
 
 
-        public static Bitmap Sharpen(Bitmap image)
+        private Bitmap Sharpen(Bitmap image)
         {
             Bitmap sharpenImage = (Bitmap)image.Clone();
 
@@ -186,8 +185,6 @@ namespace RRS_API.Models
         {
             return this.modes[3];
         }
-
-
 
         public Bitmap getImageInNewResolution()
         {

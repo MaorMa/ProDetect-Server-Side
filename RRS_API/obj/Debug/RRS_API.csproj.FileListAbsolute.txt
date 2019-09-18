@@ -310,3 +310,11 @@ C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\obj\Debug\RRS_API.csproj.CoreCompileInp
 C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\obj\Debug\RRS_API.csproj.CopyComplete
 C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\obj\Debug\RRS_API.dll
 C:\Personal\RRSV2\New\RRS-SERVER\RRS_API\obj\Debug\RRS_API.pdb
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.IdentityModel.Logging.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.IdentityModel.Tokens.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.IdentityModel.JsonWebTokens.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.IdentityModel.Logging.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\Microsoft.IdentityModel.Tokens.xml
+C:\Users\Maor\Desktop\semeter f\Client-Server-17-08\RRS-SERVER\RRS_API\bin\System.IdentityModel.Tokens.Jwt.xml

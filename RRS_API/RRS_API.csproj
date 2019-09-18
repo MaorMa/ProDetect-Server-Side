@@ -98,12 +98,32 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.IdentityModel.JsonWebTokens, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.JsonWebTokens.5.5.0\lib\net461\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Logging, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.Logging.5.5.0\lib\net461\Microsoft.IdentityModel.Logging.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Tokens, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.Tokens.5.5.0\lib\net461\Microsoft.IdentityModel.Tokens.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenTK.1.1.2225.0\lib\net20\OpenTK.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="OpenTK.GLControl, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenTK.GLControl.1.1.2225.0\lib\net20\OpenTK.GLControl.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=5.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IdentityModel.Tokens.Jwt.5.5.0\lib\net461\System.IdentityModel.Tokens.Jwt.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Net.Http" />
@@ -138,9 +158,6 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System.Web.Http.WebHost">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.3\lib\net45\System.Web.Http.WebHost.dll</HintPath>
     </Reference>
@@ -153,13 +170,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Models\EmailSender.cs" />
+    <Compile Include="Models\ImageRecognition\MarkedImageSaver.cs" />
     <Compile Include="Models\ImageRecognition\MarksDrawing.cs" />
     <Compile Include="Models\ImageRecognition\ocrResult.cs" />
+    <Compile Include="Models\JWT\IAuthContainerModel.cs" />
+    <Compile Include="Models\JWT\IAuthService.cs" />
+    <Compile Include="Models\JWT\JWTContainer.cs" />
+    <Compile Include="Models\JWT\JWTService.cs" />
+    <Compile Include="Models\Mangagers\AMngr.cs" />
+    <Compile Include="Models\Mangagers\PasswordMngr.cs" />
+    <Compile Include="Models\Mangagers\UsersMngr.cs" />
     <Compile Include="Models\Objects\FamilyUploads.cs" />
     <Compile Include="Models\ImageRecognition\ImageProccessing.cs" />
     <Compile Include="Models\ImageRecognition\ocrWord.cs" />
-    <Compile Include="Models\ProcessMngr.cs" />
+    <Compile Include="Models\Mangagers\TokenMngr.cs" />
+    <Compile Include="Models\Mangagers\ReceiptMngr.cs" />
     <Compile Include="Controllers\ReceiptController.cs" />
     <Compile Include="Controllers\SettingsController.cs" />
     <Compile Include="Global.asax.cs">
@@ -169,6 +196,7 @@
     <Compile Include="Models\Objects\MetaData.cs" />
     <Compile Include="Models\Objects\Receipt.cs" />
     <Compile Include="Models\Objects\ReceiptToReturn.cs" />
+    <Compile Include="Models\Mangagers\SettingsMngr.cs" />
     <Compile Include="Models\TextParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

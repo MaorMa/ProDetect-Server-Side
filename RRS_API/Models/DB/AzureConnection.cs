@@ -1,12 +1,9 @@
-﻿using ImageRecognition.Objects;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Text;
-using System.Web;
 
 namespace RRS_API.Models
 {
@@ -222,5 +219,154 @@ namespace RRS_API.Models
             }
         }
 
+        public string getSaltValue(string username)
+        {
+            using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+            {
+                if (!(connection.State == System.Data.ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = "SELECT Salt FROM AuthorizedUsers WHERE UserName = @UserName";
+                    command.Parameters.AddWithValue("@UserName", username);
+                    try
+                    {
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            String salt = "";
+                            while (reader.Read())
+                            {
+                                salt += reader[0];
+                            }
+                            return salt;
+                        }
+                    }
+                    catch (SqlException sqlException)
+                    {
+                        throw sqlException;
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+        }
+        public bool checkedUsernameAndPassword(string username, string password)
+        {
+            using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+            {
+                if (!(connection.State == System.Data.ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = "SELECT * FROM AuthorizedUsers WHERE UserName = @UserName AND HashedPassword = @Password";
+                    command.Parameters.AddWithValue("@UserName", username);
+                    command.Parameters.AddWithValue("@Password", password);
+                    try
+                    {
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                return true;
+                            }
+
+                            else
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                    catch (SqlException sqlException)
+                    {
+                        throw sqlException;
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+        }
+
+        public string getGroupID(string username)
+        {
+            using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+            {
+                if (!(connection.State == System.Data.ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = "SELECT GroupID FROM AuthorizedUsers WHERE UserName = @UserName";
+                    command.Parameters.AddWithValue("@UserName", username);
+                    try
+                    {
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            String groupID = "";
+                            while (reader.Read())
+                            {
+                                groupID += reader[0];
+                            }
+                            return groupID;
+                        }
+                    }
+                    catch (SqlException sqlException)
+                    {
+                        throw sqlException;
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+        }
+
+        public void AddNewFamilyUser(string username, string salt, string hashedPassword, int groupID)
+        {
+            using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+            {
+                if (!(connection.State == System.Data.ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = "INSERT into AuthorizedUsers(UserName, Salt, HashedPassword, GroupID) VALUES(@UserName, @Salt, @HashedPassword, @GroupID)";
+                    command.Parameters.AddWithValue("@UserName", username);
+                    command.Parameters.AddWithValue("@Salt", salt);
+                    command.Parameters.AddWithValue("@HashedPassword", hashedPassword);
+                    command.Parameters.AddWithValue("@GroupID", groupID);
+                    try
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    catch (SqlException sqlException)
+                    {
+                        throw sqlException;
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+        }
     }
 }

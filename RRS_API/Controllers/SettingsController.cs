@@ -18,17 +18,30 @@ namespace RRS_API.Controllers
 
         #region GET Requests
         [Route("GetFamilies")]
-        [HttpGet]
+        [HttpPost]
         public HttpResponseMessage GetFamilies()
         {
             try
             {
+                List<string> Families = new List<string>();
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Headers["Authorization"];
-                var jwtToken = new JwtSecurityToken(token);
+                //if token valid
                 if (TokenMngr.isTokenValid(token))
                 {
-                    List<String> Families = SettingsMngr.getFamilies();
+                    //if admin
+                    if (TokenMngr.isAdmin(token))
+                    {
+                        Families = SettingsMngr.getFamilies();
+                    }
+                    //user
+                    else
+                    {
+                        var jwtToken = new JwtSecurityToken(token);
+                        object username = "";
+                        jwtToken.Payload.TryGetValue("unique_name", out username);
+                        Families.Add(username.ToString());
+                    }
                     return Request.CreateResponse(HttpStatusCode.OK, Families);
                 }
                 else

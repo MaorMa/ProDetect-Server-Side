@@ -336,6 +336,43 @@ namespace RRS_API.Models
             }
         }
 
+        public List<string> getFamilies()
+        {
+            using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+            {
+                if (!(connection.State == System.Data.ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = "SELECT DISTINCT FamilyID FROM FamilyUploads";
+                    try
+                    {
+                        List<string> Families = new List<string>();
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                Families.Add(reader[0].ToString());
+                            }
+                            return Families;
+                        }
+                    }
+                    catch (SqlException sqlException)
+                    {
+                        throw sqlException;
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+        }
+
         public void AddNewFamilyUser(string username, string salt, string hashedPassword, int groupID)
         {
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))

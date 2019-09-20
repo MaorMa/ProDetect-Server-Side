@@ -50,6 +50,28 @@ namespace RRS_API.Controllers
             }
         }
 
+        [Route("tokenIsValid")]
+        [HttpPost]
+        /*
+         * given username, password
+         * return token if valid
+         */
+        public HttpResponseMessage tokenIsValid()
+        {
+            //get data from UI
+            try
+            {
+                var httpRequest = HttpContext.Current.Request;
+                string token = httpRequest.Form["token"];
+                bool isValid = TokenMngr.isTokenValid(token.Trim());
+                return Request.CreateResponse(HttpStatusCode.OK, isValid);
+            }
+            catch (Exception)
+            {
+                return Request.CreateResponse(HttpStatusCode.Forbidden);
+            }
+        }
+
         [Route("Login")]
         [HttpPost]
         /*

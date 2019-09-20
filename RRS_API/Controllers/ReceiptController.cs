@@ -77,9 +77,7 @@ namespace RRS_API.Controllers
             {
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Headers["Authorization"];
-                var jwtToken = new JwtSecurityToken(token);
-                //TokenMngr.isTokenValid(token)
-                if (true)
+                if (TokenMngr.isTokenValid(token))
                 {
                     Dictionary<String, Image> imgNameAndImg = new Dictionary<string, Image>();
                     try

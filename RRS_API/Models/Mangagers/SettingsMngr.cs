@@ -13,10 +13,9 @@ namespace RRS_API.Models
             return AzureConnection.SelectQuery(query);
         }
 
-        public List<String> getFamilies()
+        public List<string> getFamilies()
         {
-            string query = "SELECT * FROM Families";
-            return AzureConnection.SelectQuery(query);
+            return AzureConnection.getFamilies();
         }
         #endregion
     }

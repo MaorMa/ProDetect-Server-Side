@@ -12,13 +12,13 @@ namespace OcrProject.Parser
     {
         //fields
         //String= receipt name, String=Product ID, List=metaData (for multi products with same name\id)
-        private Dictionary<String, Dictionary<String, List<MetaData>>> receiptAndIdsMetaData;
-        private String date;
+        private Dictionary<string, Dictionary<string, List<MetaData>>> receiptAndIdsMetaData;
+        private string date;
 
         //C'tor
         public TextParser()
         {
-            this.receiptAndIdsMetaData = new Dictionary<String, Dictionary<String, List<MetaData>>>();
+            this.receiptAndIdsMetaData = new Dictionary<string, Dictionary<string, List<MetaData>>>();
         }
 
         //parsing function
@@ -26,11 +26,11 @@ namespace OcrProject.Parser
         public void parsing(Receipt receipt)
         {
             date = "No Date";
-            List<String> lines = receipt.getRows();
+            List<string> lines = receipt.getRows();
             for (int i = 0; i < lines.Count; i++)
             {
-                String sID = lines[i];
-                String nextsID;
+                string sID = lines[i];
+                string nextsID;
                 if (i + 1 < lines.Count)
                     nextsID = lines[i + 1];
                 else
@@ -39,17 +39,17 @@ namespace OcrProject.Parser
             }
         }
 
-        public String getDate()
+        public string getDate()
         {
             return this.date;
         }
 
-        private void addSid(String firstLine, String secondLine, Receipt receipt)
+        private void addSid(string firstLine, string secondLine, Receipt receipt)
         {
-            Dictionary<String, List<MetaData>> receiptsIdToMetadata = receipt.getIdToMetadata();
+            Dictionary<string, List<MetaData>> receiptsIdToMetadata = receipt.getIdToMetadata();
             bool dateFlag = false;
-            String[] firstLineSeperate = firstLine.Split(' ');
-            String weight = "";
+            string[] firstLineSeperate = firstLine.Split(' ');
+            string weight = "";
             if (hasKG(secondLine))
             {
                 weight = getSmaller(secondLine);
@@ -60,26 +60,36 @@ namespace OcrProject.Parser
             }
             else
             {
-                weight = "";
+                weight = "1";
             }
             double num;
-            foreach (String s in firstLineSeperate)
+            foreach (string s in firstLineSeperate)
             {
-                if (double.TryParse(s, out num) && !s.Contains(","))//if number
+                if (double.TryParse(s, out num) && !s.Contains(",") && !s.StartsWith("0"))//if number
                 {
                     if (!receipt.getIdToMetadata().ContainsKey(s))
                     {
                         receiptsIdToMetadata.Add(s, new List<MetaData>());
-                        receiptsIdToMetadata[s].Add(new MetaData(s, "", weight, "",0));
+                        receiptsIdToMetadata[s].Add(new MetaData(s, "", weight, "",0,true));
                     }
                     else
                     {
-                        receiptsIdToMetadata[s].Add(new MetaData(s, "", weight, "",0));
+                        //allready exists
+                        foreach(MetaData value in receiptsIdToMetadata[s])
+                        {
+                            try
+                            {
+                                if (Convert.ToDouble(value.getQuantity()) > Convert.ToDouble(weight) + 5)
+                                {
+                                    receiptsIdToMetadata[s].ElementAt(0).setQuantity(weight);
+                                }
+                            }catch(Exception) { }
+                        }
                     }
                 }
                 else if (!dateFlag && s.Contains('/'))//if date
                 {
-                    String[] dateCheck = s.Split('/');
+                    string[] dateCheck = s.Split('/');
                     if (dateCheck.Length == 3 && isDate(dateCheck))
                     {
                         receipt.setDate(s);
@@ -91,7 +101,7 @@ namespace OcrProject.Parser
         }
 
         //Check if array of 3 numbers is date
-        private bool isDate(String[] date)
+        private bool isDate(string[] date)
         {
             int check;
             if (int.TryParse(date[0], out check))//day
@@ -104,7 +114,7 @@ namespace OcrProject.Parser
                         {
                             if (int.TryParse(date[2], out check))//year
                             {
-                                String yearS = DateTime.Now.Year.ToString();
+                                string yearS = DateTime.Now.Year.ToString();
                                 int year;
                                 int.TryParse(yearS, out year);
                                 year = year % 100;
@@ -121,56 +131,68 @@ namespace OcrProject.Parser
         }
 
         //Check if line has Hebrew KG word
-        private bool hasKG(String line)
+        private bool hasKG(string line)
         {
-            String[] seperate = line.Split(' ');
-            foreach (String word in seperate)
+            bool containsDot = false;
+            bool containsKG = false;
+            string[] seperate = line.Split(' ');
+            foreach (string word in seperate)
             {
                 //Console.WriteLine(word);
-                if (word.Contains("ק\"ג"))
+                if (word.Contains("ק\"ג") || word.Contains("\"ג") || word.Contains("ק\"") || word.Contains("\""))
                 {
-                    return true;
+                    containsKG = true;
+                }
+                else if (word.Contains(",") || word.Contains("."))
+                {
+                    containsDot = true;
                 }
             }
-            return false;
+            return containsDot && containsKG;
         }
 
         //Check if line has Integer
-        private String hasInt(String line)
+        private string hasInt(string line)
         {
             int check;
-            String[] seperate = line.Split(' ');
-            foreach (String word in seperate)
+            string[] seperate = line.Split(' ');
+            foreach (string word in seperate)
             {
-                //Console.WriteLine(word);
-                if (int.TryParse(word, out check))
+                if (!word.StartsWith("0"))
                 {
-                    if (check <= 10)
-                        return word;
+                    //Console.WriteLine(word);
+                    if (int.TryParse(word, out check))
+                    {
+                        if (check <= 10)
+                            return word;
+                    }
                 }
             }
-            return "0";
+            return "1";
         }
 
         //returns smallest number in the line with the KG word in it 
-        private String getSmaller(String line)
+        private string getSmaller(string line)
         {
-            String[] seperate = line.Split(' ');
+            string[] seperate = line.Split(' ');
             double num;
             double smallest = 10000.0; //default num
-            foreach (String s in seperate)
+            foreach (string s in seperate)
             {
-                if (double.TryParse(s.Replace(",", "."), out num))
+                if ((s.Contains(".") || s.Contains(",")) && !s.EndsWith(".") && !s.StartsWith("."))
                 {
-                    if (num < smallest && num != 0)
+                    if (double.TryParse(s.Replace(",", "."), out num))
                     {
-                        smallest = num;
+                        if (num < smallest && num != 0)
+                        {
+                            smallest = num;
+                        }
                     }
                 }
             }
             if (smallest == 10000.0)
             {
-                return "";
+                return "1";
             }
             return smallest.ToString();
         }

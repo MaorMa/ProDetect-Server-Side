@@ -97,5 +97,24 @@ namespace RRS_API.Controllers
                 return Request.CreateResponse(HttpStatusCode.Forbidden);
             }
         }
+
+        [Route("isAdmin")]
+        [HttpPost]
+        /*
+         * return true/false for a given valid token
+         */
+        public HttpResponseMessage isAdmin()
+        {
+            try
+            {
+                var httpRequest = HttpContext.Current.Request;
+                string token = httpRequest.Headers["Authorization"];
+                return Request.CreateResponse(HttpStatusCode.OK, TokenMngr.isAdmin(token));
+            }
+            catch (Exception)
+            {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
+            }
+        }
     }
 }

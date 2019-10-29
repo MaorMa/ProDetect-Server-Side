@@ -9,14 +9,16 @@ namespace ImageRecognition.Objects
         public string quantity;
         public string price;//per unit from DB
         private double yCoordinate;
+        public Boolean validProduct;
 
-        public MetaData(string sID,string description, string quantity, string price,double yCoordinate)
+        public MetaData(string sID,string description, string quantity, string price,double yCoordinate, bool validProduct)
         {
             this.description = description;
             this.quantity = quantity;
             this.price = price;
             this.sID = sID;
             this.yCoordinate = yCoordinate;
+            this.validProduct = validProduct;
         }
         
         /*
@@ -33,7 +35,7 @@ namespace ImageRecognition.Objects
             return this.quantity;
         }
 
-        public String getPrice()
+        public string getPrice()
         {
             return this.price;
         }
@@ -41,6 +43,11 @@ namespace ImageRecognition.Objects
         public double getyCoordinate()
         {
             return this.yCoordinate;
+        }
+
+        public bool getvalidProduct()
+        {
+            return this.validProduct;
         }
 
         /*
@@ -70,6 +77,11 @@ namespace ImageRecognition.Objects
         public string getsID()
         {
             return this.sID;
+        }
+
+        public void setvalidProduct(bool validProduct)
+        {
+            this.validProduct = validProduct;
         }
     }
 }

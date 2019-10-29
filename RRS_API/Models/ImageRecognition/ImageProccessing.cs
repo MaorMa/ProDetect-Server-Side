@@ -18,11 +18,11 @@ namespace RRS_API.Models
         {
             modes = new List<Bitmap>();
             Bitmap Bitimage = new Bitmap(image);
-            imgInNewResolution = improveResolution(Bitimage, size);
-            modes.Add(convertToGrayscaleV1(Bitimage));
-            modes.Add(convertToGrayscaleV2(Bitimage));
-            modes.Add(convertToBW(Bitimage));
-            modes.Add(Sharpen(Bitimage));
+            this.imgInNewResolution = improveResolution(Bitimage, size);
+            modes.Add(convertToGrayscaleV1(imgInNewResolution));
+            modes.Add(convertToGrayscaleV2(imgInNewResolution));
+            modes.Add(convertToBW(imgInNewResolution));
+            modes.Add(Sharpen(imgInNewResolution));
         }
 
         /*
@@ -72,6 +72,13 @@ namespace RRS_API.Models
             Image<Bgr, byte> image_pass = new Image<Bgr, byte>(image);
             newImage = image_pass.Convert<Gray, Byte>().ThresholdBinaryInv(new Gray(190), new Gray(255));
             return newImage.ToBitmap();
+            /*
+            Image<Gray, byte> imgGray = new Image<Gray, byte>(image);
+            Image<Gray, byte> imgBinarize;
+            imgBinarize = new Image<Gray, byte>(imgGray.Width, imgGray.Height, new Gray(0));
+            CvInvoke.Threshold(imgGray, imgBinarize, 100, 255, Emgu.CV.CvEnum.ThresholdType.Otsu);
+            return imgBinarize.ToBitmap();
+            */
         }
 
 

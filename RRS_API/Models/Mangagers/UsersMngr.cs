@@ -6,7 +6,7 @@ using System.Web;
 
 namespace RRS_API.Models.Mangagers
 {
-    public class UsersMngr
+    public class UsersMngr : AMngr
     {
         PasswordMngr passwordMnr = new PasswordMngr();
 

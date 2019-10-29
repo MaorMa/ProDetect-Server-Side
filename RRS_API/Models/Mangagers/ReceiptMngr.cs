@@ -11,6 +11,7 @@ using System.Linq;
 using RRS_API.Models.ImageRecognition;
 using RRS_API.Models.Mangagers;
 using System.Text;
+using System.Security.Cryptography;
 
 namespace RRS_API.Controllers
 {
@@ -34,22 +35,36 @@ namespace RRS_API.Controllers
         {
             UploadTime = DateTime.Now;
             setSelectedFamilyID(selectedFamilyID);
-            //before we start using ocr engine , we need to approve the image not uploaded before            
-            Dictionary<string, Image> withoutMultiplicity = detectMultiplicty(imgNameAndImg);
-            if (withoutMultiplicity.Count == 0)
+            //before we start using ocr engine , we need to approve the receipt not uploaded before            
+            imgNameAndImg = detectMultiplicty(imgNameAndImg);
+            if (imgNameAndImg.Count != 0)
             {
-                throw new Exception();
+                //first set status to "-1" = in progress
+                // pair.key - receiptID - hash of image
+                foreach (KeyValuePair<string, Image> pair in imgNameAndImg)
+                {
+                    insertToFamiliyUploads(selectedFamilyID, pair.Key, selectedMarket, -1, UploadTime.ToString());
+                }
+                //call ocr proccessing
+                List<Receipt> receipts = ocrResult.fromImagesToText(imgNameAndImg);
+                //parsing ocr result
+                receipts = TextParser.getAllRecieptsData(receipts);
+                compeleteInfoAndMarks(receipts, selectedMarket);
             }
-            //first set status to "-1" = in progress
-            foreach (KeyValuePair<string, Image> pair in withoutMultiplicity)
+        }
+
+        /*
+         * return hash (sha1) for a given image
+         * same images get the same hash 
+         */
+        public string getHash(Image image)
+        {
+            using (var ms = new MemoryStream())
             {
-                insertToFamiliyUploads(selectedFamilyID, pair.Key, selectedMarket, -1, UploadTime.ToString());
+                SHA1CryptoServiceProvider sha1 = new SHA1CryptoServiceProvider();
+                image.Save(ms, image.RawFormat);
+                return BitConverter.ToString(sha1.ComputeHash(ms.ToArray())).Replace("-", "");
             }
-            //call ocr proccessing
-            List<Receipt> receipts = ocrResult.fromImagesToText(withoutMultiplicity);
-            //parsing ocr result
-            receipts = TextParser.getAllRecieptsData(receipts);
-            compeleteInfoAndMarks(receipts, selectedMarket);
         }
 
         /*
@@ -59,7 +74,7 @@ namespace RRS_API.Controllers
         {
             string queryStatusWorking = "SELECT * FROM FamilyUploads WHERE ReceiptStatus = -1";
             List<string> resultsStatusWorking = AzureConnection.SelectQuery(queryStatusWorking);
-            string query = "SELECT fu.FamilyID, fu.ReceiptID, fu.MarketID, fu.UploadTime, fu.ReceiptStatus, rd.ProductID, rd.Description, rd.Quantity,rd.Price, rd.YCoordinate FROM FamilyUploads as fu JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID and fu.ReceiptStatus = 0";
+            string query = "SELECT fu.FamilyID, fu.ReceiptID, fu.MarketID, fu.UploadTime, fu.ReceiptStatus, ISNULL(rd.ProductID,'') as ProductID , ISNULL(rd.Description,'') as Description, ISNULL(rd.Quantity,'') as Quantity, ISNULL(rd.Price,'') as Price, ISNULL(rd.Ycoordinate,'') as Ycoordinate, ISNULL(rd.validProduct,'') as validProduct FROM FamilyUploads as fu FULL JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID WHERE fu.ReceiptStatus = 0";
             List<string> results = AzureConnection.SelectQuery(query);
             Dictionary<string, Dictionary<string, ReceiptToReturn>> allInfo = new Dictionary<string, Dictionary<string, ReceiptToReturn>>();
             string MarkedImagesPath = MarkedImageSaver.getMarkedImagesPath();
@@ -75,23 +90,31 @@ namespace RRS_API.Controllers
                 string description = recordSplit[6];
                 string quantity = recordSplit[7];
                 string price = recordSplit[8];
-                double yCoordinate = Convert.ToDouble(recordSplit[9]);
+                double yCoordinate;
+                bool validProduct = recordSplit[10].Equals("True");
+                if (recordSplit[9] != "")
+                {
+                    yCoordinate = Convert.ToDouble(recordSplit[9]);
+                }
+                else
+                {
+                    yCoordinate = 0;
+                }
                 if (allInfo.ContainsKey(FamilyID))//Family ID exists
                 {
                     if (allInfo[FamilyID].ContainsKey(receiptID))//Receipt exists for family ID
-                        allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, yCoordinate);
+                        allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, yCoordinate, validProduct);
                     else//Create Receipt for family ID
                     {
                         using (Image image = Image.FromFile(MarkedImagesPath + "/" + FamilyID + "/" + receiptID))
                         {
                             using (MemoryStream m = new MemoryStream())
                             {
-                                image.Save(m, image.RawFormat);
-                                byte[] imageBytes = m.ToArray();
+                                image.Save(m, image.RawFormat); //image to memory stream
                                 //Convert byte[] to Base64 String
-                                string base64String = Convert.ToBase64String(imageBytes);
+                                string base64String = Convert.ToBase64String(m.ToArray());
                                 allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, marketID, base64String, receiptStatus, uploadTime));
-                                allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, yCoordinate);
+                                allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, yCoordinate, validProduct);
                             }
                         }
                     }
@@ -108,7 +131,7 @@ namespace RRS_API.Controllers
                             string base64String = Convert.ToBase64String(imageBytes);
                             allInfo.Add(FamilyID, new Dictionary<string, ReceiptToReturn>());
                             allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, marketID, base64String, receiptStatus, uploadTime));
-                            allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, yCoordinate);
+                            allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, yCoordinate, validProduct);
                         }
                     }
                 }
@@ -163,7 +186,7 @@ namespace RRS_API.Controllers
          * first we delete all products of given receipt
          * then we add all products of updated receipt
          */
-        public void UpdateReceiptData(ReceiptToReturn receiptToUpdate)
+        public void UpdateReceiptData(string familyID, ReceiptToReturn receiptToUpdate)
         {
             try
             {
@@ -178,14 +201,60 @@ namespace RRS_API.Controllers
                     string productDescription = product.getDescription();
                     string productQuantity = product.getQuantity();
                     string productPrice = product.getPrice();
-                    AzureConnection.insertReceiptData(receiptID, productID, productDescription, productQuantity, productPrice, 0);
+                    AzureConnection.insertReceiptData(familyID, receiptID, productID, productDescription, productQuantity, productPrice, 0,true);
                 }
-                AzureConnection.updateStatus(receiptID, "1");
+                AzureConnection.updateStatus(familyID, receiptID, "1");
             }
             catch (Exception exception)
             {
                 throw exception;
             }
+        }
+
+        public string GetAllApprovedData()
+        {
+            Dictionary<string, Dictionary<string, ReceiptToReturn>> allInfo = new Dictionary<string, Dictionary<string, ReceiptToReturn>>();
+            string queryStatusApproved = "SELECT fu.FamilyID, fu.ReceiptID, fu.MarketID, rd.ProductID, rd.Description, rd.Quantity,rd.Price FROM FamilyUploads as fu JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID AND fu.ReceiptStatus = 1";
+            List<string> resultsStatusApproved = AzureConnection.SelectQuery(queryStatusApproved);
+            foreach (string record in resultsStatusApproved)
+            {
+                string[] recordSplit = record.Split(',');
+                string FamilyID = recordSplit[0];
+                string receiptID = recordSplit[1];
+                string marketID = recordSplit[2];
+                string productID = recordSplit[3];
+                string description = recordSplit[4];
+                string quantity = recordSplit[5];
+                string price = recordSplit[6];
+                if (allInfo.ContainsKey(FamilyID))//Family ID exists
+                {
+                    if (allInfo[FamilyID].ContainsKey(receiptID))//Receipt exists for family ID
+                        allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, 0, true);
+                    else//Create Receipt for family ID
+                    {
+                        allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, marketID, "", "1", ""));
+                        allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, 0, true);
+                    }
+                }
+                else//Family ID not exists
+                {
+                    allInfo.Add(FamilyID, new Dictionary<string, ReceiptToReturn>());
+                    allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, marketID, "", "1", ""));
+                    allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, 0, true);
+                }
+            }
+            Dictionary<string, List<ReceiptToReturn>> toReturn = new Dictionary<string, List<ReceiptToReturn>>();
+            foreach (KeyValuePair<string, Dictionary<string, ReceiptToReturn>> data in allInfo)//for all families
+            {
+                List<ReceiptToReturn> receiptsForFamily = new List<ReceiptToReturn>();
+                foreach (KeyValuePair<string, ReceiptToReturn> receipt in data.Value)//for all receipts for family
+                {
+                    receiptsForFamily.Add(receipt.Value);
+                }
+                toReturn.Add(data.Key, receiptsForFamily);
+            }
+
+            return JsonConvert.SerializeObject(toReturn.ToList());
         }
 
 
@@ -235,10 +304,8 @@ namespace RRS_API.Controllers
                 if (!(checkIfFamilyExists(familyID, toReturn)))
                 {
                     toReturn.Add(new FamilyUploads { familyID = familyID, count = 1 });
-
                 }
             }
-
             return JsonConvert.SerializeObject(toReturn);
         }
         #endregion
@@ -253,7 +320,7 @@ namespace RRS_API.Controllers
             Dictionary<string, Image> toReturn = new Dictionary<string, Image>();
             foreach (KeyValuePair<string, Image> rec in imgNameAndImg)
             {
-                string receiptID = rec.Key;
+                string receiptID = getHash(rec.Value);
                 Image image = rec.Value;
 
                 if (!(AzureConnection.SelectQuery("SELECT * FROM FamilyUploads where FamilyID ='" + selectedFamilyID + "' AND ReceiptID='" + receiptID + "' AND NOT ReceiptStatus = -1").Count > 0))
@@ -276,7 +343,8 @@ namespace RRS_API.Controllers
             {
                 receipt.setMarketID(selectedMarket);
                 List<ocrWord> wordsToDraw = new List<ocrWord>();
-                double averageX = 0, averageY = 0, numOfWords = 0;
+                List<ocrWord> tmpWords;
+                double averageX = 0, averageY = 0, numOfWords = 0, normalizedX, normalizedWidth;
 
                 //iterate over all the item in receipt
                 foreach (KeyValuePair<String, List<MetaData>> sid in receipt.getIdToMetadata())
@@ -287,23 +355,25 @@ namespace RRS_API.Controllers
                         //if there are results for originalSQL/newSQL, update description and price
                         if (productInfoFromDb.Count > 0)
                         {
-                            foreach (String s in productInfoFromDb)
+                            foreach (string s in productInfoFromDb)
                             {
                                 if (s != null && !s.Equals(""))
                                 {
-                                    String[] descAndPrice = s.Split(',');
-                                    String description = descAndPrice[1];
-                                    String price = descAndPrice[2];
+                                    string[] descAndPrice = s.Split(',');
+                                    string description = descAndPrice[1];
+                                    string price = descAndPrice[2];
                                     obj.setDescription(description);
                                     obj.setPrice(price);
                                 }
                             }
 
-                            List<ocrWord> tmpWords = receipt.getWord(sid.Key);
+                            tmpWords = receipt.getWord(sid.Key);
                             foreach (ocrWord word in tmpWords)
                             {
                                 numOfWords += 1;
-                                averageX = ((averageX * (numOfWords - 1)) + word.getX() + word.getWidth()) / numOfWords;
+                                normalizedX = (int)((word.getX() / receipt.getWidth()) * receipt.getOriginalImage().Width);
+                                normalizedWidth = (int)((word.getWidth() / receipt.getWidth()) * receipt.getOriginalImage().Width);
+                                averageX = ((averageX * (numOfWords - 1)) + normalizedX + normalizedWidth) / numOfWords;
                                 averageY = ((averageY * (numOfWords - 1)) + word.getY()) / numOfWords;
                                 obj.setYcoordinate(word.getY());
                                 wordsToDraw.Add(word);
@@ -311,26 +381,62 @@ namespace RRS_API.Controllers
                         }
                     }
                 }
+                receipt.setAverageCoordinates(averageX, averageY);
                 //draw marks on images -> save them -> insert detected products to db -> send email to researcher
-                marksDrawing.draw(wordsToDraw, receipt, averageX, averageY);
+                setvalidProduct(receipt);
+                marksDrawing.draw(wordsToDraw, receipt);
                 MarkedImageSaver.saveMarkedImage(receipt, selectedFamilyID);
-                saveDataToDB(receipt);
+                saveDataToDB(selectedFamilyID, receipt);
+
+                wordsToDraw = null;
+                tmpWords = null;
             }
             //EmailSender.sendEmail(receipts.Count, selectedFamilyID);
             ocrResult = null;
             TextParser = null;
             marksDrawing = null;
             EmailSender = null;
+            receipts = null;
+            MarkedImageSaver = null;
+            AzureConnection = null;
         }
 
         /*
+         * if word is False Positive - IsFP = true, else IsFP = False
+         */
+        private void setvalidProduct(Receipt receipt)
+        {
+            double normalizedX, normalizedWidth;
+            bool xRuleDeviation;
+            double averageX = receipt.getXAverage();
+
+            foreach (KeyValuePair<String, List<MetaData>> sid in receipt.getIdToMetadata())
+            {
+                foreach (MetaData obj in sid.Value)
+                {
+                    if (obj.description != "")
+                    {
+                        List<ocrWord> tmpWords = receipt.getWord(sid.Key);
+                        foreach (ocrWord word in tmpWords)
+                        {
+                            normalizedX = (int)((word.getX() / receipt.getWidth()) * receipt.getOriginalImage().Width);
+                            normalizedWidth = (int)((word.getWidth() / receipt.getWidth()) * receipt.getOriginalImage().Width + 14);
+                            xRuleDeviation = Math.Abs(normalizedX + normalizedWidth - (receipt.getXAverage())) < 0.08 * receipt.getWidth();
+                            obj.setvalidProduct(xRuleDeviation);
+                        }
+                    }
+
+                }
+            }
+        }
+        /*
          * 
          */
-        private void saveDataToDB(Receipt receipt)
+        private void saveDataToDB(string FamilyID, Receipt receipt)
         {
             try
             {
-                AzureConnection.updateStatus(receipt.getName(), "0");
+                AzureConnection.updateStatus(FamilyID, receipt.getName(), "0");
                 foreach (KeyValuePair<string, List<MetaData>> data in receipt.getIdToMetadata())
                 {
                     string id = data.Key;
@@ -342,7 +448,8 @@ namespace RRS_API.Controllers
                         string price = values.ToArray()[0].getPrice();
                         string quantitiy = values.ToArray()[0].getQuantity();
                         double yCoordinate = values.ElementAt(0).getyCoordinate();
-                        AzureConnection.insertReceiptData(receipt.getName(), id, desc, quantitiy, price, yCoordinate);
+                        bool validProduct = values.ElementAt(0).getvalidProduct();
+                        AzureConnection.insertReceiptData(FamilyID, receipt.getName(), id, desc, quantitiy, price, yCoordinate, validProduct);
                     }
                 }
             }

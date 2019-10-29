@@ -32,9 +32,9 @@ namespace RRS_API.Models
         {
             this.products = products;
         }
-        public void addProduct(string productID,string Description, string Quantity, string price, double yCoordinate)
+        public void addProduct(string productID,string Description, string Quantity, string price, double yCoordinate,bool validProduct)
         {
-            products.Add(new MetaData(productID,Description,Quantity,price,yCoordinate));
+            products.Add(new MetaData(productID,Description,Quantity,price,yCoordinate, validProduct));
         }
     }
 }

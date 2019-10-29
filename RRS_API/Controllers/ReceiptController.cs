@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web;
@@ -19,7 +20,7 @@ namespace RRS_API.Controllers
         TokenMngr TokenMngr = new TokenMngr();
 
         #region Get requests
-        [Route("GetTotalUploadsDetails")]
+        /*[Route("GetTotalUploadsDetails")]
         [HttpGet]
         public HttpResponseMessage GetTotalUploadsDetails()
         {
@@ -32,16 +33,47 @@ namespace RRS_API.Controllers
             {
                 return Request.CreateResponse(HttpStatusCode.InternalServerError);
             }
-        }
+        }*/
 
         [Route("GetAllRecognizedData")]
-        [HttpGet]
+        [HttpPost]
         public HttpResponseMessage GetAllRecognizedData()
         {
             try
             {
-                string result = ReceiptMngr.GetAllRecognizedData();
-                return Request.CreateResponse(HttpStatusCode.Created, result);
+                var httpRequest = HttpContext.Current.Request;
+                string token = httpRequest.Headers["Authorization"];
+                if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
+                {
+                    return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllRecognizedData());
+                }
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.Forbidden);
+                }
+            }
+            catch (Exception)
+            {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        [Route("GetAllApprovedData")]
+        [HttpPost]
+        public HttpResponseMessage GetAllApprovedData()
+        {
+            try
+            {
+                var httpRequest = HttpContext.Current.Request;
+                string token = httpRequest.Headers["Authorization"];
+                if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
+                {
+                    return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllApprovedData());
+                }
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.Forbidden);
+                }
             }
             catch (Exception)
             {
@@ -55,8 +87,7 @@ namespace RRS_API.Controllers
         {
             try
             {
-                List<string> result = ReceiptMngr.GetProductInfo(productID, marketID);
-                return Request.CreateResponse(HttpStatusCode.OK, result);
+                return Request.CreateResponse(HttpStatusCode.OK, ReceiptMngr.GetProductInfo(productID, marketID));
             }
             catch (Exception)
             {
@@ -119,14 +150,23 @@ namespace RRS_API.Controllers
 
         #region PUT Requests
         //need to send token
-        [Route("UpdateReceiptData")]
+        [Route("UpdateReceiptData/{familyID}")]
         [HttpPut]
-        public HttpResponseMessage UpdateReceiptData([FromBody] ReceiptToReturn receiptToUpdate)
+        public HttpResponseMessage UpdateReceiptData(string familyID, [FromBody] ReceiptToReturn receiptToUpdate)
         {
             try
             {
-                ReceiptMngr.UpdateReceiptData(receiptToUpdate);
-                return Request.CreateResponse(HttpStatusCode.OK);
+                var httpRequest = HttpContext.Current.Request;
+                string token = httpRequest.Headers["Authorization"];
+                if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
+                {
+                    ReceiptMngr.UpdateReceiptData(familyID, receiptToUpdate);
+                    return Request.CreateResponse(HttpStatusCode.OK);
+                }
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.Forbidden);
+                }
             }
             catch (Exception)
             {

@@ -15,10 +15,11 @@ namespace RRS_API.Models
         double lowerYBound, upperYBound;
         bool xRuleDeviation = false, yRuleDeviation = false;
 
-        public void draw(List<ocrWord> wordsToDraw, Receipt receipt, double averageX, double averageY)
+        public void draw(List<ocrWord> wordsToDraw, Receipt receipt)
         {
             graphics = Graphics.FromImage(receipt.getOriginalImage());
-
+            double xAverage = receipt.getXAverage();
+            double yAverage = receipt.getYAverage();
             //iterate over all recognized products we need to mark on the receipt
             foreach (ocrWord word in wordsToDraw)
             {
@@ -30,23 +31,23 @@ namespace RRS_API.Models
 
                 //rule for detect true negative (not products indeed)
                 //draw red rectangle
-                lowerYBound = averageY - (0.75 * averageY);
-                upperYBound = averageY + (0.75 * averageY);
-                xRuleDeviation = Math.Abs(word.getX() + word.getWidth() - (averageX)) > 350;
+                lowerYBound = 0.5 * yAverage;
+                upperYBound = 1.25 * yAverage;
+                xRuleDeviation = Math.Abs(normalizedX + normalizedWidth - (xAverage)) > 0.08 * receipt.getWidth();
                 yRuleDeviation = false;
                 if (word.getY() < lowerYBound || word.getY() > upperYBound)
                 {
                     if (word.getY() < lowerYBound)
                     {
-                        yRuleDeviation = Math.Abs(word.getY() - lowerYBound) > 440;
+                        yRuleDeviation = Math.Abs(word.getY() - lowerYBound) > 400;
                     }
                     else
                     {
-                        yRuleDeviation = Math.Abs(word.getY() - upperYBound) > 440;
+                        yRuleDeviation = Math.Abs(word.getY() - upperYBound) > 400;
                     }
                 }
 
-                if (xRuleDeviation || yRuleDeviation)
+                if (xRuleDeviation)
                 {
                     graphics.DrawRectangle(redPen, rect);
                 }

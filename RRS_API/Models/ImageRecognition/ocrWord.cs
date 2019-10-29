@@ -38,7 +38,7 @@ public class ocrWord
         return this.width;
     }
 
-    public String getText()
+    public string getText()
     {
         return this.text;
     }

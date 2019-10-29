@@ -5,6 +5,8 @@ using System.Drawing;
 using System.Threading;
 using RRS_API.Models;
 using System.Threading.Tasks;
+using System.IO;
+using System.Security.Cryptography;
 //using log4net;
 
 namespace Server
@@ -75,6 +77,19 @@ namespace Server
         }
 
         /*
+         * return hash of given image object
+         */ 
+        public string getHash(Image image)
+        {
+            using (var ms = new MemoryStream())
+            {
+                SHA1CryptoServiceProvider sha1 = new SHA1CryptoServiceProvider();
+                image.Save(ms, image.RawFormat);
+                return BitConverter.ToString(sha1.ComputeHash(ms.ToArray())).Replace("-", "");
+            }
+        }
+
+        /*
          * This method responsible for calling detectWords methond with all the three modes
          */
         private void initReceiptsList(String imgName, Image img)
@@ -84,36 +99,36 @@ namespace Server
 
             OcrResult ocrResults;
 
-            //try 3 different modes to get best results
+            //try 4 different modes to get best results
             //grayScaleV1 - mode 1
-            ocrResults = ocr.Read(imgInNewResolution);
+            ocrResults = ocr.Read(imageProccessing.getMode1());
             if (ocrResults.Pages.Count > 0)
             {
                 Receipt receipt = new Receipt(ocrResults.Pages[0].Width, ocrResults.Pages[0].Height, imgName, imgInNewResolution, img);//create receipt object with sizes and name
-                detectWords(ocrResults, imgInNewResolution, receipt);
+                detectWords(ocrResults, receipt);
 
                 var mode1 = new Task(() =>
                 {
-                    ocrResults = ocr.Read(imageProccessing.getMode1());
-                    detectWords(ocrResults, imgInNewResolution, receipt);
+                    ocrResults = ocr.Read(imgInNewResolution);
+                    detectWords(ocrResults, receipt);
                 });
 
                 var mode2 = new Task(() =>
                 {
                     ocrResults = ocr.Read(imageProccessing.getMode2());
-                    detectWords(ocrResults, imgInNewResolution, receipt);
+                    detectWords(ocrResults, receipt);
                 });
 
                 var mode3 = new Task(() =>
                 {
                     ocrResults = ocr.Read(imageProccessing.getMode3());
-                    detectWords(ocrResults, imgInNewResolution, receipt);
+                    detectWords(ocrResults, receipt);
                 });
 
                 var mode4 = new Task(() =>
                 {
                     ocrResults = ocr.Read(imageProccessing.getMode4());
-                    detectWords(ocrResults, imgInNewResolution, receipt);
+                    detectWords(ocrResults, receipt);
                 });
 
                 mode1.Start();
@@ -134,7 +149,7 @@ namespace Server
         /*
          * This function is the most important - detecting all words using ocr engine
          */
-        private void detectWords(OcrResult ocrResults, Bitmap imgInNewResolution, Receipt receipt)
+        private void detectWords(OcrResult ocrResults, Receipt receipt)
         {
             //page object
             foreach (var page in ocrResults.Pages)

@@ -11,6 +11,7 @@ public class Receipt
     private string name;
     private string date;
     private double xAverage;
+    private double yAverage;
     private Dictionary<String, List<ocrWord>> words;
     private Dictionary<String, List<MetaData>> idToMetadata;
     private List<String> rows;
@@ -30,6 +31,12 @@ public class Receipt
         this.rows = new List<string>();
     }
 
+    public void setAverageCoordinates(double xAverage, double yAverage)
+    {
+        this.xAverage = xAverage;
+        this.yAverage = yAverage;
+    }
+
     public string getMarketID()
     {
         return this.marketID;
@@ -40,15 +47,14 @@ public class Receipt
         this.marketID = marketID;
     }
 
-
-    public void setxAverage(int average)
-    {
-        this.xAverage = average;
-    }
-
-    public double getxAverage()
+    public double getXAverage()
     {
         return this.xAverage;
+    }
+
+    public double getYAverage()
+    {
+        return this.yAverage;
     }
 
     public void addWord(ocrWord word)

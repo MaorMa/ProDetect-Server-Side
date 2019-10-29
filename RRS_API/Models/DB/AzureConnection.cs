@@ -83,7 +83,7 @@ namespace RRS_API.Models
          * change status from 0 to 1 
          * 0 - means need to be approved , 1 - means already approved 
          */
-        public void updateStatus(String receiptID, string status)
+        public void updateStatus(string FamilyID, string ReceiptID, string status)
         {
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
@@ -95,8 +95,9 @@ namespace RRS_API.Models
                 {
                     command.Connection = connection;
                     command.CommandType = CommandType.Text;
-                    command.CommandText = "UPDATE FamilyUploads SET ReceiptStatus = " + status + " Where ReceiptID = @receiptID";
-                    command.Parameters.AddWithValue("@ReceiptID", receiptID);
+                    command.CommandText = "UPDATE FamilyUploads SET ReceiptStatus = " + status + " Where FamilyID = @FamilyID AND ReceiptID = @ReceiptID";
+                    command.Parameters.AddWithValue("@ReceiptID", ReceiptID);
+                    command.Parameters.AddWithValue("@FamilyID", FamilyID);
                     try
                     {
                         command.ExecuteNonQuery();
@@ -150,7 +151,7 @@ namespace RRS_API.Models
             }
         }
 
-        public void insertReceiptData(string receiptID, string productID, string productDescription, string productQuantity, string productPrice, double yCoordinate)
+        public void insertReceiptData(string familyID, string receiptID, string productID, string productDescription, string productQuantity, string productPrice, double yCoordinate, bool validProduct)
         {
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
@@ -162,13 +163,15 @@ namespace RRS_API.Models
                 {
                     command.Connection = connection;
                     command.CommandType = CommandType.Text;
-                    command.CommandText = "INSERT into ReceiptData(ReceiptID, ProductID, Description, Quantity, Price, YCoordinate) VALUES(@ReceiptID, @ProductID, @Description, @Quantity, @Price, @YCoordinate)";
+                    command.CommandText = "INSERT into ReceiptData(ReceiptID, ProductID, Description, Quantity, Price, YCoordinate, validProduct) VALUES(@ReceiptID, @ProductID, @Description, @Quantity, @Price, @YCoordinate, @validProduct)";
                     command.Parameters.AddWithValue("@ReceiptID", receiptID);
                     command.Parameters.AddWithValue("@ProductID", productID);
                     command.Parameters.AddWithValue("@Description", productDescription);
                     command.Parameters.AddWithValue("@Quantity", productQuantity);
                     command.Parameters.AddWithValue("@Price", productPrice);
                     command.Parameters.AddWithValue("@YCoordinate", yCoordinate.ToString());
+                    command.Parameters.AddWithValue("@validProduct", validProduct);
+
                     try
                     {
                         command.ExecuteNonQuery();
@@ -348,7 +351,7 @@ namespace RRS_API.Models
                 {
                     command.Connection = connection;
                     command.CommandType = CommandType.Text;
-                    command.CommandText = "SELECT DISTINCT FamilyID FROM FamilyUploads";
+                    command.CommandText = "SELECT DISTINCT UserName FROM AuthorizedUsers";
                     try
                     {
                         List<string> Families = new List<string>();

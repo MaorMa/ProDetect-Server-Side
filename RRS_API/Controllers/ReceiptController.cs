@@ -10,6 +10,8 @@ using System.Net;
 using System.Net.Http;
 using System.Web;
 using System.Web.Http;
+using log4net;
+using System.Reflection;
 
 namespace RRS_API.Controllers
 {
@@ -18,6 +20,7 @@ namespace RRS_API.Controllers
     {
         ReceiptMngr ReceiptMngr = new ReceiptMngr();
         TokenMngr TokenMngr = new TokenMngr();
+        private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         #region Get requests
         /*[Route("GetTotalUploadsDetails")]
@@ -39,21 +42,25 @@ namespace RRS_API.Controllers
         [HttpPost]
         public HttpResponseMessage GetAllRecognizedData()
         {
+            _logger.Debug("GetAllRecognizedData started");
             try
             {
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Headers["Authorization"];
                 if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
                 {
+                    _logger.Info("Succesful GetAllRecognizedData");
                     return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllRecognizedData());
                 }
                 else
                 {
+                    _logger.Debug("GetAllRecognizedData Forbidden");
                     return Request.CreateResponse(HttpStatusCode.Forbidden);
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.Error("Error - GetAllRecognizedData", e);
                 return Request.CreateResponse(HttpStatusCode.InternalServerError);
             }
         }
@@ -62,21 +69,25 @@ namespace RRS_API.Controllers
         [HttpPost]
         public HttpResponseMessage GetAllApprovedData()
         {
+            _logger.Debug("GetAllApprovedData started");
             try
             {
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Headers["Authorization"];
                 if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
                 {
+                    _logger.Info("Succesful GetAllApprovedData");
                     return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllApprovedData());
                 }
                 else
                 {
+                    _logger.Debug("GetAllApprovedData Forbidden");
                     return Request.CreateResponse(HttpStatusCode.Forbidden);
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.Error("Error - GetAllApprovedData", e);
                 return Request.CreateResponse(HttpStatusCode.InternalServerError);
             }
         }
@@ -85,12 +96,15 @@ namespace RRS_API.Controllers
         [HttpGet]
         public HttpResponseMessage GetProductInfo(string marketID, string productID)
         {
+            _logger.Debug($"GetProductInfo started, marketID: {marketID}, productID: {productID}");
             try
             {
+                _logger.Info("Succesful GetProductInfo");
                 return Request.CreateResponse(HttpStatusCode.OK, ReceiptMngr.GetProductInfo(productID, marketID));
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.Error("Error - GetProductInfo", e);
                 return Request.CreateResponse(HttpStatusCode.InternalServerError);
             }
         }
@@ -104,6 +118,7 @@ namespace RRS_API.Controllers
         [HttpPost]
         public HttpResponseMessage UploadReceipts()
         {
+            _logger.Debug($"UploadReceipts started");
             try
             {
                 var httpRequest = HttpContext.Current.Request;
@@ -116,6 +131,7 @@ namespace RRS_API.Controllers
                         var selectedFamilyID = httpRequest.Form["familyID"];//2 arg
                         var selectedMarket = httpRequest.Form["market"];//2 arg
                         var postedFiles = httpRequest.Files;//3 arg
+                        _logger.Debug($"UploadReceipts FamilyID: {selectedFamilyID}, market: {selectedMarket}, files: {postedFiles.Count}");
 
                         foreach (var fileKey in postedFiles.AllKeys)
                         {
@@ -131,8 +147,9 @@ namespace RRS_API.Controllers
                         }).Start();
                         return Request.CreateResponse(HttpStatusCode.Created);
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        _logger.Error("Error UploadReceipts working of photos", e);
                         return Request.CreateResponse(HttpStatusCode.InternalServerError);
                     }
                 }
@@ -141,19 +158,19 @@ namespace RRS_API.Controllers
                     return Request.CreateResponse(HttpStatusCode.Forbidden);
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.Error("Error UploadReceipts", e);
                 return Request.CreateResponse(HttpStatusCode.Forbidden);
             }
         }
-        #endregion
 
-        #region PUT Requests
         //need to send token
         [Route("UpdateReceiptData/{familyID}")]
-        [HttpPut]
+        [HttpPost]
         public HttpResponseMessage UpdateReceiptData(string familyID, [FromBody] ReceiptToReturn receiptToUpdate)
         {
+            _logger.Debug($"UpdateReceiptData started, familyID: {familyID}, receipt: {receiptToUpdate.receiptID}");
             try
             {
                 var httpRequest = HttpContext.Current.Request;
@@ -168,8 +185,9 @@ namespace RRS_API.Controllers
                     return Request.CreateResponse(HttpStatusCode.Forbidden);
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.Error($"Error - UpdateReceiptData, familyID: {familyID}, receipt: {receiptToUpdate.receiptID}");
                 return Request.CreateResponse(HttpStatusCode.InternalServerError);
             }
         }

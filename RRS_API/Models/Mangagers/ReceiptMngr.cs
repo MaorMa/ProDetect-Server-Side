@@ -12,6 +12,8 @@ using RRS_API.Models.ImageRecognition;
 using RRS_API.Models.Mangagers;
 using System.Text;
 using System.Security.Cryptography;
+using log4net;
+using System.Reflection;
 
 namespace RRS_API.Controllers
 {
@@ -25,6 +27,8 @@ namespace RRS_API.Controllers
         private MarkedImageSaver MarkedImageSaver = new MarkedImageSaver();
         private DateTime UploadTime;
         private string selectedFamilyID;
+
+        private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         #endregion
 
         #region public Methods
@@ -33,6 +37,7 @@ namespace RRS_API.Controllers
          */
         public void processPhotos(string selectedFamilyID, string selectedMarket, Dictionary<string, Image> imgNameAndImg)
         {
+            _logger.Debug($"ProcessPhotos started, selectedFamilyID: {selectedFamilyID}, selectedMarket: {selectedMarket}");
             UploadTime = DateTime.Now;
             setSelectedFamilyID(selectedFamilyID);
             //before we start using ocr engine , we need to approve the receipt not uploaded before            
@@ -363,6 +368,8 @@ namespace RRS_API.Controllers
                                     string description = descAndPrice[1];
                                     string price = descAndPrice[2];
                                     obj.setDescription(description);
+                                    //get optional names in object ResearchProduct(sid,name) from db
+                                    //obj.setoptionalProducts()
                                     obj.setPrice(price);
                                 }
                             }

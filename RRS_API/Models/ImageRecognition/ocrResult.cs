@@ -7,7 +7,9 @@ using RRS_API.Models;
 using System.Threading.Tasks;
 using System.IO;
 using System.Security.Cryptography;
-//using log4net;
+using log4net;
+using System.Reflection;
+using System.Linq;
 
 namespace Server
 {
@@ -19,11 +21,13 @@ namespace Server
     {
         private AdvancedOcr ocr; //ocr object
         private List<Receipt> receipts;
-        //private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         public ocrResult()
         {
+            _logger.Debug("ocrResult started");
             IronOcr.License.LicenseKey = "IRONOCR-331669D230-119164-85AA56-6D1E880DDB-7AC6351-UEx46DE8D12FEFC7D8-BENGURIONUNIVERSITY.IRO190324.4912.54129.PRO.1DEV.1YR.SUPPORTED.UNTIL.24.MAR.2020";
+            IronOcrInstallation.InstallationPath = System.Web.HttpContext.Current.Server.MapPath("~/RequiredDLL/");
             bool res = IronOcr.License.IsValidLicense("IRONOCR-331669D230-119164-85AA56-6D1E880DDB-7AC6351-UEx46DE8D12FEFC7D8-BENGURIONUNIVERSITY.IRO190324.4912.54129.PRO.1DEV.1YR.SUPPORTED.UNTIL.24.MAR.2020");
             this.ocr = new AdvancedOcr()
             {
@@ -49,10 +53,11 @@ namespace Server
          */
         public List<Receipt> fromImagesToText(Dictionary<string, Image> imgList)
         {
-            List<Thread> threadsPool = new List<Thread>();
+            _logger.Debug($"fromImagesToText started with list of size {imgList.Keys.Count}");
+            //List<Thread> threadsPool = new List<Thread>();
             foreach (KeyValuePair<string, Image> pair in imgList)
             {
-                initReceiptsList(pair.Key, pair.Value);
+                initReceiptsList(pair.Key, flip(pair.Value));
 
                 /*
                 //run each convertion in seperate thread
@@ -78,7 +83,7 @@ namespace Server
 
         /*
          * return hash of given image object
-         */ 
+         */
         public string getHash(Image image)
         {
             using (var ms = new MemoryStream())
@@ -94,56 +99,136 @@ namespace Server
          */
         private void initReceiptsList(String imgName, Image img)
         {
+            _logger.Debug($"Initializing Receipt list imgName: {imgName}");
             ImageProccessing imageProccessing = new ImageProccessing(img, new Size((int)(img.Width), (int)(img.Height)));
             Bitmap imgInNewResolution = imageProccessing.getImageInNewResolution();
 
-            OcrResult ocrResults;
+            OcrResult ocrResults = null;
 
             //try 4 different modes to get best results
             //grayScaleV1 - mode 1
-            ocrResults = ocr.Read(imageProccessing.getMode1());
-            if (ocrResults.Pages.Count > 0)
+            try
             {
-                Receipt receipt = new Receipt(ocrResults.Pages[0].Width, ocrResults.Pages[0].Height, imgName, imgInNewResolution, img);//create receipt object with sizes and name
-                detectWords(ocrResults, receipt);
-
-                var mode1 = new Task(() =>
+                _logger.Debug($"OcrRead imgName: {imgName} - Mode1");
+                try
                 {
-                    ocrResults = ocr.Read(imgInNewResolution);
-                    detectWords(ocrResults, receipt);
-                });
-
-                var mode2 = new Task(() =>
+                    ocrResults = ocr.Read(imageProccessing.getMode1());
+                    _logger.Info($"OcrRead Result: {ocrResults.Pages.Count}");
+                }
+                catch (Exception e)
                 {
-                    ocrResults = ocr.Read(imageProccessing.getMode2());
-                    detectWords(ocrResults, receipt);
-                });
-
-                var mode3 = new Task(() =>
+                    _logger.Error($"Read",e);
+                }
+                if (ocrResults.Pages.Count > 0)
                 {
-                    ocrResults = ocr.Read(imageProccessing.getMode3());
+                    Receipt receipt = new Receipt(ocrResults.Pages[0].Width, ocrResults.Pages[0].Height, imgName, imgInNewResolution, img);//create receipt object with sizes and name
                     detectWords(ocrResults, receipt);
-                });
+                    var NewResolution = new Task(() =>
+                    {
+                        try
+                        {
+                            _logger.Debug($"OcrRead imgName: {imgName} - New Resolution");
+                            ocrResults = ocr.Read(imageProccessing.getImageInNewResolution());
+                            detectWords(ocrResults, receipt);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Error($"Error - OcrRead imgName: {imgName} - New Resolution", e);
+                        }
+                    });
 
-                var mode4 = new Task(() =>
-                {
-                    ocrResults = ocr.Read(imageProccessing.getMode4());
-                    detectWords(ocrResults, receipt);
-                });
+                    var mode1 = new Task(() =>
+                    {
+                        try
+                        {
+                            _logger.Debug($"OcrRead imgName: {imgName} - Mode1");
+                            ocrResults = ocr.Read(imageProccessing.getMode1());
+                            detectWords(ocrResults, receipt);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Error($"Error - OcrRead imgName: {imgName} - Mode1", e);
+                        }
+                    });
 
-                mode1.Start();
-                mode2.Start();
-                mode3.Start();
-                mode4.Start();
+                    var mode2 = new Task(() =>
+                    {
+                        try
+                        {
+                            _logger.Debug($"OcrRead imgName: {imgName} - Mode2");
+                            ocrResults = ocr.Read(imageProccessing.getMode2());
+                            detectWords(ocrResults, receipt);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Error($"Error - OcrRead imgName: {imgName} - Mode2", e);
+                        }
+                    });
 
-                mode1.Wait();
-                mode2.Wait();
-                mode3.Wait();
-                mode4.Wait();
+                    var mode3 = new Task(() =>
+                    {
+                        try
+                        {
+                            _logger.Debug($"OcrRead imgName: {imgName} - Mode3");
+                            ocrResults = ocr.Read(imageProccessing.getMode3());
+                            detectWords(ocrResults, receipt);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Error($"Error - OcrRead imgName: {imgName} - Mode3", e);
+                        }
+                    });
 
-                //add receipt after trying all m modes
-                this.receipts.Add(receipt);
+                    NewResolution.Start();
+                    mode1.Start();
+                    mode2.Start();
+                    mode3.Start();
+
+                    NewResolution.Wait();
+                    mode1.Wait();
+                    mode2.Wait();
+                    mode3.Wait();
+
+                    //add receipt after trying all m modes
+                    _logger.Debug($"Adding receipt {receipt.getName()} to list of ready receits");
+                    this.receipts.Add(receipt);
+                }
             }
+            catch (Exception e)
+            {
+                _logger.Error($"Error OcrRead imgName: {imgName} - Mode1", e);
+            }
+        }
+
+        private Image flip(Image image)
+        {
+            const int exifOrientationID = 0x112; //274
+            if (!image.PropertyIdList.Contains(exifOrientationID))
+            {
+                return image;
+            }
+            //change rotation manually
+            else
+            {
+                _logger.Debug($"Receipt upload from Phone");
+                var prop = image.GetPropertyItem(exifOrientationID);
+                int val = BitConverter.ToUInt16(prop.Value, 0);
+                var rot = RotateFlipType.RotateNoneFlipNone;
+
+                if (val == 3 || val == 4)
+                    rot = RotateFlipType.Rotate180FlipNone;
+                else if (val == 5 || val == 6)
+                    rot = RotateFlipType.Rotate90FlipNone;
+                else if (val == 7 || val == 8)
+                    rot = RotateFlipType.Rotate270FlipNone;
+
+                if (val == 2 || val == 4 || val == 5 || val == 7)
+                    rot |= RotateFlipType.RotateNoneFlipX;
+
+                if (rot != RotateFlipType.RotateNoneFlipNone)
+                    image.RotateFlip(rot);
+            }
+            return image;
         }
 
         /*
@@ -151,6 +236,7 @@ namespace Server
          */
         private void detectWords(OcrResult ocrResults, Receipt receipt)
         {
+            _logger.Debug($"Detecting words for receipt: {receipt.getName()}");
             //page object
             foreach (var page in ocrResults.Pages)
             {
@@ -174,6 +260,7 @@ namespace Server
                     }
                 }
             }
+            _logger.Debug($"Succesful Detecting words for receipt: {receipt.getName()}");
         }
     }
 }

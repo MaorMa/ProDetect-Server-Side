@@ -67,6 +67,7 @@ namespace OcrProject.Parser
             {
                 if (double.TryParse(s, out num) && !s.Contains(",") && !s.StartsWith("0"))//if number
                 {
+                    //IdToMetadata not contains product
                     if (!receipt.getIdToMetadata().ContainsKey(s))
                     {
                         receiptsIdToMetadata.Add(s, new List<MetaData>());

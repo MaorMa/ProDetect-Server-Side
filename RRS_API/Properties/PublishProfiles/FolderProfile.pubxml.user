@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <_PublishTargetUrl>C:\RR\RRS-SERVER\RRS_API\bin\Release\Publish</_PublishTargetUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <File Include="ApplicationInsights.config">
+      <publishTime>10/30/2019 07:22:32</publishTime>
+    </File>
+    <File Include="bin/AForge.dll">
+      <publishTime>07/17/2013 23:15:16</publishTime>
+    </File>
+    <File Include="bin/AForge.Imaging.dll">
+      <publishTime>07/17/2013 23:19:04</publishTime>
+    </File>
+    <File Include="bin/AForge.Math.dll">
+      <publishTime>07/17/2013 23:17:04</publishTime>
+    </File>
+    <File Include="bin/ApplicationInsights.config">
+      <publishTime>10/30/2019 07:22:32</publishTime>
+    </File>
+    <File Include="bin/de/ZedGraph.resources.dll">
+      <publishTime>09/19/2015 15:28:04</publishTime>
+    </File>
+    <File Include="bin/Emgu.CV.UI.dll">
+      <publishTime>09/18/2019 14:23:34</publishTime>
+    </File>
+    <File Include="bin/Emgu.CV.UI.GL.dll">
+      <publishTime>10/30/2019 07:22:36</publishTime>
+    </File>
+    <File Include="bin/Emgu.CV.World.dll">
+      <publishTime>09/18/2019 14:23:26</publishTime>
+    </File>
+    <File Include="bin/es/ZedGraph.resources.dll">
+      <publishTime>09/19/2015 15:28:04</publishTime>
+    </File>
+    <File Include="bin/fr/ZedGraph.resources.dll">
+      <publishTime>09/19/2015 15:28:04</publishTime>
+    </File>
+    <File Include="bin/hu/ZedGraph.resources.dll">
+      <publishTime>09/19/2015 15:28:04</publishTime>
+    </File>
+    <File Include="bin/IronOcr.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/IronOcr.Hebrew.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/it/ZedGraph.resources.dll">
+      <publishTime>09/19/2015 15:28:04</publishTime>
+    </File>
+    <File Include="bin/ja/ZedGraph.resources.dll">
+      <publishTime>09/19/2015 15:28:04</publishTime>
+    </File>
+    <File Include="bin/log4net.dll">
+      <publishTime>03/08/2017 19:25:34</publishTime>
+    </File>
+    <File Include="bin/Magick.NET-Q16-AnyCPU.dll">
+      <publishTime>10/22/2019 21:19:50</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.Agent.Intercept.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.DependencyCollector.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.PerfCounterCollector.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.ServerTelemetryChannel.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.Web.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.WindowsServer.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/Microsoft.ApplicationInsights.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/Microsoft.IdentityModel.JsonWebTokens.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/Microsoft.IdentityModel.Logging.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/Microsoft.IdentityModel.Tokens.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/Newtonsoft.Json.dll">
+      <publishTime>10/30/2019 07:22:39</publishTime>
+    </File>
+    <File Include="bin/OpenTK.dll">
+      <publishTime>10/30/2019 07:22:39</publishTime>
+    </File>
+    <File Include="bin/OpenTK.GLControl.dll">
+      <publishTime>10/30/2019 07:22:39</publishTime>
+    </File>
+    <File Include="bin/pt/ZedGraph.resources.dll">
+      <publishTime>09/19/2015 15:28:04</publishTime>
+    </File>
+    <File Include="bin/roslyn/csc.exe">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.Build.Tasks.CodeAnalysis.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CodeAnalysis.CSharp.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CodeAnalysis.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CodeAnalysis.VisualBasic.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CSharp.Core.targets">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.VisualBasic.Core.targets">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/roslyn/System.Collections.Immutable.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/roslyn/System.Reflection.Metadata.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/roslyn/vbc.exe">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/roslyn/VBCSCompiler.exe">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/roslyn/VBCSCompiler.exe.config">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/RRS_API.dll">
+      <publishTime>11/19/2019 19:00:06</publishTime>
+    </File>
+    <File Include="bin/RRS_API.pdb">
+      <publishTime>11/19/2019 19:00:06</publishTime>
+    </File>
+    <File Include="bin/ru/ZedGraph.resources.dll">
+      <publishTime>09/19/2015 15:28:04</publishTime>
+    </File>
+    <File Include="bin/sk/ZedGraph.resources.dll">
+      <publishTime>09/19/2015 15:28:04</publishTime>
+    </File>
+    <File Include="bin/sv/ZedGraph.resources.dll">
+      <publishTime>09/19/2015 15:28:04</publishTime>
+    </File>
+    <File Include="bin/System.IdentityModel.Tokens.Jwt.dll">
+      <publishTime>10/30/2019 07:22:39</publishTime>
+    </File>
+    <File Include="bin/System.Net.Http.Formatting.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/System.Web.Cors.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/System.Web.Http.Cors.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/System.Web.Http.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/System.Web.Http.WebHost.dll">
+      <publishTime>10/30/2019 07:22:38</publishTime>
+    </File>
+    <File Include="bin/tr/ZedGraph.resources.dll">
+      <publishTime>09/19/2015 15:28:04</publishTime>
+    </File>
+    <File Include="bin/x64/concrt140.dll">
+      <publishTime>09/18/2019 14:23:10</publishTime>
+    </File>
+    <File Include="bin/x64/cvextern.dll">
+      <publishTime>09/18/2019 14:23:08</publishTime>
+    </File>
+    <File Include="bin/x64/msvcp140.dll">
+      <publishTime>09/18/2019 14:23:10</publishTime>
+    </File>
+    <File Include="bin/x64/opencv_videoio_ffmpeg411_64.dll">
+      <publishTime>09/18/2019 14:23:10</publishTime>
+    </File>
+    <File Include="bin/x64/vcruntime140.dll">
+      <publishTime>09/18/2019 14:23:10</publishTime>
+    </File>
+    <File Include="bin/x86/concrt140.dll">
+      <publishTime>08/06/2019 18:50:34</publishTime>
+    </File>
+    <File Include="bin/x86/cvextern.dll">
+      <publishTime>09/18/2019 09:34:26</publishTime>
+    </File>
+    <File Include="bin/x86/msvcp140.dll">
+      <publishTime>08/06/2019 18:50:34</publishTime>
+    </File>
+    <File Include="bin/x86/opencv_videoio_ffmpeg411.dll">
+      <publishTime>09/18/2019 09:03:18</publishTime>
+    </File>
+    <File Include="bin/x86/vcruntime140.dll">
+      <publishTime>08/06/2019 18:50:34</publishTime>
+    </File>
+    <File Include="bin/ZedGraph.dll">
+      <publishTime>09/19/2015 15:28:04</publishTime>
+    </File>
+    <File Include="bin/zh-cn/ZedGraph.resources.dll">
+      <publishTime>09/19/2015 15:28:04</publishTime>
+    </File>
+    <File Include="bin/zh-tw/ZedGraph.resources.dll">
+      <publishTime>09/19/2015 15:28:04</publishTime>
+    </File>
+    <File Include="ClassDiagram1.cd">
+      <publishTime>10/30/2019 07:22:32</publishTime>
+    </File>
+    <File Include="ClassDiagram2.cd">
+      <publishTime>10/30/2019 07:22:32</publishTime>
+    </File>
+    <File Include="Global.asax">
+      <publishTime>10/30/2019 07:22:32</publishTime>
+    </File>
+    <File Include="License-LGPL.txt">
+      <publishTime>11/05/2019 15:59:29</publishTime>
+    </File>
+    <File Include="log4net.config">
+      <publishTime>11/05/2019 14:58:01</publishTime>
+    </File>
+    <File Include="OpenTK.dll.config">
+      <publishTime>10/30/2019 07:22:32</publishTime>
+    </File>
+    <File Include="packages.config">
+      <publishTime>11/13/2019 14:56:22</publishTime>
+    </File>
+    <File Include="Web.config">
+      <publishTime>11/13/2019 15:04:01</publishTime>
+    </File>
+  </ItemGroup>
+</Project>

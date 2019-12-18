@@ -10,7 +10,7 @@ namespace RRS_API.Models.ImageRecognition
 {
     public class MarkedImageSaver
     {
-        private string MarkedImagesPath = System.Web.Hosting.HostingEnvironment.MapPath(@"\App_Data\Marked\");
+        private string MarkedImagesPath = System.Web.HttpContext.Current.Server.MapPath("~/Images/");
 
         public void saveMarkedImage(Receipt receipt, string selectedFamilyID)
         {

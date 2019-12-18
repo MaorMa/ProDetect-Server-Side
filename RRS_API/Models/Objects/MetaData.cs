@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RRS_API.Models.Objects;
+using System;
 
 namespace ImageRecognition.Objects
 {
@@ -8,6 +9,9 @@ namespace ImageRecognition.Objects
         public string description;//item description-name
         public string quantity;
         public string price;//per unit from DB
+        //public Nutrient[] nutrients;
+        public ResearchProduct[] optionalProducts;
+        public string productNameChosen;
         private double yCoordinate;
         public Boolean validProduct;
 
@@ -82,6 +86,11 @@ namespace ImageRecognition.Objects
         public void setvalidProduct(bool validProduct)
         {
             this.validProduct = validProduct;
+        }
+
+        public void setoptionalProducts(ResearchProduct[] optionalProducts)
+        {
+            this.optionalProducts = optionalProducts;
         }
     }
 }

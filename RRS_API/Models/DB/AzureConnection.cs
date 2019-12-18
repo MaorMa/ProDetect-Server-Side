@@ -4,6 +4,8 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
+using log4net;
+using System.Reflection;
 
 namespace RRS_API.Models
 {
@@ -12,6 +14,7 @@ namespace RRS_API.Models
     {
         private SqlConnectionStringBuilder builder;
         private static AzureConnection INSTANCE = new AzureConnection();
+        private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         /*
          * create connection to azure database
@@ -21,10 +24,13 @@ namespace RRS_API.Models
         {
             try
             {
+                _logger.Debug("Trying to create connection to SQL Server");
                 builder = new SqlConnectionStringBuilder(ConfigurationManager.ConnectionStrings["AzureConnection"].ToString());
+                _logger.Info("Succesful connection to SQL Server");
             }
-            catch (SqlException e)
+            catch (Exception e)
             {
+                //_logger.Error($"Error while connecting to SQL Server", e);
                 Console.WriteLine(e.ToString());
             }
         }
@@ -41,6 +47,7 @@ namespace RRS_API.Models
          */
         public List<String> SelectQuery(String query)
         {
+            //_logger.Debug($"Running select query {query}");
             List<String> result = new List<string>();
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
@@ -85,6 +92,7 @@ namespace RRS_API.Models
          */
         public void updateStatus(string FamilyID, string ReceiptID, string status)
         {
+            _logger.Debug($"Updating receipt status, familyID: {FamilyID}, ReceiptID: {ReceiptID}, status: {status}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
                 if (!(connection.State == System.Data.ConnectionState.Open))
@@ -101,9 +109,11 @@ namespace RRS_API.Models
                     try
                     {
                         command.ExecuteNonQuery();
+                        _logger.Info($"Succesful Updating receipt status, familyID: {FamilyID}, ReceiptID: {ReceiptID}");
                     }
                     catch (SqlException sqlException)
                     {
+                        _logger.Error($"Error while Updating receipt status, familyID: {FamilyID}, ReceiptID: {ReceiptID}", sqlException);
                         throw sqlException;
                     }
                     finally
@@ -119,6 +129,7 @@ namespace RRS_API.Models
          */
         public void updateFamilyUploads(string selectedFamilyID, string MarketID, string imageName, int status, string UploadTime)
         {
+            _logger.Debug($"Updating family uploads, familyID: {selectedFamilyID}, MarketID: {MarketID}, imageName: {imageName} status: {status}, upload time: {UploadTime}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
                 if (!(connection.State == System.Data.ConnectionState.Open))
@@ -138,9 +149,11 @@ namespace RRS_API.Models
                     try
                     {
                         command.ExecuteNonQuery();
+                        _logger.Info($"Succesful Updating family uploads, familyID: {selectedFamilyID}, MarketID: {MarketID}, imageName: {imageName} status: {status}, upload time: {UploadTime}");
                     }
                     catch (SqlException sqlException)
                     {
+                        _logger.Error($"Error while Updating family uploads, familyID: {selectedFamilyID}, MarketID: {MarketID}, imageName: {imageName} status: {status}, upload time: {UploadTime}", sqlException);
                         throw sqlException;
                     }
                     finally
@@ -153,6 +166,7 @@ namespace RRS_API.Models
 
         public void insertReceiptData(string familyID, string receiptID, string productID, string productDescription, string productQuantity, string productPrice, double yCoordinate, bool validProduct)
         {
+            _logger.Debug($"Inserting receipt data, familyID: {familyID}, receiptID: {receiptID}, productID: {productID}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
                 if (!(connection.State == System.Data.ConnectionState.Open))
@@ -171,13 +185,14 @@ namespace RRS_API.Models
                     command.Parameters.AddWithValue("@Price", productPrice);
                     command.Parameters.AddWithValue("@YCoordinate", yCoordinate.ToString());
                     command.Parameters.AddWithValue("@validProduct", validProduct);
-
                     try
                     {
                         command.ExecuteNonQuery();
+                        _logger.Info($"Succesful Inserting receipt data, familyID: {familyID}, receiptID: {receiptID}, productID: {productID}");
                     }
                     catch (SqlException sqlException)
                     {
+                        _logger.Debug($"Error while Inserting receipt data, familyID: {familyID}, receiptID: {receiptID}, productID: {productID}", sqlException);
                         throw sqlException;
                     }
                     finally
@@ -194,6 +209,7 @@ namespace RRS_API.Models
          */
         public void deleteReceiptData(string receiptID)
         {
+            _logger.Debug($"Deleting receipt data, receiptID: {receiptID}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
                 if (!(connection.State == System.Data.ConnectionState.Open))
@@ -209,10 +225,12 @@ namespace RRS_API.Models
                     try
                     {
                         command.ExecuteNonQuery();
+                        _logger.Info($"Succesful Deleting receipt data, receiptID: {receiptID}");
                     }
                     catch (SqlException sqlException)
                     {
-                        throw sqlException;
+                        _logger.Debug($"Error while Deleting receipt data, receiptID: {receiptID}", sqlException);
+                        //throw sqlException;
                     }
                     finally
                     {
@@ -224,6 +242,7 @@ namespace RRS_API.Models
 
         public string getSaltValue(string username)
         {
+            _logger.Debug($"Getting salt value, username: {username}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
                 if (!(connection.State == System.Data.ConnectionState.Open))
@@ -245,11 +264,13 @@ namespace RRS_API.Models
                             {
                                 salt += reader[0];
                             }
+                            _logger.Info($"Succesful Getting salt value, username: {username}");
                             return salt;
                         }
                     }
                     catch (SqlException sqlException)
                     {
+                        _logger.Error($"Error while Getting salt value, username: {username}", sqlException);
                         throw sqlException;
                     }
                     finally
@@ -261,6 +282,7 @@ namespace RRS_API.Models
         }
         public bool checkedUsernameAndPassword(string username, string password)
         {
+            _logger.Debug($"Checking username and password, username: {username}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
                 if (!(connection.State == System.Data.ConnectionState.Open))
@@ -280,17 +302,20 @@ namespace RRS_API.Models
                         {
                             if (reader.HasRows)
                             {
+                                _logger.Info($"Valid Username: {username} and password");
                                 return true;
                             }
 
                             else
                             {
+                                _logger.Debug($"Invalid Username: {username} and password");
                                 return false;
                             }
                         }
                     }
                     catch (SqlException sqlException)
                     {
+                        _logger.Error($"Error while Checking username and password, username: {username}", sqlException);
                         throw sqlException;
                     }
                     finally
@@ -303,6 +328,7 @@ namespace RRS_API.Models
 
         public string getGroupID(string username)
         {
+            _logger.Debug($"Getting groupId, username: {username}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
                 if (!(connection.State == System.Data.ConnectionState.Open))
@@ -324,11 +350,13 @@ namespace RRS_API.Models
                             {
                                 groupID += reader[0];
                             }
+                            _logger.Info($"Succesful Getting groupId {groupID} for username: {username}");
                             return groupID;
                         }
                     }
                     catch (SqlException sqlException)
                     {
+                        _logger.Error($"Error while getting groupid, username: {username}", sqlException);
                         throw sqlException;
                     }
                     finally
@@ -341,6 +369,7 @@ namespace RRS_API.Models
 
         public List<string> getFamilies()
         {
+            _logger.Debug($"Getting families");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
                 if (!(connection.State == System.Data.ConnectionState.Open))
@@ -361,11 +390,13 @@ namespace RRS_API.Models
                             {
                                 Families.Add(reader[0].ToString());
                             }
+                            _logger.Info($"Succesful Getting families");
                             return Families;
                         }
                     }
                     catch (SqlException sqlException)
                     {
+                        _logger.Error($"Error while getting families", sqlException);
                         throw sqlException;
                     }
                     finally
@@ -378,6 +409,7 @@ namespace RRS_API.Models
 
         public void AddNewFamilyUser(string username, string salt, string hashedPassword, int groupID)
         {
+            _logger.Debug($"Adding new family, username: {username}, groupID: {groupID}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
                 if (!(connection.State == System.Data.ConnectionState.Open))
@@ -396,9 +428,11 @@ namespace RRS_API.Models
                     try
                     {
                         command.ExecuteNonQuery();
+                        _logger.Info($"Succesful Adding new family: {username}, groupID: {groupID}");
                     }
                     catch (SqlException sqlException)
                     {
+                        _logger.Error($"Error while adding new family: {username}, groupID: {groupID}", sqlException);
                         throw sqlException;
                     }
                     finally

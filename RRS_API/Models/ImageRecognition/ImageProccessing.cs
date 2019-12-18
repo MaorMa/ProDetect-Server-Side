@@ -1,9 +1,10 @@
-﻿using Emgu.CV;
-using Emgu.CV.Structure;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using log4net;
+using System.Reflection;
+using AForge.Imaging.Filters;
 namespace RRS_API.Models
 {
     /*
@@ -13,16 +14,24 @@ namespace RRS_API.Models
     {
         private Bitmap imgInNewResolution;
         List<Bitmap> modes; //mode1 - improve resolution, mode2 - grayscale, mode3 - sharpen image
+        private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         public ImageProccessing(Image image, Size size)
         {
-            modes = new List<Bitmap>();
-            Bitmap Bitimage = new Bitmap(image);
-            this.imgInNewResolution = improveResolution(Bitimage, size);
-            modes.Add(convertToGrayscaleV1(imgInNewResolution));
-            modes.Add(convertToGrayscaleV2(imgInNewResolution));
-            modes.Add(convertToBW(imgInNewResolution));
-            modes.Add(Sharpen(imgInNewResolution));
+            _logger.Debug($"Creating ImageProccessing");
+            try
+            {
+                modes = new List<Bitmap>();
+                Bitmap Bitimage = new Bitmap(image);
+                this.imgInNewResolution = improveResolution(Bitimage, size);
+                modes.Add(convertToGrayscale(imgInNewResolution));
+                modes.Add(Sharpen(imgInNewResolution));
+                modes.Add(convertToBW(imgInNewResolution));
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error - creating ImageProccessing", e);
+            }
         }
 
         /*
@@ -37,17 +46,29 @@ namespace RRS_API.Models
 
         /*
          * mode 1
-         */
-        private Bitmap convertToGrayscaleV1(Bitmap image)
+         */ 
+        private Bitmap convertToBW(Image image)
         {
-            Image<Gray, Byte> img = new Image<Gray, Byte>(image);
-            return img.ToBitmap();
+            Bitmap a = new Bitmap(image);
+            int[,] kernel = {
+            { -2, -1,  0 },
+            { -1,  1,  1 },
+            {  0,  1,  2 } };
+            // create filter
+            Convolution Convolution = new Convolution(kernel);
+            // apply the filter
+            Convolution.ApplyInPlace(a);
+
+            var bmp8bpp = Grayscale.CommonAlgorithms.BT709.Apply(a);
+            OtsuThreshold OtsuThreshold = new OtsuThreshold();
+            OtsuThreshold.ApplyInPlace(bmp8bpp);
+            return a;
         }
 
         /*
          * mode 2
          */
-        private Bitmap convertToGrayscaleV2(Bitmap image)
+        private Bitmap convertToGrayscale(Bitmap image)
         {
             Bitmap grayScale = new Bitmap(image.Width, image.Height);
 
@@ -62,25 +83,6 @@ namespace RRS_API.Models
                 }
             return grayScale;
         }
-
-        /*
-         * mode 3
-         */
-        private Bitmap convertToBW(Bitmap image)
-        {
-            Image<Gray, Byte> newImage;
-            Image<Bgr, byte> image_pass = new Image<Bgr, byte>(image);
-            newImage = image_pass.Convert<Gray, Byte>().ThresholdBinaryInv(new Gray(190), new Gray(255));
-            return newImage.ToBitmap();
-            /*
-            Image<Gray, byte> imgGray = new Image<Gray, byte>(image);
-            Image<Gray, byte> imgBinarize;
-            imgBinarize = new Image<Gray, byte>(imgGray.Width, imgGray.Height, new Gray(0));
-            CvInvoke.Threshold(imgGray, imgBinarize, 100, 255, Emgu.CV.CvEnum.ThresholdType.Otsu);
-            return imgBinarize.ToBitmap();
-            */
-        }
-
 
         private Bitmap Sharpen(Bitmap image)
         {
@@ -178,19 +180,11 @@ namespace RRS_API.Models
         }
 
         /*
-         * get 3rd mode
+         * get third mode
          */
         public Bitmap getMode3()
         {
             return this.modes[2];
-        }
-
-        /*
-         * get 4th mode
-         */
-        public Bitmap getMode4()
-        {
-            return this.modes[3];
         }
 
         public Bitmap getImageInNewResolution()

@@ -65,6 +65,60 @@ namespace RRS_API.Controllers
             }
         }
 
+        [Route("GetAllFamilies")]
+        [HttpPost]
+        public HttpResponseMessage GetAllFamilies()
+        {
+            _logger.Debug("GetAllFamilies started");
+            try
+            {
+                var httpRequest = HttpContext.Current.Request;
+                string token = httpRequest.Headers["Authorization"];
+                if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
+                {
+                    _logger.Info("Succesful GetAllFamilies");
+                    return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllFamilies());
+                }
+                else
+                {
+                    _logger.Debug("GetAllFamilies Forbidden");
+                    return Request.CreateResponse(HttpStatusCode.Forbidden);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error - GetAllFamilies", e);
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        [Route("GetAllFamilyData/{familyID}")]
+        [HttpPost]
+        public HttpResponseMessage GetAllFamilyData(string familyID)
+        {
+            _logger.Debug("GetAllFamilyData started");
+            try
+            {
+                var httpRequest = HttpContext.Current.Request;
+                string token = httpRequest.Headers["Authorization"];
+                if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
+                {
+                    _logger.Info("Succesful GetAllFamilyData");
+                    return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllFamilyData(familyID));
+                }
+                else
+                {
+                    _logger.Debug("GetAllFamilyData Forbidden");
+                    return Request.CreateResponse(HttpStatusCode.Forbidden);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error - GetAllFamilyData", e);
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
+            }
+        }
+
         [Route("GetAllApprovedData")]
         [HttpPost]
         public HttpResponseMessage GetAllApprovedData()

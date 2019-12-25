@@ -1,5 +1,6 @@
 ﻿using RRS_API.Models.Objects;
 using System;
+using System.Collections.Generic;
 
 namespace ImageRecognition.Objects
 {
@@ -9,13 +10,13 @@ namespace ImageRecognition.Objects
         public string description;//item description-name
         public string quantity;
         public string price;//per unit from DB
-        //public Nutrient[] nutrients;
-        public ResearchProduct[] optionalProducts;
+        public List<string> nutrients;
+        public List<ResearchProduct> optionalProducts;
         public string productNameChosen;
         private double yCoordinate;
         public Boolean validProduct;
 
-        public MetaData(string sID,string description, string quantity, string price,double yCoordinate, bool validProduct)
+        public MetaData(string sID, string description, string quantity, string price, double yCoordinate, bool validProduct)
         {
             this.description = description;
             this.quantity = quantity;
@@ -24,10 +25,32 @@ namespace ImageRecognition.Objects
             this.yCoordinate = yCoordinate;
             this.validProduct = validProduct;
         }
-        
+
+        public MetaData(string sID,string description, string quantity, string price,double yCoordinate, bool validProduct, List<ResearchProduct> optionalProducts)
+        {
+            this.description = description;
+            this.quantity = quantity;
+            this.price = price;
+            this.sID = sID;
+            this.yCoordinate = yCoordinate;
+            this.validProduct = validProduct;
+            this.optionalProducts = optionalProducts;
+        }
+
+        public MetaData(string sID, string description, string quantity, string price, double yCoordinate, bool validProduct, List<string> nutrients)
+        {
+            this.description = description;
+            this.quantity = quantity;
+            this.price = price;
+            this.sID = sID;
+            this.yCoordinate = yCoordinate;
+            this.validProduct = validProduct;
+            this.nutrients = nutrients;
+        }
+
         /*
          * Getters
-         */ 
+         */
 
         public String getDescription()
         {
@@ -52,6 +75,11 @@ namespace ImageRecognition.Objects
         public bool getvalidProduct()
         {
             return this.validProduct;
+        }
+
+        public List<ResearchProduct> getOptionalProducts()
+        {
+            return this.optionalProducts;
         }
 
         /*
@@ -88,9 +116,14 @@ namespace ImageRecognition.Objects
             this.validProduct = validProduct;
         }
 
-        public void setoptionalProducts(ResearchProduct[] optionalProducts)
+        public void setOptionalProducts(List<ResearchProduct> optionalProducts)
         {
             this.optionalProducts = optionalProducts;
+        }
+
+        public void setNutrients(List<string> nutrients)
+        {
+            this.nutrients = nutrients;
         }
     }
 }

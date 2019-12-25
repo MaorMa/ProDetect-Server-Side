@@ -206,6 +206,7 @@
     <Compile Include="Models\Objects\ReceiptToReturn.cs" />
     <Compile Include="Models\Mangagers\SettingsMngr.cs" />
     <Compile Include="Models\Objects\ResearchProduct.cs" />
+    <Compile Include="Models\StringSimilarityAlgorithms\JaroWinklerDistance.cs" />
     <Compile Include="Models\TextParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -228,7 +229,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\StringSimilarityAlgorithms\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

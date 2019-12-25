@@ -1,4 +1,5 @@
 ﻿using ImageRecognition.Objects;
+using RRS_API.Models.Objects;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -32,9 +33,15 @@ namespace RRS_API.Models
         {
             this.products = products;
         }
-        public void addProduct(string productID,string Description, string Quantity, string price, double yCoordinate,bool validProduct)
+
+        public void addProduct(string productID, string Description, string Quantity, string price, double yCoordinate, bool validProduct, List<string> nutrient)
         {
-            products.Add(new MetaData(productID,Description,Quantity,price,yCoordinate, validProduct));
+            products.Add(new MetaData(productID, Description, Quantity, price, yCoordinate, validProduct, nutrient));
+        }
+
+        public void addProduct(string productID,string Description, string Quantity, string price, double yCoordinate,bool validProduct, List<ResearchProduct> optionalProducts)
+        {
+            products.Add(new MetaData(productID,Description,Quantity,price,yCoordinate, validProduct, optionalProducts));
         }
     }
 }

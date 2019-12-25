@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Text;
 using log4net;
 using System.Reflection;
+using RRS_API.Models.Objects;
 
 namespace RRS_API.Models
 {
@@ -30,8 +31,8 @@ namespace RRS_API.Models
             }
             catch (Exception e)
             {
-                //_logger.Error($"Error while connecting to SQL Server", e);
-                Console.WriteLine(e.ToString());
+                _logger.Error($"Error while connecting to SQL Server", e);
+                throw new Exception("35", e);
             }
         }
 
@@ -111,10 +112,10 @@ namespace RRS_API.Models
                         command.ExecuteNonQuery();
                         _logger.Info($"Succesful Updating receipt status, familyID: {FamilyID}, ReceiptID: {ReceiptID}");
                     }
-                    catch (SqlException sqlException)
+                    catch (Exception sqlException)
                     {
                         _logger.Error($"Error while Updating receipt status, familyID: {FamilyID}, ReceiptID: {ReceiptID}", sqlException);
-                        throw sqlException;
+                        throw new Exception("118", sqlException);
                     }
                     finally
                     {
@@ -151,10 +152,10 @@ namespace RRS_API.Models
                         command.ExecuteNonQuery();
                         _logger.Info($"Succesful Updating family uploads, familyID: {selectedFamilyID}, MarketID: {MarketID}, imageName: {imageName} status: {status}, upload time: {UploadTime}");
                     }
-                    catch (SqlException sqlException)
+                    catch (Exception sqlException)
                     {
                         _logger.Error($"Error while Updating family uploads, familyID: {selectedFamilyID}, MarketID: {MarketID}, imageName: {imageName} status: {status}, upload time: {UploadTime}", sqlException);
-                        throw sqlException;
+                        throw new Exception("158", sqlException);
                     }
                     finally
                     {
@@ -190,10 +191,10 @@ namespace RRS_API.Models
                         command.ExecuteNonQuery();
                         _logger.Info($"Succesful Inserting receipt data, familyID: {familyID}, receiptID: {receiptID}, productID: {productID}");
                     }
-                    catch (SqlException sqlException)
+                    catch (Exception sqlException)
                     {
                         _logger.Debug($"Error while Inserting receipt data, familyID: {familyID}, receiptID: {receiptID}, productID: {productID}", sqlException);
-                        throw sqlException;
+                        throw new Exception("197", sqlException);
                     }
                     finally
                     {
@@ -227,10 +228,10 @@ namespace RRS_API.Models
                         command.ExecuteNonQuery();
                         _logger.Info($"Succesful Deleting receipt data, receiptID: {receiptID}");
                     }
-                    catch (SqlException sqlException)
+                    catch (Exception sqlException)
                     {
                         _logger.Debug($"Error while Deleting receipt data, receiptID: {receiptID}", sqlException);
-                        //throw sqlException;
+                        throw new Exception("234", sqlException);
                     }
                     finally
                     {
@@ -268,10 +269,10 @@ namespace RRS_API.Models
                             return salt;
                         }
                     }
-                    catch (SqlException sqlException)
+                    catch (Exception sqlException)
                     {
                         _logger.Error($"Error while Getting salt value, username: {username}", sqlException);
-                        throw sqlException;
+                        throw new Exception("275", sqlException);
                     }
                     finally
                     {
@@ -313,10 +314,10 @@ namespace RRS_API.Models
                             }
                         }
                     }
-                    catch (SqlException sqlException)
+                    catch (Exception sqlException)
                     {
                         _logger.Error($"Error while Checking username and password, username: {username}", sqlException);
-                        throw sqlException;
+                        throw new Exception("320", sqlException);
                     }
                     finally
                     {
@@ -354,10 +355,10 @@ namespace RRS_API.Models
                             return groupID;
                         }
                     }
-                    catch (SqlException sqlException)
+                    catch (Exception sqlException)
                     {
                         _logger.Error($"Error while getting groupid, username: {username}", sqlException);
-                        throw sqlException;
+                        throw new Exception("361", sqlException);
                     }
                     finally
                     {
@@ -394,10 +395,10 @@ namespace RRS_API.Models
                             return Families;
                         }
                     }
-                    catch (SqlException sqlException)
+                    catch (Exception exception)
                     {
-                        _logger.Error($"Error while getting families", sqlException);
-                        throw sqlException;
+                        _logger.Error($"Error while getting families", exception);
+                        throw new Exception("401", exception);
                     }
                     finally
                     {
@@ -430,9 +431,143 @@ namespace RRS_API.Models
                         command.ExecuteNonQuery();
                         _logger.Info($"Succesful Adding new family: {username}, groupID: {groupID}");
                     }
-                    catch (SqlException sqlException)
+                    catch (Exception exception)
                     {
-                        _logger.Error($"Error while adding new family: {username}, groupID: {groupID}", sqlException);
+                        _logger.Error($"Error while adding new family: {username}, groupID: {groupID}", exception);
+                        throw new Exception("437", exception);
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+        }
+
+
+        public Dictionary<string, string> getSimiliarProductNames(string productName)
+        {
+            _logger.Debug($"Getting SimiliarProductNames");
+            using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+            {
+                if (!(connection.State == System.Data.ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = "SELECT SID, Description FROM Nutrients WHERE Description LIKE N'%" + productName + " %' OR Description=N'" + productName + "'";
+                    try
+                    {
+                        Dictionary<string, string> similiarProductNames = new Dictionary<string, string>();
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                //var i0 = reader[0];
+                                //var i1 = reader[1];
+                                if (!similiarProductNames.ContainsKey(reader[0].ToString()))
+                                    similiarProductNames.Add(reader[0].ToString(), reader[1].ToString());
+                            }
+                            _logger.Info($"Succesful Getting SimiliarProductNames");
+                            return similiarProductNames;
+                        }
+                    }
+                    catch (Exception exception)
+                    {
+                        _logger.Error($"Error while Getting SimiliarProductNames", exception);
+                        throw new Exception("481", exception);
+
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+        }
+
+        /*
+        * Insert top 5 similar products to OptionalProducts table
+        */
+        //public void insertOptionalProducts(string productId, string SID, string OptionalName)
+        public void insertOptionalProducts(string productId, List<ResearchProduct> optionalProducts)
+        {
+            _logger.Debug($"Inserting optional products for ProductId: {productId}");
+            if (productExistsInOptionalProducts(productId))
+                return;
+            foreach (ResearchProduct rp in optionalProducts)
+            {
+                using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+                {
+                    if (!(connection.State == System.Data.ConnectionState.Open))
+                    {
+                        connection.Open();
+                    }
+                    using (SqlCommand command = new SqlCommand())
+                    {
+                        command.Connection = connection;
+                        command.CommandType = CommandType.Text;
+
+                        command.CommandText = "INSERT into OptionalProducts(ProductID, SID, OptionalName) VALUES(@ProductID, @SID, @OptionalName)";
+                        command.Parameters.AddWithValue("@ProductID", productId);
+                        command.Parameters.AddWithValue("@SID", rp.SID);
+                        command.Parameters.AddWithValue("@OptionalName", rp.Name);
+                        try
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                        catch (Exception sqlException)
+                        {
+                            connection.Close();
+                            throw new Exception("524",sqlException);
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+        }
+
+        /*
+         * Checks if product already exists in OptionalProducts table (was already selected in the past)
+         */
+        private bool productExistsInOptionalProducts(string productId)
+        {
+            _logger.Debug($"Checking if productId: {productId} exists in OptionalProducts");
+            using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+            {
+                if (!(connection.State == System.Data.ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = "SELECT * FROM OptionalProducts WHERE ProductID = @productId";
+                    command.Parameters.AddWithValue("@productId", productId);
+                    try
+                    {
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                _logger.Info($"productId: {productId} exists");
+                                return true;
+                            }
+
+                            else
+                            {
+                                _logger.Debug($"productId: {productId} does NOT exists");
+                                return false;
+                            }
+                        }
+                    }
+                    catch (Exception sqlException)
+                    {
+                        _logger.Error($"Error while Checking if productId: {productId} exists", sqlException);
                         throw sqlException;
                     }
                     finally

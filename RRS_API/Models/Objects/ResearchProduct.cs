@@ -41,5 +41,21 @@ namespace RRS_API.Models.Objects
             this.SID = sID;
             this.Name = name;
         }
+
+        /*public int CompareTo(ResearchProduct other)
+        {
+            if (this.SID.Equals(other.SID)) return 0;
+            return 1;
+        }*/
+
+        public override bool Equals(object y)
+        {
+            return this.SID.Equals(((ResearchProduct)y).SID);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.SID.GetHashCode();
+        }
     }
 }

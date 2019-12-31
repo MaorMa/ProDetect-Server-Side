@@ -16,6 +16,7 @@ using log4net;
 using System.Reflection;
 using RRS_API.Models.Objects;
 using RRS_API.Models.StringSimilarityAlgorithms;
+using RRS_API.Models.Parsers;
 
 namespace RRS_API.Controllers
 {
@@ -78,9 +79,13 @@ namespace RRS_API.Controllers
         /*
         * return all families from db
         */
-        public string GetAllFamilies()
+        public string GetAllFamilies(string accView)
         {
-            string queryStatusWorking = "SELECT DISTINCT FamilyID FROM FamilyUploads";
+            string queryStatusWorking;
+            if (accView.Equals("Acc"))
+                queryStatusWorking = "SELECT DISTINCT FamilyID FROM FamilyUploads WHERE NOT ReceiptStatus = 1";
+            else
+                queryStatusWorking = "SELECT DISTINCT FamilyID FROM FamilyUploads WHERE ReceiptStatus = 1";
             List<string> familiesList = AzureConnection.SelectQuery(queryStatusWorking);
             return JsonConvert.SerializeObject(familiesList);
         }
@@ -105,8 +110,9 @@ namespace RRS_API.Controllers
                 string uploadTime = recordSplit[3];
                 string receiptStatus = recordSplit[4];
                 string productID = recordSplit[5];
-                List<string> OptionalNames = AzureConnection.SelectQuery("SELECT SID, OptionalName FROM OptionalProducts WHERE ProductID ='" + productID + "'");
+                List<string> OptionalNames = AzureConnection.SelectQuery("SELECT SID, OptionalName, Similarity FROM OptionalProducts WHERE ProductID ='" + productID + "'");
                 List<ResearchProduct> rp = createResarchListForProductID(OptionalNames);
+                rp.Sort((el1, el2) => Double.Parse(el2.similarity).CompareTo(Double.Parse(el1.similarity)));
                 string description = recordSplit[6];
                 string quantity = recordSplit[7];
                 string price = recordSplit[8];
@@ -157,10 +163,10 @@ namespace RRS_API.Controllers
             List<ReceiptToReturn> sorted = allInfo.Values.ToList();
             foreach (ReceiptToReturn rtr in sorted)
             {
-                    if (!rtr.status.Equals("-1"))
-                    {
-                        List<MetaData> sortedProducts = rtr.products.OrderBy(y => y.getyCoordinate()).ToList();
-                        rtr.updateProducts(sortedProducts);
+                if (!rtr.status.Equals("-1"))
+                {
+                    List<MetaData> sortedProducts = rtr.products.OrderBy(y => y.getyCoordinate()).ToList();
+                    rtr.updateProducts(sortedProducts);
                 }
             }
             return JsonConvert.SerializeObject(sorted);
@@ -169,6 +175,7 @@ namespace RRS_API.Controllers
         /*
         * return all recognized data from db
         */
+        /*
         public string GetAllRecognizedData()
         {
             string queryStatusWorking = "SELECT * FROM FamilyUploads WHERE ReceiptStatus = -1";
@@ -282,6 +289,7 @@ namespace RRS_API.Controllers
             }
             return JsonConvert.SerializeObject(sorted);
         }
+        */
 
         /*
          * Return list of researchProduct for productId - for approval
@@ -292,7 +300,7 @@ namespace RRS_API.Controllers
             foreach (string s in optionalName)
             {
                 string[] sidAndName = s.Split(',');
-                researchProduct.Add(new ResearchProduct(sidAndName[0], sidAndName[1]));
+                researchProduct.Add(new ResearchProduct(sidAndName[0], sidAndName[1], sidAndName[2]));
             }
             return researchProduct;
         }
@@ -305,6 +313,7 @@ namespace RRS_API.Controllers
         {
             try
             {
+                ProductDescriptionParser pdp = new ProductDescriptionParser();
                 string receiptID = receiptToUpdate.receiptID;
                 List<MetaData> sortedProducts = receiptToUpdate.products.ToList();
 
@@ -314,9 +323,29 @@ namespace RRS_API.Controllers
                 {
                     string productID = product.getsID();
                     string productDescription = product.getDescription();
+                    //Parse the desc to find quantity
+                    string quantityFoundInDesc = pdp.getQuantityFromDescription(productDescription);
                     string productQuantity = product.getQuantity();
+                    if (quantityFoundInDesc.Equals(""))//Parser returned nothing
+                    {
+                        double realQuantity;
+                        if (!productQuantity.Contains('.') && double.TryParse(productQuantity, out realQuantity)){//The quantity is integer
+                            productQuantity = (realQuantity/10) + "";
+                        }
+                    }
+                    else//Parser returned something
+                    {
+                        double realQuantity, foundQuantity;
+                        if (double.TryParse(quantityFoundInDesc, out foundQuantity) && double.TryParse(productQuantity, out realQuantity))
+                        {
+                            productQuantity = ((realQuantity * foundQuantity)/1000) + "";
+                        }
+                    }
                     string productPrice = product.getPrice();
+                    ResearchProduct rp = product.getOptionalProductsChosen();
                     AzureConnection.insertReceiptData(familyID, receiptID, productID, productDescription, productQuantity, productPrice, 0, true);
+                    if (rp != null)
+                        AzureConnection.deleteOptionalData(product.getsID(), product.getOptionalProductsChosen());
                 }
                 AzureConnection.updateStatus(familyID, receiptID, "1");
             }
@@ -326,50 +355,43 @@ namespace RRS_API.Controllers
             }
         }
 
-        public string GetAllApprovedData()
+        public string GetAllApprovedData(string familyId)
         {
-            Dictionary<string, Dictionary<string, ReceiptToReturn>> allInfo = new Dictionary<string, Dictionary<string, ReceiptToReturn>>();
-            string queryStatusApproved = "SELECT fu.FamilyID, fu.ReceiptID, fu.MarketID, rd.ProductID, rd.Description, rd.Quantity,rd.Price FROM FamilyUploads as fu JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID AND fu.ReceiptStatus = 1";
+            Dictionary<string, ReceiptToReturn> allInfo = new Dictionary<string, ReceiptToReturn>();
+            string queryStatusApproved = "SELECT fu.ReceiptID, fu.MarketID, rd.ProductID, rd.Description, rd.Quantity,rd.Price FROM FamilyUploads as fu JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID AND fu.ReceiptStatus = 1 WHERE fu.FamilyID='" + familyId + "'";
             List<string> resultsStatusApproved = AzureConnection.SelectQuery(queryStatusApproved);
             foreach (string record in resultsStatusApproved)
             {
                 string[] recordSplit = record.Split(',');
-                string FamilyID = recordSplit[0];
-                string receiptID = recordSplit[1];
-                string marketID = recordSplit[2];
-                string productID = recordSplit[3];
-                List<string> nutrients = AzureConnection.SelectQuery("select * from Nutrients where Nutrients.SID = (select SID from OptionalProducts AS OP WHERE OP.ProductID ='" + productID + "'");
-                string description = recordSplit[4];
-                string quantity = recordSplit[5];
-                string price = recordSplit[6];
-                if (allInfo.ContainsKey(FamilyID))//Family ID exists
+                string receiptID = recordSplit[0];
+                string marketID = recordSplit[1];
+                string productID = recordSplit[2];
+                List<string> nutrientsString = AzureConnection.SelectQuery("select * from Nutrients where Nutrients.SID = (select SID from OptionalProducts AS OP WHERE OP.ProductID ='" + productID + "')");
+                List<string> nutrients = new List<string>();
+                if (nutrientsString.Count != 0)
+                    nutrients = nutrientsString.ElementAt(0).Split(',').ToList();
+                string description = recordSplit[3];
+                string quantity = recordSplit[4];
+                for(int i=2; i< nutrients.Count; i++)
                 {
-                    if (allInfo[FamilyID].ContainsKey(receiptID))//Receipt exists for family ID
-                        allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, 0, true, nutrients);
-                    else//Create Receipt for family ID
-                    {
-                        allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, marketID, "", "1", ""));
-                        allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, 0, true, nutrients);
-                    }
+                    nutrients[i] = double.Parse(nutrients.ElementAt(i)) * double.Parse(quantity) * 10 + "";
                 }
-                else//Family ID not exists
+                string price = recordSplit[5];
+                if (allInfo.ContainsKey(receiptID))//Receipt exists
+                    allInfo[receiptID].addProduct(productID, description, quantity, price, 0, true, nutrients);
+                else//Create Receipt for family ID
                 {
-                    allInfo.Add(FamilyID, new Dictionary<string, ReceiptToReturn>());
-                    allInfo[FamilyID].Add(receiptID, new ReceiptToReturn(receiptID, marketID, "", "1", ""));
-                    allInfo[FamilyID][receiptID].addProduct(productID, description, quantity, price, 0, true, nutrients);
+                    allInfo.Add(receiptID, new ReceiptToReturn(receiptID, marketID, "", "1", ""));
+                    allInfo[receiptID].addProduct(productID, description, quantity, price, 0, true, nutrients);
                 }
+
             }
-            Dictionary<string, List<ReceiptToReturn>> toReturn = new Dictionary<string, List<ReceiptToReturn>>();
-            foreach (KeyValuePair<string, Dictionary<string, ReceiptToReturn>> data in allInfo)//for all families
+            List<ReceiptToReturn> toReturn = new List<ReceiptToReturn>();
+            foreach (KeyValuePair<string, ReceiptToReturn> receipt in allInfo)//for all receipts for family
             {
-                List<ReceiptToReturn> receiptsForFamily = new List<ReceiptToReturn>();
-                foreach (KeyValuePair<string, ReceiptToReturn> receipt in data.Value)//for all receipts for family
-                {
-                    receiptsForFamily.Add(receipt.Value);
-                }
-                toReturn.Add(data.Key, receiptsForFamily);
+                toReturn.Add(receipt.Value);
             }
-            return JsonConvert.SerializeObject(toReturn.ToList());
+            return JsonConvert.SerializeObject(toReturn);
         }
 
 
@@ -570,7 +592,8 @@ namespace RRS_API.Controllers
                         //foreach (ResearchProduct rp in optionalProducts)
                         //{
                         //AzureConnection.insertOptionalProducts(id, rp.SID, rp.Name);
-                        AzureConnection.insertOptionalProducts(id, optionalProducts);
+                        if(AzureConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.ProductID ='" + id + "'").Count == 0)
+                            AzureConnection.insertOptionalProducts(id, optionalProducts);
                         //}
                     }
                 }
@@ -578,6 +601,21 @@ namespace RRS_API.Controllers
             catch (Exception e)
             {
                 _logger.Error($"Error: Exceprion {e}");
+                throw e;
+            }
+        }
+
+        public bool DeleteReceipt(string receiptID)
+        {
+            try
+            {
+                AzureConnection.deleteReceiptData(receiptID);
+                AzureConnection.deleteReceiptFromFamily(receiptID);
+                return true;
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error - DeleteReceipt 596", e);
                 throw e;
             }
         }

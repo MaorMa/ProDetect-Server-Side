@@ -46,47 +46,64 @@ namespace RRS_API.Models.StringSimilarityAlgorithms
             }
 
             string firstWord = words[0];
-            Dictionary<ResearchProduct, double> topProductDic = new Dictionary<ResearchProduct, double>();
-            foreach(string word in newProductName)
+            string secondWord = "";
+            if (words.Length > 1)
+            {
+                secondWord = words[1];
+            }
+            //Dictionary<ResearchProduct, double> topProductDic = new Dictionary<ResearchProduct, double>();
+            HashSet<ResearchProduct> topProductSet= new HashSet<ResearchProduct>();
+            foreach (string word in newProductName)
             {
                 if (this.wordsToIgnoreInProductDesc.Contains(word))
                     continue;
                 Dictionary<string, string> similarProducts = AzureConnection.getSimiliarProductNames(word);
                 foreach (KeyValuePair<string, string> entry in similarProducts)
                 {
-                    if (checkIfContainsFirstWord(entry.Value,firstWord))
+                    double bonus = 0;
+                    if (checkIfContainsWord(entry.Value,firstWord) || checkIfContainsWord(entry.Value, secondWord))
                     {
-                        var rp = new ResearchProduct(entry.Key, entry.Value);
-                        if (topProductDic.ContainsKey(rp))
+                        if (checkIfContainsWord(entry.Value, firstWord))
+                        {
+                            bonus += 0.3;
+                        }
+
+                        if (!secondWord.Equals("") && checkIfContainsWord(entry.Value, secondWord))
+                        {
+                            bonus += 0.2;
+                        }
+                        double similarity = distance(productName, entry.Value) + bonus;
+                        var rp = new ResearchProduct(entry.Key, entry.Value, similarity+"");
+                        if (topProductSet.Contains(rp) || similarity < 0.55)
                             continue;
-                        double similarity = distance(productName, entry.Value);
-                        topProductDic.Add(rp, similarity);
+                        topProductSet.Add(rp);
                     }
                 }
             }
-            var topProductList = topProductDic.ToList();
-            topProductList.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
+            List<ResearchProduct> topProductList = topProductSet.ToList();
+            topProductList.Sort((element1,element2) => Double.Parse(element2.similarity).CompareTo(Double.Parse(element1.similarity)));
             List<ResearchProduct> toReturn = new List<ResearchProduct>();
             for (int i = 0; i < Math.Min(5, topProductList.Count); i++)
             {
-                toReturn.Add(topProductList.ElementAt(i).Key);
+                toReturn.Add(topProductList.ElementAt(i));
             }
             return toReturn;
         }
 
 
-        private bool checkIfContainsFirstWord(string value,string firstword)
+        private bool checkIfContainsWord(string value,string word)
         {
             string[] seperated = value.Split(' ');
             foreach(string s in seperated)
             {
-                if (s.Equals(firstword))
+                if (s.Equals(word))
                 {
                     return true;
                 }
             }
             return false;
         }
+
 
         /// <summary>
         /// Returns the Jaro-Winkler distance between the specified  

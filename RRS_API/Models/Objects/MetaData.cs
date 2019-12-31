@@ -10,11 +10,23 @@ namespace ImageRecognition.Objects
         public string description;//item description-name
         public string quantity;
         public string price;//per unit from DB
+        public Boolean validProduct;
+        private double yCoordinate;
         public List<string> nutrients;
         public List<ResearchProduct> optionalProducts;
-        public string productNameChosen;
-        private double yCoordinate;
-        public Boolean validProduct;
+        public ResearchProduct optionalProductsChosen;
+
+        /*public MetaData(string sID, string description, string quantity, string price, double yCoordinate, bool validProduct, List<ResearchProduct> optionalProducts, ResearchProduct optionalProductsChosen)
+        {
+            this.description = description;
+            this.quantity = quantity;
+            this.price = price;
+            this.sID = sID;
+            this.yCoordinate = yCoordinate;
+            this.validProduct = validProduct;
+            this.optionalProducts = optionalProducts;
+            this.optionalProductsChosen = optionalProductsChosen;
+        }*/
 
         public MetaData(string sID, string description, string quantity, string price, double yCoordinate, bool validProduct)
         {
@@ -26,7 +38,7 @@ namespace ImageRecognition.Objects
             this.validProduct = validProduct;
         }
 
-        public MetaData(string sID,string description, string quantity, string price,double yCoordinate, bool validProduct, List<ResearchProduct> optionalProducts)
+        /*public MetaData(string sID,string description, string quantity, string price,double yCoordinate, bool validProduct, List<ResearchProduct> optionalProducts)
         {
             this.description = description;
             this.quantity = quantity;
@@ -45,8 +57,8 @@ namespace ImageRecognition.Objects
             this.sID = sID;
             this.yCoordinate = yCoordinate;
             this.validProduct = validProduct;
-            this.nutrients = nutrients;
-        }
+                
+        }/*
 
         /*
          * Getters
@@ -80,6 +92,11 @@ namespace ImageRecognition.Objects
         public List<ResearchProduct> getOptionalProducts()
         {
             return this.optionalProducts;
+        }
+
+        public ResearchProduct getOptionalProductsChosen()
+        {
+            return this.optionalProductsChosen;
         }
 
         /*
@@ -121,9 +138,14 @@ namespace ImageRecognition.Objects
             this.optionalProducts = optionalProducts;
         }
 
-        public void setNutrients(List<string> nutrients)
+        public void setOptionalProductsChosen(ResearchProduct optionalProducts)
+        {
+            this.optionalProductsChosen = optionalProducts;
+        }
+
+        /*public void setNutrients(List<string> nutrients)
         {
             this.nutrients = nutrients;
-        }
+        }*/
     }
 }

@@ -38,6 +38,7 @@ namespace RRS_API.Controllers
             }
         }*/
 
+            /*
         [Route("GetAllRecognizedData")]
         [HttpPost]
         public HttpResponseMessage GetAllRecognizedData()
@@ -64,10 +65,11 @@ namespace RRS_API.Controllers
                 return Request.CreateResponse(HttpStatusCode.InternalServerError);
             }
         }
+        */
 
-        [Route("GetAllFamilies")]
+        [Route("GetAllFamilies/{accView}")]
         [HttpPost]
-        public HttpResponseMessage GetAllFamilies()
+        public HttpResponseMessage GetAllFamilies(string accView)
         {
             _logger.Debug("GetAllFamilies started");
             try
@@ -77,7 +79,7 @@ namespace RRS_API.Controllers
                 if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
                 {
                     _logger.Info("Succesful GetAllFamilies");
-                    return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllFamilies());
+                    return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllFamilies(accView));
                 }
                 else
                 {
@@ -119,9 +121,37 @@ namespace RRS_API.Controllers
             }
         }
 
-        [Route("GetAllApprovedData")]
+
+        [Route("DeleteReceipt/{receiptID}")]
         [HttpPost]
-        public HttpResponseMessage GetAllApprovedData()
+        public HttpResponseMessage DeleteReceipt(string receiptID)
+        {
+            _logger.Debug("DeleteReceipt started");
+            try
+            {
+                var httpRequest = HttpContext.Current.Request;
+                string token = httpRequest.Headers["Authorization"];
+                if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
+                {
+                    _logger.Info("Succesful DeleteReceipt");
+                    return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.DeleteReceipt(receiptID));
+                }
+                else
+                {
+                    _logger.Debug("DeleteReceipt Forbidden");
+                    return Request.CreateResponse(HttpStatusCode.Forbidden);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error - DeleteReceipt", e);
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        [Route("GetAllApprovedData/{familyId}")]
+        [HttpPost]
+        public HttpResponseMessage GetAllApprovedData(string familyId)
         {
             _logger.Debug("GetAllApprovedData started");
             try
@@ -131,7 +161,7 @@ namespace RRS_API.Controllers
                 if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
                 {
                     _logger.Info("Succesful GetAllApprovedData");
-                    return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllApprovedData());
+                    return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllApprovedData(familyId));
                 }
                 else
                 {

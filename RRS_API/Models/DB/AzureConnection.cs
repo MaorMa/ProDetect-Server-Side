@@ -204,7 +204,6 @@ namespace RRS_API.Models
             }
         }
 
-
         /*
          * delete products of given receipt
          */
@@ -232,6 +231,79 @@ namespace RRS_API.Models
                     {
                         _logger.Debug($"Error while Deleting receipt data, receiptID: {receiptID}", sqlException);
                         throw new Exception("234", sqlException);
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+        }
+
+        /*
+         * delete products of given receipt
+         */
+        public void deleteReceiptFromFamily(string receiptID)
+        {
+            _logger.Debug($"Deleting receipt from family, receiptID: {receiptID}");
+            using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+            {
+                if (!(connection.State == System.Data.ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = "DELETE FROM FamilyUploads WHERE ReceiptID = @ReceiptID";
+                    command.Parameters.AddWithValue("@ReceiptID", receiptID);
+                    try
+                    {
+                        command.ExecuteNonQuery();
+                        _logger.Info($"Succesful Deleting receipt from family, receiptID: {receiptID}");
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Debug($"Error while Deleting receipt from family, receiptID: {receiptID}", e);
+                        throw new Exception("234", e);
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+        }
+
+        /**
+         * Before inderting the chosen product, delete all optional products
+         */
+        public void deleteOptionalData(string productID, ResearchProduct rp)
+        {
+            _logger.Debug($"Deleting optional data, productID: {productID}");
+            using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+            {
+                if (!(connection.State == System.Data.ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = "DELETE FROM OptionalProducts WHERE ProductID = @ProductID AND NOT SID = @SID";
+                    command.Parameters.AddWithValue("@ProductID", productID);
+                    command.Parameters.AddWithValue("@SID", rp.sID);
+                    try
+                    {
+                        command.ExecuteNonQuery();
+                        _logger.Info($"Succesful Deleting optional data, ProductID: {productID}");
+                    }
+                    catch (Exception sqlException)
+                    {
+                        _logger.Debug($"Error while Deleting optional data, ProductID: {productID}", sqlException);
+                        throw new Exception("267", sqlException);
                     }
                     finally
                     {
@@ -511,10 +583,11 @@ namespace RRS_API.Models
                         command.Connection = connection;
                         command.CommandType = CommandType.Text;
 
-                        command.CommandText = "INSERT into OptionalProducts(ProductID, SID, OptionalName) VALUES(@ProductID, @SID, @OptionalName)";
+                        command.CommandText = "INSERT into OptionalProducts(ProductID, SID, OptionalName, Similarity) VALUES(@ProductID, @SID, @OptionalName, @Similarity)";
                         command.Parameters.AddWithValue("@ProductID", productId);
-                        command.Parameters.AddWithValue("@SID", rp.SID);
-                        command.Parameters.AddWithValue("@OptionalName", rp.Name);
+                        command.Parameters.AddWithValue("@SID", rp.sID);
+                        command.Parameters.AddWithValue("@OptionalName", rp.name);
+                        command.Parameters.AddWithValue("@Similarity", rp.similarity);
                         try
                         {
                             command.ExecuteNonQuery();
@@ -522,7 +595,7 @@ namespace RRS_API.Models
                         catch (Exception sqlException)
                         {
                             connection.Close();
-                            throw new Exception("524",sqlException);
+                            throw new Exception("526",sqlException);
                         }
                     }
                     connection.Close();

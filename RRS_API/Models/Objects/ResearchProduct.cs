@@ -7,55 +7,26 @@ namespace RRS_API.Models.Objects
 {
     public class ResearchProduct
     {
-        private string sID;
-        private string name;
+        public string sID { get; set; }
+        public string name { get; set; }
+        public string similarity { get; set; }
 
-        public string SID
+        public ResearchProduct(string sID, string name, string similarity)
         {
-            get
-            {
-                return sID;
-            }
-
-            set
-            {
-                sID = value;
-            }
+            this.sID = sID;
+            this.name = name;
+            this.similarity = similarity;
         }
 
-        public string Name
-        {
-            get
-            {
-                return name;
-            }
-
-            set
-            {
-                name = value;
-            }
-        }
-
-        public ResearchProduct(string sID, string name)
-        {
-            this.SID = sID;
-            this.Name = name;
-        }
-
-        /*public int CompareTo(ResearchProduct other)
-        {
-            if (this.SID.Equals(other.SID)) return 0;
-            return 1;
-        }*/
 
         public override bool Equals(object y)
         {
-            return this.SID.Equals(((ResearchProduct)y).SID);
+            return this.sID.Equals(((ResearchProduct)y).sID);
         }
 
         public override int GetHashCode()
         {
-            return this.SID.GetHashCode();
+            return this.sID.GetHashCode();
         }
     }
 }

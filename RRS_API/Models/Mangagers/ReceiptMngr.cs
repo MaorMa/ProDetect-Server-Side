@@ -110,7 +110,7 @@ namespace RRS_API.Controllers
                 string uploadTime = recordSplit[3];
                 string receiptStatus = recordSplit[4];
                 string productID = recordSplit[5];
-                List<string> OptionalNames = AzureConnection.SelectQuery("SELECT SID, OptionalName, Similarity FROM OptionalProducts WHERE ProductID ='" + productID + "'");
+                List<string> OptionalNames = AzureConnection.SelectQuery("SELECT SID, OptionalName, Similarity FROM OptionalProducts WHERE MarketID ='" + marketID + "' AND ProductID ='" + productID + "'");
                 List<ResearchProduct> rp = createResarchListForProductID(OptionalNames);
                 rp.Sort((el1, el2) => Double.Parse(el2.similarity).CompareTo(Double.Parse(el1.similarity)));
                 string description = recordSplit[6];
@@ -329,8 +329,9 @@ namespace RRS_API.Controllers
                     if (quantityFoundInDesc.Equals(""))//Parser returned nothing
                     {
                         double realQuantity;
-                        if (!productQuantity.Contains('.') && double.TryParse(productQuantity, out realQuantity)){//The quantity is integer
-                            productQuantity = (realQuantity/10) + "";
+                        if (!productQuantity.Contains('.') && double.TryParse(productQuantity, out realQuantity))
+                        {//The quantity is integer
+                            productQuantity = (realQuantity / 10) + "";
                         }
                     }
                     else//Parser returned something
@@ -338,14 +339,22 @@ namespace RRS_API.Controllers
                         double realQuantity, foundQuantity;
                         if (double.TryParse(quantityFoundInDesc, out foundQuantity) && double.TryParse(productQuantity, out realQuantity))
                         {
-                            productQuantity = ((realQuantity * foundQuantity)/1000) + "";
+                            productQuantity = ((realQuantity * foundQuantity) / 1000) + "";
                         }
                     }
                     string productPrice = product.getPrice();
                     ResearchProduct rp = product.getOptionalProductsChosen();
                     AzureConnection.insertReceiptData(familyID, receiptID, productID, productDescription, productQuantity, productPrice, 0, true);
+                    //if chosen - delete all except chosen
                     if (rp != null)
-                        AzureConnection.deleteOptionalData(product.getsID(), product.getOptionalProductsChosen());
+                        AzureConnection.deleteOptionalData(receiptToUpdate.marketID, product.getsID(), rp.sID);
+
+                    //not chosen - delete all up to 5 optionals
+                    else if (rp == null)
+                    {
+                        AzureConnection.deleteOptionalData(receiptToUpdate.marketID, product.getsID(), product.sID);
+
+                    }
                 }
                 AzureConnection.updateStatus(familyID, receiptID, "1");
             }
@@ -366,15 +375,16 @@ namespace RRS_API.Controllers
                 string receiptID = recordSplit[0];
                 string marketID = recordSplit[1];
                 string productID = recordSplit[2];
-                List<string> nutrientsString = AzureConnection.SelectQuery("select * from Nutrients where Nutrients.SID = (select SID from OptionalProducts AS OP WHERE OP.ProductID ='" + productID + "')");
-                List<string> nutrients = new List<string>();
+                List<string> nutrientsString = AzureConnection.SelectQuery("select * from Nutrients where Nutrients.SID = (select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "')");
+                List<Nutrient> nutrients = new List<Nutrient>();
+                NutrientMngr nm = new NutrientMngr();
                 if (nutrientsString.Count != 0)
-                    nutrients = nutrientsString.ElementAt(0).Split(',').ToList();
+                    nutrients = nm.toNutList(nutrientsString.ElementAt(0).Split(',').ToList());
                 string description = recordSplit[3];
                 string quantity = recordSplit[4];
-                for(int i=2; i< nutrients.Count; i++)
+                for (int i = 0; i < nutrients.Count; i++)
                 {
-                    nutrients[i] = double.Parse(nutrients.ElementAt(i)) * double.Parse(quantity) * 10 + "";
+                    nutrients[i].Value = nutrients.ElementAt(i).Value * double.Parse(quantity) * 10;
                 }
                 string price = recordSplit[5];
                 if (allInfo.ContainsKey(receiptID))//Receipt exists
@@ -393,7 +403,6 @@ namespace RRS_API.Controllers
             }
             return JsonConvert.SerializeObject(toReturn);
         }
-
 
         /*
          * This method return product info 
@@ -467,6 +476,20 @@ namespace RRS_API.Controllers
                 }
             }
             return toReturn;
+        }
+
+        public string GetProductDataWithOptionalNames(string productID, string marketID)
+        {
+            Dictionary<List<string>, List<ResearchProduct>> toReturn = new Dictionary<List<string>, List<ResearchProduct>>();
+            List<string> productData = GetProductInfo(productID, marketID);
+            if (productData.Count != 0)
+            {
+                List<ResearchProduct> products = jwd.getTopFiveSimilarProducts(productData[0].Split(',')[1]);
+                if (products.Count != 0 && AzureConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "'").Count == 0)
+                    AzureConnection.insertOptionalProducts(marketID, productID, products);
+                toReturn.Add(productData, products);
+            }
+            return JsonConvert.SerializeObject(toReturn.ToList());
         }
 
         /*
@@ -577,7 +600,7 @@ namespace RRS_API.Controllers
                 AzureConnection.updateStatus(FamilyID, receipt.getName(), "0");
                 foreach (KeyValuePair<string, List<MetaData>> data in receipt.getIdToMetadata())
                 {
-                    string id = data.Key;
+                    string productId = data.Key;
                     List<MetaData> values = data.Value;
 
                     if (values.ToArray()[0].getDescription() != "")
@@ -587,20 +610,21 @@ namespace RRS_API.Controllers
                         string quantitiy = values.ToArray()[0].getQuantity();
                         double yCoordinate = values.ElementAt(0).getyCoordinate();
                         bool validProduct = values.ElementAt(0).getvalidProduct();
+                        string marketId = receipt.getMarketID();
                         List<ResearchProduct> optionalProducts = values.ElementAt(0).getOptionalProducts();
-                        AzureConnection.insertReceiptData(FamilyID, receipt.getName(), id, desc, quantitiy, price, yCoordinate, validProduct);
+                        AzureConnection.insertReceiptData(FamilyID, receipt.getName(), productId, desc, quantitiy, price, yCoordinate, validProduct);
                         //foreach (ResearchProduct rp in optionalProducts)
                         //{
                         //AzureConnection.insertOptionalProducts(id, rp.SID, rp.Name);
-                        if(AzureConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.ProductID ='" + id + "'").Count == 0)
-                            AzureConnection.insertOptionalProducts(id, optionalProducts);
+                        if (AzureConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketId + "' AND OP.ProductID ='" + productId + "'").Count == 0)
+                            AzureConnection.insertOptionalProducts(marketId, productId, optionalProducts);
                         //}
                     }
                 }
             }
             catch (Exception e)
             {
-                _logger.Error($"Error: Exceprion {e}");
+                _logger.Error($"Error: Exeption {e}");
                 throw e;
             }
         }
@@ -631,7 +655,34 @@ namespace RRS_API.Controllers
             {
                 AzureConnection.updateFamilyUploads(selectedFamilyID, marketID, imageName, status, UploadTime);
             }
-            catch (Exception) { }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        /*
+         * Return receipt to accept
+         */
+         public void ReturnToAccept(string familyID, ReceiptToReturn receiptToUpdate)
+        {
+            //first we update status to -1
+            AzureConnection.updateStatus(familyID, receiptToUpdate.receiptID, "-1");
+            string marketId = receiptToUpdate.marketID;
+
+            //than we need to find similar products
+            foreach (MetaData product in receiptToUpdate.products)
+            {
+                string productId = product.getsID();
+                if (AzureConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketId + "' AND OP.ProductID ='" + productId + "'").Count == 0)
+                {
+                    List<ResearchProduct> optionalProducts = jwd.getTopFiveSimilarProducts(product.description);
+                    AzureConnection.insertOptionalProducts(marketId, productId, optionalProducts);
+                }
+            }
+
+            //after finished, set status to 0
+            AzureConnection.updateStatus(familyID, receiptToUpdate.receiptID, "0");
         }
 
         /*

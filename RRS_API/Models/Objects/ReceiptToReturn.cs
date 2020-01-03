@@ -30,7 +30,7 @@ namespace RRS_API.Models
             this.products = products;
         }
         
-        public void addProduct(string productID, string Description, string Quantity, string price, double yCoordinate, bool validProduct, List<string> nutrient)
+        public void addProduct(string productID, string Description, string Quantity, string price, double yCoordinate, bool validProduct, List<Nutrient> nutrient)
         {
             var meta = new MetaData(productID, Description, Quantity, price, yCoordinate, validProduct);
             meta.nutrients = nutrient;

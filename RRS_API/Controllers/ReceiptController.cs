@@ -184,7 +184,8 @@ namespace RRS_API.Controllers
             try
             {
                 _logger.Info("Succesful GetProductInfo");
-                return Request.CreateResponse(HttpStatusCode.OK, ReceiptMngr.GetProductInfo(productID, marketID));
+                //var data = ReceiptMngr.GetProductInfo(productID, marketID);
+                return Request.CreateResponse(HttpStatusCode.OK, ReceiptMngr.GetProductDataWithOptionalNames(productID, marketID));
             }
             catch (Exception e)
             {
@@ -272,6 +273,32 @@ namespace RRS_API.Controllers
             catch (Exception e)
             {
                 _logger.Error($"Error - UpdateReceiptData, familyID: {familyID}, receipt: {receiptToUpdate.receiptID}");
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        [Route("ReturnToAccept/{familyID}")]
+        [HttpPost]
+        public HttpResponseMessage ReturnToAccept(string familyID, [FromBody] ReceiptToReturn receipt)
+        {
+            _logger.Debug($"ReturnToAccept started, familyID: {familyID} receiptID: {receipt.receiptID}");
+            try
+            {
+                var httpRequest = HttpContext.Current.Request;
+                string token = httpRequest.Headers["Authorization"];
+                if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
+                {
+                    ReceiptMngr.ReturnToAccept(familyID, receipt);
+                    return Request.CreateResponse(HttpStatusCode.OK);
+                }
+                else
+                {
+                    return Request.CreateResponse(HttpStatusCode.Forbidden);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error - ReturnToAccept, familyID: {familyID} receiptID: {receipt.receiptID}");
                 return Request.CreateResponse(HttpStatusCode.InternalServerError);
             }
         }

@@ -279,9 +279,9 @@ namespace RRS_API.Models
         /**
          * Before inderting the chosen product, delete all optional products
          */
-        public void deleteOptionalData(string productID, ResearchProduct rp)
+        public void deleteOptionalData(string marketId, string productID, string sID)
         {
-            _logger.Debug($"Deleting optional data, productID: {productID}");
+            _logger.Debug($"Deleting optional data, marketID:{marketId} productID: {productID}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
             {
                 if (!(connection.State == System.Data.ConnectionState.Open))
@@ -292,17 +292,18 @@ namespace RRS_API.Models
                 {
                     command.Connection = connection;
                     command.CommandType = CommandType.Text;
-                    command.CommandText = "DELETE FROM OptionalProducts WHERE ProductID = @ProductID AND NOT SID = @SID";
+                    command.CommandText = "DELETE FROM OptionalProducts WHERE MarketID = @MarketID AND ProductID = @ProductID AND NOT SID = @SID";
+                    command.Parameters.AddWithValue("@MarketID", marketId);
                     command.Parameters.AddWithValue("@ProductID", productID);
-                    command.Parameters.AddWithValue("@SID", rp.sID);
+                    command.Parameters.AddWithValue("@SID", sID);
                     try
                     {
                         command.ExecuteNonQuery();
-                        _logger.Info($"Succesful Deleting optional data, ProductID: {productID}");
+                        _logger.Info($"Succesful Deleting optional data, marketID:{marketId} ProductID: {productID}");
                     }
                     catch (Exception sqlException)
                     {
-                        _logger.Debug($"Error while Deleting optional data, ProductID: {productID}", sqlException);
+                        _logger.Debug($"Error while Deleting optional data, marketID:{marketId} ProductID: {productID}", sqlException);
                         throw new Exception("267", sqlException);
                     }
                     finally
@@ -565,10 +566,10 @@ namespace RRS_API.Models
         * Insert top 5 similar products to OptionalProducts table
         */
         //public void insertOptionalProducts(string productId, string SID, string OptionalName)
-        public void insertOptionalProducts(string productId, List<ResearchProduct> optionalProducts)
+        public void insertOptionalProducts(string marketId, string productId, List<ResearchProduct> optionalProducts)
         {
             _logger.Debug($"Inserting optional products for ProductId: {productId}");
-            if (productExistsInOptionalProducts(productId))
+            if (productExistsInOptionalProducts(marketId, productId))
                 return;
             foreach (ResearchProduct rp in optionalProducts)
             {
@@ -583,7 +584,8 @@ namespace RRS_API.Models
                         command.Connection = connection;
                         command.CommandType = CommandType.Text;
 
-                        command.CommandText = "INSERT into OptionalProducts(ProductID, SID, OptionalName, Similarity) VALUES(@ProductID, @SID, @OptionalName, @Similarity)";
+                        command.CommandText = "INSERT into OptionalProducts(MarketID, ProductID, SID, OptionalName, Similarity) VALUES(@MarketID, @ProductID, @SID, @OptionalName, @Similarity)";
+                        command.Parameters.AddWithValue("@MarketID", marketId);
                         command.Parameters.AddWithValue("@ProductID", productId);
                         command.Parameters.AddWithValue("@SID", rp.sID);
                         command.Parameters.AddWithValue("@OptionalName", rp.name);
@@ -606,7 +608,7 @@ namespace RRS_API.Models
         /*
          * Checks if product already exists in OptionalProducts table (was already selected in the past)
          */
-        private bool productExistsInOptionalProducts(string productId)
+        private bool productExistsInOptionalProducts(string marketId, string productId)
         {
             _logger.Debug($"Checking if productId: {productId} exists in OptionalProducts");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
@@ -619,7 +621,8 @@ namespace RRS_API.Models
                 {
                     command.Connection = connection;
                     command.CommandType = CommandType.Text;
-                    command.CommandText = "SELECT * FROM OptionalProducts WHERE ProductID = @productId";
+                    command.CommandText = "SELECT * FROM OptionalProducts WHERE MarketID = @marketId AND ProductID = @productId";
+                    command.Parameters.AddWithValue("@marketId", marketId);
                     command.Parameters.AddWithValue("@productId", productId);
                     try
                     {

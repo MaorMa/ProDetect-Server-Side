@@ -187,6 +187,7 @@
     <Compile Include="Models\JWT\JWTContainer.cs" />
     <Compile Include="Models\JWT\JWTService.cs" />
     <Compile Include="Models\Mangagers\AMngr.cs" />
+    <Compile Include="Models\Mangagers\NutrientMngr.cs" />
     <Compile Include="Models\Mangagers\PasswordMngr.cs" />
     <Compile Include="Models\Mangagers\UsersMngr.cs" />
     <Compile Include="Models\Objects\FamilyUploads.cs" />

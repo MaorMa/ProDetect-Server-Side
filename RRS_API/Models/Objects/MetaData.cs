@@ -12,7 +12,7 @@ namespace ImageRecognition.Objects
         public string price;//per unit from DB
         public Boolean validProduct;
         private double yCoordinate;
-        public List<string> nutrients;
+        public List<Nutrient> nutrients;
         public List<ResearchProduct> optionalProducts;
         public ResearchProduct optionalProductsChosen;
 

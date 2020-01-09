@@ -8,7 +8,7 @@ namespace RRS_API.Models.StringSimilarityAlgorithms
 {
     public class JaroWinklerDistance
     {
-        protected AzureConnection AzureConnection = AzureConnection.getInstance();
+        protected DBConnection AzureConnection = DBConnection.getInstance();
         protected HashSet<string> wordsToIgnoreInProductDesc = new HashSet<string>();
 
         public JaroWinklerDistance()
@@ -93,6 +93,7 @@ namespace RRS_API.Models.StringSimilarityAlgorithms
 
         private bool checkIfContainsWord(string value,string word)
         {
+            /*
             string[] seperated = value.Split(' ');
             foreach(string s in seperated)
             {
@@ -102,6 +103,8 @@ namespace RRS_API.Models.StringSimilarityAlgorithms
                 }
             }
             return false;
+            */
+            return value.Contains(word);
         }
 
 

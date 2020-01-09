@@ -177,6 +177,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\StatisticsController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Models\EmailSender.cs" />
     <Compile Include="Models\ImageRecognition\MarkedImageSaver.cs" />
@@ -189,6 +190,7 @@
     <Compile Include="Models\Mangagers\AMngr.cs" />
     <Compile Include="Models\Mangagers\NutrientMngr.cs" />
     <Compile Include="Models\Mangagers\PasswordMngr.cs" />
+    <Compile Include="Models\Mangagers\StatisticsMngr.cs" />
     <Compile Include="Models\Mangagers\UsersMngr.cs" />
     <Compile Include="Models\Objects\FamilyUploads.cs" />
     <Compile Include="Models\ImageRecognition\ImageProccessing.cs" />
@@ -200,7 +202,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\DB\AzureConnection.cs" />
+    <Compile Include="Models\DB\DBConnection.cs" />
     <Compile Include="Models\Objects\MetaData.cs" />
     <Compile Include="Models\Objects\Nutrient.cs" />
     <Compile Include="Models\Objects\Receipt.cs" />

@@ -11,6 +11,9 @@ namespace RRS_API.Models.Parsers
 
         public ProductDescriptionParser()
         {
+            this.Regexes.Add(new Regex(@"\d+ יח"));
+            this.Regexes.Add(new Regex(@"\d+יח"));
+            this.Regexes.Add(new Regex(@"\d+ קלוריות"));
             this.Regexes.Add(new Regex(@"\d+x+\d+ גרם"));
             this.Regexes.Add(new Regex(@"\d+\*+\d+ג"));
             this.Regexes.Add(new Regex(@"\d+\*+\d+ ג"));
@@ -23,11 +26,16 @@ namespace RRS_API.Models.Parsers
             this.Regexes.Add(new Regex(@"\d+ ג"));
             this.Regexes.Add(new Regex(@"\d+ גר"));
             this.Regexes.Add(new Regex(@"\d+ גרם"));
+            this.Regexes.Add(new Regex(@"\d+\.+\d+קג"));
+            this.Regexes.Add(new Regex(@"\d+\.+\d+ ק"));
             this.Regexes.Add(new Regex(@"\d+קג"));
-            this.Regexes.Add(new Regex(@"\d+ ק`ג"));
+            this.Regexes.Add(new Regex(@"\d+" + "ק"));
+            this.Regexes.Add(new Regex(@"\d+ " + "ק`ג"));
             this.Regexes.Add(new Regex(@"\d+ " + "ק\""));
             this.Regexes.Add(new Regex(@"\d+ קג"));
+            this.Regexes.Add(new Regex(@"\d+\* +\d+\.+\d+ לי"));
             this.Regexes.Add(new Regex(@"\d+" + "ק\"ג"));
+            this.Regexes.Add(new Regex(@"\d+\.+\d" + " ל"));
             this.Regexes.Add(new Regex(@"\d+\.+\d" + " ליטר"));
             this.Regexes.Add(new Regex(@"\d+\.+\d+\*+\d+ל"));
             this.Regexes.Add(new Regex(@"\d+\.+\d+\*+\d+ ל"));
@@ -39,17 +47,19 @@ namespace RRS_API.Models.Parsers
             this.Regexes.Add(new Regex(@"\d+ " + "מ\"ל"));
             this.Regexes.Add(new Regex(@"\d+" + "מל"));
             this.Regexes.Add(new Regex(@"\d" + " ליטר"));
-            this.Regexes.Add(new Regex(@"\d"+ "ליטר"));
+            this.Regexes.Add(new Regex(@"\d" + "ליטר"));
             this.Regexes.Add(new Regex(@"\d" + "ל"));
             this.Regexes.Add(new Regex(@"\d " + "ל"));
             this.Regexes.Add(new Regex(@"\d" + "ל`"));
             this.Regexes.Add(new Regex(@"\d " + "ל`"));
             this.Regexes.Add(new Regex(@"\d+ " + "ק\"ג"));
+            this.Regexes.Add(new Regex(@"\d+\*+\d"));
             this.Regexes.Add(new Regex(@"\d+%"));
             this.Regexes.Add(new Regex(@"\d+"));
         }
+
         /*
-         * This function return the quantity of a given product includes in his description
+         * This function return the quantity of a given product includes in his description in grams
          */
         public string getQuantityFromDescription(string productDescription)
         {
@@ -61,13 +71,19 @@ namespace RRS_API.Models.Parsers
                 {
                     //if contains % return ""
                     //check it at the end
-                    if (toReturnInGrams.Contains("%"))
+                    if (toReturnInGrams.Contains("%") || toReturnInGrams.Contains("קלוריות"))
                     {
                         return "";
                     }
 
+
+                    //multiple num of product * 100
+                    if (toReturnInGrams.Contains("יח"))
+                    {
+                        return Double.Parse(Regex.Replace(toReturnInGrams, "[^0-9.]", "")) * 100 + "";
+                    }
                     //if is kg/liter
-                    if (!toReturnInGrams.Contains("*") && (toReturnInGrams.Contains("קג") || toReturnInGrams.Contains("ק\"ג") || toReturnInGrams.Contains("ק\"") || toReturnInGrams.Contains("ליטר") || ((toReturnInGrams.Contains("ל") || toReturnInGrams.Contains("ליטר") || toReturnInGrams.Contains("ל'") || toReturnInGrams.Contains("ל`")) && (!toReturnInGrams.Contains("מל") && !toReturnInGrams.Contains("מ\"ל")))))
+                    if (!toReturnInGrams.Contains("*") && (toReturnInGrams.Contains("קג") || toReturnInGrams.Contains("ק") || toReturnInGrams.Contains("ק\"ג") || toReturnInGrams.Contains("ק`ג") || toReturnInGrams.Contains("ק\"") || toReturnInGrams.Contains("ליטר") || ((toReturnInGrams.Contains("ל") || toReturnInGrams.Contains("ליטר") || toReturnInGrams.Contains("ל'") || toReturnInGrams.Contains("ל`")) && (!toReturnInGrams.Contains("מל") && !toReturnInGrams.Contains("מ\"ל")))))
                     {
                         //if contains "." than we need to multiple by 1000 to get correct result
                         if (toReturnInGrams.Contains("."))
@@ -110,7 +126,7 @@ namespace RRS_API.Models.Parsers
                         }
 
                         //if kg/liter add "000"
-                        if (toReturnInGrams.Contains("קג") || toReturnInGrams.Contains("ק\"ג") || toReturnInGrams.Contains("ק\"") || toReturnInGrams.Contains("ליטר") || ((toReturnInGrams.Contains("ל") || toReturnInGrams.Contains("ליטר") || toReturnInGrams.Contains("ל'") || toReturnInGrams.Contains("ל`")) && (!toReturnInGrams.Contains("מל") && !toReturnInGrams.Contains("מ\"ל"))))
+                        if (toReturnInGrams.Contains("קג") || toReturnInGrams.Contains("ק\"ג") || toReturnInGrams.Contains("ק\"ג") || toReturnInGrams.Contains("ק\"") || toReturnInGrams.Contains("ליטר") || ((toReturnInGrams.Contains("ל") || toReturnInGrams.Contains("ליטר") || toReturnInGrams.Contains("ל'") || toReturnInGrams.Contains("ל`")) && (!toReturnInGrams.Contains("מל") && !toReturnInGrams.Contains("מ\"ל"))))
                         {
                             return cleanNumber1 * cleanNumber2 + "000";
                         }
@@ -122,6 +138,7 @@ namespace RRS_API.Models.Parsers
                     return new String(toReturnInGrams.Where(Char.IsDigit).ToArray());
                 }
             }
+
             return toReturnInGrams;
         }
     }

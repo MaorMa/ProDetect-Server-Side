@@ -21,7 +21,7 @@ namespace RRS_API.Models.Objects
         public string generateToken(string username, string password, string hashedPass)
         {
             _logger.Debug($"Generating token for username: {username}");
-            if (AzureConnection.getInstance().checkedUsernameAndPassword(username, hashedPass))
+            if (DBConnection.getInstance().checkedUsernameAndPassword(username, hashedPass))
             {
                 model = GetJWTContainerModel(username, password);
                 authService = new JWTService(model.secretKey);

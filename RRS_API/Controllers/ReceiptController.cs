@@ -18,8 +18,8 @@ namespace RRS_API.Controllers
     [RoutePrefix("api/Receipt")]
     public class ReceiptController : ApiController
     {
-        ReceiptMngr ReceiptMngr = new ReceiptMngr();
-        TokenMngr TokenMngr = new TokenMngr();
+        private ReceiptMngr ReceiptMngr = new ReceiptMngr();
+        private TokenMngr TokenMngr = new TokenMngr();
         private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         #region Get requests
@@ -71,15 +71,28 @@ namespace RRS_API.Controllers
         [HttpPost]
         public HttpResponseMessage GetAllFamilies(string accView)
         {
+
             _logger.Debug("GetAllFamilies started");
             try
             {
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Headers["Authorization"];
-                if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
+                if (TokenMngr.isTokenValid(token) /*&& TokenMngr.isAdmin(token)*/)
                 {
                     _logger.Info("Succesful GetAllFamilies");
-                    return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllFamilies(accView));
+                    //if admin
+                    if (TokenMngr.isAdmin(token))
+                    {
+                        return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllFamilies(accView, "", true));
+                    }
+                    //user
+                    else
+                    {
+                        var jwtToken = new JwtSecurityToken(token);
+                        object username = "";
+                        jwtToken.Payload.TryGetValue("unique_name", out username);
+                        return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllFamilies(accView, username.ToString(), false));
+                    }
                 }
                 else
                 {
@@ -158,7 +171,7 @@ namespace RRS_API.Controllers
             {
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Headers["Authorization"];
-                if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
+                if (TokenMngr.isTokenValid(token))
                 {
                     _logger.Info("Succesful GetAllApprovedData");
                     return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllApprovedData(familyId));

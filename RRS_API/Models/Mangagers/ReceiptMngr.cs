@@ -79,14 +79,22 @@ namespace RRS_API.Controllers
         /*
         * return all families from db
         */
-        public string GetAllFamilies(string accView)
+        public string GetAllFamilies(string accView,string username, bool isAdmin)
         {
-            string queryStatusWorking;
-            if (accView.Equals("Acc"))
-                queryStatusWorking = "SELECT DISTINCT FamilyID FROM FamilyUploads WHERE NOT ReceiptStatus = 1";
+            List<string> familiesList = new List<string>();
+            if (isAdmin)
+            {
+                string queryStatusWorking;
+                if (accView.Equals("Acc"))
+                    queryStatusWorking = "SELECT DISTINCT FamilyID FROM FamilyUploads WHERE NOT ReceiptStatus = 1";
+                else
+                    queryStatusWorking = "SELECT DISTINCT FamilyID FROM FamilyUploads WHERE ReceiptStatus = 1";
+                familiesList = AzureConnection.SelectQuery(queryStatusWorking);
+            }
             else
-                queryStatusWorking = "SELECT DISTINCT FamilyID FROM FamilyUploads WHERE ReceiptStatus = 1";
-            List<string> familiesList = AzureConnection.SelectQuery(queryStatusWorking);
+            {
+                familiesList.Add(username);
+            }
             return JsonConvert.SerializeObject(familiesList);
         }
 
@@ -324,16 +332,45 @@ namespace RRS_API.Controllers
                     string productID = product.getsID();
                     string productDescription = product.getDescription();
                     //Parse the desc to find quantity
+                    double quantityInDesc;
                     string quantityFoundInDesc = pdp.getQuantityFromDescription(productDescription);
                     string productQuantity = product.getQuantity();
-                    if (quantityFoundInDesc.Equals(""))//Parser returned nothing
+
+                    //if not found quantity in description
+                    if (quantityFoundInDesc.Equals("") || productQuantity.Contains('.'))
                     {
+                        //if qunatitny is float (0.35 for example) than we set quantityFoundInDesc to 1
+                        if (productQuantity.Contains('.'))
+                        {
+                            quantityFoundInDesc = "1";
+                        }
+
+                        //not float, set quantityFoundInDesc to 0.1 (default is 100 gr)
+                        else
+                        {
+                            quantityFoundInDesc = "0.1";
+                        }
+                    }
+
+
+                    //found quantity in description
+                    else
+                    {
+                        if(double.TryParse(pdp.getQuantityFromDescription(productDescription), out quantityInDesc))
+                        {
+                            quantityFoundInDesc = (quantityInDesc / 1000) + "";
+                        }
+                    }
+
+                        /*
                         double realQuantity;
                         if (!productQuantity.Contains('.') && double.TryParse(productQuantity, out realQuantity))
                         {//The quantity is integer
                             productQuantity = (realQuantity / 10) + "";
                         }
-                    }
+                        */
+
+                    /*
                     else//Parser returned something
                     {
                         double realQuantity, foundQuantity;
@@ -342,9 +379,11 @@ namespace RRS_API.Controllers
                             productQuantity = ((realQuantity * foundQuantity) / 1000) + "";
                         }
                     }
+                    */
+                    
                     string productPrice = product.getPrice();
                     ResearchProduct rp = product.getOptionalProductsChosen();
-                    AzureConnection.insertReceiptData(familyID, receiptID, productID, productDescription, productQuantity, productPrice, 0, true);
+                    AzureConnection.insertReceiptData(familyID, receiptID, productID, productDescription, productQuantity, quantityFoundInDesc, productPrice, 0, true);
                     //if chosen - delete all except chosen
                     if (rp != null)
                         AzureConnection.deleteOptionalData(receiptToUpdate.marketID, product.getsID(), rp.sID);
@@ -367,32 +406,35 @@ namespace RRS_API.Controllers
         public string GetAllApprovedData(string familyId)
         {
             Dictionary<string, ReceiptToReturn> allInfo = new Dictionary<string, ReceiptToReturn>();
-            string queryStatusApproved = "SELECT fu.ReceiptID, fu.MarketID, rd.ProductID, rd.Description, rd.Quantity,rd.Price FROM FamilyUploads as fu JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID AND fu.ReceiptStatus = 1 WHERE fu.FamilyID='" + familyId + "'";
+            string queryStatusApproved = "SELECT fu.ReceiptID, fu.MarketID, fu.UploadTime, rd.ProductID, rd.Description, rd.Quantity, rd.DescriptionQuantity, rd.Price FROM FamilyUploads as fu JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID AND fu.ReceiptStatus = 1 WHERE fu.FamilyID='" + familyId + "'";
             List<string> resultsStatusApproved = AzureConnection.SelectQuery(queryStatusApproved);
             foreach (string record in resultsStatusApproved)
             {
                 string[] recordSplit = record.Split(',');
                 string receiptID = recordSplit[0];
                 string marketID = recordSplit[1];
-                string productID = recordSplit[2];
+                string uploadTime = recordSplit[2];
+                string productID = recordSplit[3];
                 List<string> nutrientsString = AzureConnection.SelectQuery("select * from Nutrients where Nutrients.SID = (select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "')");
                 List<Nutrient> nutrients = new List<Nutrient>();
                 NutrientMngr nm = new NutrientMngr();
                 if (nutrientsString.Count != 0)
                     nutrients = nm.toNutList(nutrientsString.ElementAt(0).Split(',').ToList());
-                string description = recordSplit[3];
-                string quantity = recordSplit[4];
+                string description = recordSplit[4];
+                string quantity = recordSplit[5];
+                string descriptionQuantity = recordSplit[6];
+                double calculatedQuantity = (double.Parse(quantity) * double.Parse(descriptionQuantity));
                 for (int i = 0; i < nutrients.Count; i++)
                 {
-                    nutrients[i].Value = nutrients.ElementAt(i).Value * double.Parse(quantity) * 10;
+                    nutrients[i].Value = nutrients.ElementAt(i).Value * calculatedQuantity * 10;
                 }
-                string price = recordSplit[5];
+                string price = recordSplit[7];
                 if (allInfo.ContainsKey(receiptID))//Receipt exists
-                    allInfo[receiptID].addProduct(productID, description, quantity, price, 0, true, nutrients);
+                    allInfo[receiptID].addProduct(productID, description, calculatedQuantity.ToString(), price, 0, true, nutrients);
                 else//Create Receipt for family ID
                 {
-                    allInfo.Add(receiptID, new ReceiptToReturn(receiptID, marketID, "", "1", ""));
-                    allInfo[receiptID].addProduct(productID, description, quantity, price, 0, true, nutrients);
+                    allInfo.Add(receiptID, new ReceiptToReturn(receiptID, marketID, "", "1", uploadTime));
+                    allInfo[receiptID].addProduct(productID, description, calculatedQuantity.ToString(), price, 0, true, nutrients);
                 }
 
             }
@@ -469,7 +511,7 @@ namespace RRS_API.Controllers
                 string receiptID = getHash(rec.Value);
                 Image image = rec.Value;
 
-                if (!(AzureConnection.SelectQuery("SELECT * FROM FamilyUploads where FamilyID ='" + selectedFamilyID + "' AND ReceiptID='" + receiptID + "' AND NOT ReceiptStatus = -1").Count > 0))
+                if (!(AzureConnection.SelectQuery("SELECT * FROM FamilyUploads where ReceiptID='" + receiptID + "' AND NOT ReceiptStatus = -1").Count > 0))
                 {
                     //means receipt not uploaded in the past - thus we add it
                     toReturn.Add(receiptID, image);
@@ -612,7 +654,7 @@ namespace RRS_API.Controllers
                         bool validProduct = values.ElementAt(0).getvalidProduct();
                         string marketId = receipt.getMarketID();
                         List<ResearchProduct> optionalProducts = values.ElementAt(0).getOptionalProducts();
-                        AzureConnection.insertReceiptData(FamilyID, receipt.getName(), productId, desc, quantitiy, price, yCoordinate, validProduct);
+                        AzureConnection.insertReceiptData(FamilyID, receipt.getName(), productId, desc, quantitiy, "1", price, yCoordinate, validProduct);
                         //foreach (ResearchProduct rp in optionalProducts)
                         //{
                         //AzureConnection.insertOptionalProducts(id, rp.SID, rp.Name);

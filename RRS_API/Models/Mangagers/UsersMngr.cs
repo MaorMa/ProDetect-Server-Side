@@ -21,7 +21,7 @@ namespace RRS_API.Models.Mangagers
             salt_bytes = Encoding.UTF8.GetBytes(salt);
             var password_bytes = Encoding.UTF8.GetBytes(password);
             string hashedPass = Convert.ToBase64String(passwordMnr.ComputeHMAC_SHA256(password_bytes, salt_bytes)); //generate hashed password
-            AzureConnection.getInstance().AddNewFamilyUser(username, salt, hashedPass, 0);
+            DBConnection.getInstance().AddNewFamilyUser(username, salt, hashedPass, 0);
         }
     }
 }

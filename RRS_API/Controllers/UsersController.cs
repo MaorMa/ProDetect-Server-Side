@@ -102,7 +102,7 @@ namespace RRS_API.Controllers
             var username = HttpContext.Current.Request.Form["username"];
             _logger.Debug($"{username} is trying to login");
             var password = HttpContext.Current.Request.Form["password"];
-            var salt_value = AzureConnection.getInstance().getSaltValue(username);
+            var salt_value = DBConnection.getInstance().getSaltValue(username);
             var salt_bytes = Encoding.UTF8.GetBytes(salt_value);
             var password_bytes = Encoding.UTF8.GetBytes(password);
             string hashedPass = Convert.ToBase64String(PasswordMngr.ComputeHMAC_SHA256(password_bytes, salt_bytes));
@@ -129,7 +129,7 @@ namespace RRS_API.Controllers
             try
             {
                 var httpRequest = HttpContext.Current.Request;
-                string token = httpRequest.Headers["Authorization"];
+                string token = httpRequest.Form["token"];
                 return Request.CreateResponse(HttpStatusCode.OK, TokenMngr.isAdmin(token));
             }
             catch (Exception e)

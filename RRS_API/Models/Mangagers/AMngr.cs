@@ -7,6 +7,6 @@ namespace RRS_API.Models.Mangagers
 {
     public abstract class AMngr
     {
-        protected AzureConnection AzureConnection = AzureConnection.getInstance();
+        protected DBConnection AzureConnection = DBConnection.getInstance();
     }
 }

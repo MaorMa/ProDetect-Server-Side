@@ -200,6 +200,9 @@ namespace Server
             }
         }
 
+        /*
+         * flip image if needed (uploaded from phone)
+         */ 
         private Image flip(Image image)
         {
             const int exifOrientationID = 0x112; //274

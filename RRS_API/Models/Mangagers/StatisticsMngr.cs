@@ -15,7 +15,7 @@ namespace RRS_API.Models.Mangagers
             //query get marketID,ProductID,Price
             Dictionary<string, Double> categoryAndPrices = new Dictionary<string, Double>();
             string queryStatusApproved = "SELECT fu.MarketID, rd.ProductID,rd.Quantity, rd.Price FROM FamilyUploads as fu JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID AND fu.ReceiptStatus = 1 WHERE fu.FamilyID='" + familyID + "'";
-            List<string> resultsStatusApproved = AzureConnection.SelectQuery(queryStatusApproved);
+            List<string> resultsStatusApproved = DBConnection.SelectQuery(queryStatusApproved);
             foreach (string record in resultsStatusApproved)
             {
                 string[] recordSplit = record.Split(',');
@@ -23,7 +23,7 @@ namespace RRS_API.Models.Mangagers
                 string productID = recordSplit[1];
                 string quantity = recordSplit[2];
                 double price = double.Parse(recordSplit[3]) * double.Parse(quantity);
-                List<string> sID = AzureConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "'");
+                List<string> sID = DBConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "'");
                 if (sID.Count > 0)
                 {
                     string category = getCategoryByID(sID[0]);
@@ -48,7 +48,7 @@ namespace RRS_API.Models.Mangagers
         {
             Dictionary<string, Double> categoryAndPrices = new Dictionary<string, Double>();
             string queryStatusApproved = "SELECT fu.MarketID, rd.ProductID, rd.Quantity, rd.DescriptionQuantity FROM FamilyUploads as fu JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID AND fu.ReceiptStatus = 1 WHERE fu.FamilyID='" + familyID + "'";
-            List<string> resultsStatusApproved = AzureConnection.SelectQuery(queryStatusApproved);
+            List<string> resultsStatusApproved = DBConnection.SelectQuery(queryStatusApproved);
             foreach (string record in resultsStatusApproved)
             {
                 string[] recordSplit = record.Split(',');
@@ -57,7 +57,7 @@ namespace RRS_API.Models.Mangagers
                 double quantity = double.Parse(recordSplit[2]);
                 double descriptionQuantity = double.Parse(recordSplit[3]);
                 double totalQuantity = quantity * descriptionQuantity;
-                List<string> sID = AzureConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "'");
+                List<string> sID = DBConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "'");
                 if (sID.Count > 0)
                 {
                     string category = getCategoryByID(sID[0]);
@@ -86,7 +86,7 @@ namespace RRS_API.Models.Mangagers
             //Double - quantity
             Dictionary<string, Double> nutrientAndQuantity = new Dictionary<string, Double>();
             string queryStatusApproved = "SELECT fu.MarketID, rd.ProductID, rd.Quantity, rd.DescriptionQuantity FROM FamilyUploads as fu JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID AND fu.ReceiptStatus = 1 WHERE fu.FamilyID='" + familyID + "'";
-            List<string> resultsStatusApproved = AzureConnection.SelectQuery(queryStatusApproved);
+            List<string> resultsStatusApproved = DBConnection.SelectQuery(queryStatusApproved);
             foreach (string record in resultsStatusApproved)
             {
                 string[] recordSplit = record.Split(',');
@@ -95,7 +95,7 @@ namespace RRS_API.Models.Mangagers
                 double quantity = double.Parse(recordSplit[2]);
                 double descriptionQuantity = double.Parse(recordSplit[3]);
                 double totalQuantity = quantity * descriptionQuantity;
-                List<string> nutrientsString = AzureConnection.SelectQuery("select * from Nutrients where Nutrients.SID = (select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "')");
+                List<string> nutrientsString = DBConnection.SelectQuery("select * from Nutrients where Nutrients.SID = (select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "')");
                 List<Nutrient> nutrients = new List<Nutrient>();
                 NutrientMngr nm = new NutrientMngr();
                 if (nutrientsString.Count != 0)
@@ -124,17 +124,14 @@ namespace RRS_API.Models.Mangagers
 
         public string GetCompareByCost(string familyID)
         {
-            //string - nutrient
-            //Double - quantity
-            Dictionary<string, Dictionary<string, Double>> FamilyPriceCompareCategories = new Dictionary<string, Dictionary<string, Double>>();
-            List<string> AllFamilies = AzureConnection.getFamiliesWithApprovedData();
-            //OtherFamiliesExceptMe.Remove(familyID);
-
+            //{"category":{"myValue","otherValue"}},{"category":{"myValue","otherValue"}}...
+            Dictionary<string, Tuple<double, double>> FamilyPriceCompareCategories = new Dictionary<string, Tuple<double, double>>();
+            List<string> AllFamilies = DBConnection.getFamiliesWithApprovedData();
             //foreach other family
             foreach (string family in AllFamilies)
             {
                 string queryStatusApproved = "SELECT fu.MarketID, rd.ProductID,rd.Quantity, rd.Price FROM FamilyUploads as fu JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID AND fu.ReceiptStatus = 1 WHERE fu.FamilyID='" + family + "'";
-                List<string> resultsStatusApproved = AzureConnection.SelectQuery(queryStatusApproved);
+                List<string> resultsStatusApproved = DBConnection.SelectQuery(queryStatusApproved);
                 foreach (string record in resultsStatusApproved)
                 {
                     string[] recordSplit = record.Split(',');
@@ -142,80 +139,51 @@ namespace RRS_API.Models.Mangagers
                     string productID = recordSplit[1];
                     string quantity = recordSplit[2];
                     double price = double.Parse(recordSplit[3]) * double.Parse(quantity);
-                    List<string> sID = AzureConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "'");
+                    List<string> sID = DBConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "'");
                     if (sID.Count > 0)
                     {
+                        //get category
                         string category = getCategoryByID(sID[0]);
-                        string key = "";
 
-                        //contains family
-                        if (family.Equals(familyID))
-                        {
-                            key = "me";
-                        }
-                        else
-                        {
-                            key = "other";
-                        }
 
-                        if (FamilyPriceCompareCategories.ContainsKey(key))
+                        //contains category
+                        if (FamilyPriceCompareCategories.ContainsKey(category))
                         {
-                            var x = FamilyPriceCompareCategories[key];
-                            //contains category
-                            if (FamilyPriceCompareCategories[key].ContainsKey(category))
+                            //me
+                            if (family.Equals(familyID))
                             {
-                                if (family.Equals(familyID))
-                                {
-                                    FamilyPriceCompareCategories[key][category] += price;
-                                }
-                                else
-                                {
-                                    FamilyPriceCompareCategories[key][category] += price / (AllFamilies.Count-1);
-                                }
+                                double myValue = FamilyPriceCompareCategories[category].Item1;
+                                double otherValue = FamilyPriceCompareCategories[category].Item2;
+                                FamilyPriceCompareCategories[category] = new Tuple<double, double>(myValue + price, otherValue);
                             }
-                            //not contains category
+
+                            //other
                             else
                             {
-                                if (family.Equals(familyID))
-                                {
-                                    FamilyPriceCompareCategories[key].Add(category, price);
-                                }
-                                else
-                                {
-                                    FamilyPriceCompareCategories[key].Add(category, price / (AllFamilies.Count - 1)); 
-                                }
+                                double currentmyValue = FamilyPriceCompareCategories[category].Item1;
+                                double newOtherValue = FamilyPriceCompareCategories[category].Item2 + (price / (AllFamilies.Count - 1));
+                                FamilyPriceCompareCategories[category] = new Tuple<double, double>(currentmyValue, newOtherValue);
                             }
                         }
 
-                        //not contains family
+                        //not contains category
                         else
                         {
-                            Dictionary<string, double> toInsert = new Dictionary<string, double>();
-                            if (key.Equals("me"))
+                            if (family.Equals(familyID))
                             {
-
-                                FamilyPriceCompareCategories.Add("me", new Dictionary<string, double>());
-                                //insert new category and price
-                                toInsert.Add(category, price);
-                                FamilyPriceCompareCategories[key] = toInsert;
+                                FamilyPriceCompareCategories.Add(category, new Tuple<double, double>(price, 0));
                             }
+                            //other
                             else
                             {
-                                //create family 
-                                FamilyPriceCompareCategories.Add("other", new Dictionary<string, double>());
-                                //insert new category and price
-                                toInsert.Add(category, price);
-                                FamilyPriceCompareCategories[key] = toInsert;
+                                FamilyPriceCompareCategories[category] = new Tuple<double, double>(0, price / (AllFamilies.Count - 1));
                             }
                         }
                     }
-
                 }
             }
-            Dictionary<string, string> myList = new Dictionary<string,string>();
-            myList.Add("other", JsonConvert.SerializeObject(FamilyPriceCompareCategories["other"].Values.ToList()));
-            myList.Add("me", JsonConvert.SerializeObject(FamilyPriceCompareCategories["me"].Values.ToList()));
-            return JsonConvert.SerializeObject(myList.ToList()); 
+
+            return JsonConvert.SerializeObject(FamilyPriceCompareCategories.ToList());
         }
 
         private string getCategoryByID(string id)
@@ -256,11 +224,11 @@ namespace RRS_API.Models.Mangagers
             {
                 return "שמנים ורטבים";
             }
-            else if (id.StartsWith("910") || id.StartsWith("912"))
+            else if (id.StartsWith("910") || id.StartsWith("911") || id.StartsWith("912"))
             {
                 return "תבלינים";
             }
-            else if (id.StartsWith("913") || id.StartsWith("918"))
+            else if (id.StartsWith("913") || id.StartsWith("914") || id.StartsWith("915") || id.StartsWith("916") || id.StartsWith("917") || id.StartsWith("918"))
             {
                 return "ממתקים וממתיקים";
             }

@@ -10,12 +10,12 @@ namespace RRS_API.Models
         public List<String> getMarkets()
         {
             string query = "SELECT * FROM Markets";
-            return AzureConnection.SelectQuery(query);
+            return DBConnection.SelectQuery(query);
         }
 
         public List<string> getFamilies()
         {
-            return AzureConnection.getFamilies();
+            return DBConnection.getFamilies();
         }
         #endregion
     }

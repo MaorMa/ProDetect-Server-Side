@@ -41,7 +41,7 @@ namespace RRS_API.Models.Objects
             var jwtToken = new JwtSecurityToken(token);
             object username = "";
             jwtToken.Payload.TryGetValue("unique_name", out username);
-            string groupID =  AzureConnection.getGroupID(username.ToString());
+            string groupID = DBConnection.getGroupID(username.ToString());
             return groupID.Equals("True");
         }
 

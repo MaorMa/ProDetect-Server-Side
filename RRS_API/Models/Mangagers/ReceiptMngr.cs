@@ -89,7 +89,7 @@ namespace RRS_API.Controllers
                     queryStatusWorking = "SELECT DISTINCT FamilyID FROM FamilyUploads WHERE NOT ReceiptStatus = 1";
                 else
                     queryStatusWorking = "SELECT DISTINCT FamilyID FROM FamilyUploads WHERE ReceiptStatus = 1";
-                familiesList = AzureConnection.SelectQuery(queryStatusWorking);
+                familiesList = DBConnection.SelectQuery(queryStatusWorking);
             }
             else
             {
@@ -104,9 +104,9 @@ namespace RRS_API.Controllers
         public string GetAllFamilyData(string familyID)
         {
             string queryStatusWorking = "SELECT * FROM FamilyUploads WHERE ReceiptStatus = -1 AND FamilyID = '" + familyID + "'";
-            List<string> resultsStatusWorking = AzureConnection.SelectQuery(queryStatusWorking);
+            List<string> resultsStatusWorking = DBConnection.SelectQuery(queryStatusWorking);
             string query = "SELECT fu.FamilyID, fu.ReceiptID, fu.MarketID, fu.UploadTime, fu.ReceiptStatus, ISNULL(rd.ProductID,'') as ProductID , ISNULL(rd.Description,'') as Description, ISNULL(rd.Quantity,'') as Quantity, ISNULL(rd.Price,'') as Price, ISNULL(rd.Ycoordinate,'') as Ycoordinate, ISNULL(rd.validProduct,'') as validProduct FROM FamilyUploads as fu FULL JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID WHERE fu.ReceiptStatus = 0 AND FamilyID = '" + familyID + "'";
-            List<string> results = AzureConnection.SelectQuery(query);
+            List<string> results = DBConnection.SelectQuery(query);
             Dictionary<string, ReceiptToReturn> allInfo = new Dictionary<string, ReceiptToReturn>();
             string MarkedImagesPath = MarkedImageSaver.getMarkedImagesPath();
             foreach (string record in results)
@@ -118,7 +118,7 @@ namespace RRS_API.Controllers
                 string uploadTime = recordSplit[3];
                 string receiptStatus = recordSplit[4];
                 string productID = recordSplit[5];
-                List<string> OptionalNames = AzureConnection.SelectQuery("SELECT SID, OptionalName, Similarity FROM OptionalProducts WHERE MarketID ='" + marketID + "' AND ProductID ='" + productID + "'");
+                List<string> OptionalNames = DBConnection.SelectQuery("SELECT SID, OptionalName, Similarity FROM OptionalProducts WHERE MarketID ='" + marketID + "' AND ProductID ='" + productID + "'");
                 List<ResearchProduct> rp = createResarchListForProductID(OptionalNames);
                 rp.Sort((el1, el2) => Double.Parse(el2.similarity).CompareTo(Double.Parse(el1.similarity)));
                 string description = recordSplit[6];
@@ -326,7 +326,7 @@ namespace RRS_API.Controllers
                 List<MetaData> sortedProducts = receiptToUpdate.products.ToList();
 
                 //delete -> insert -> updateStatus
-                AzureConnection.deleteReceiptData(receiptID);
+                DBConnection.deleteReceiptData(receiptID);
                 foreach (MetaData product in sortedProducts)
                 {
                     string productID = product.getsID();
@@ -383,19 +383,19 @@ namespace RRS_API.Controllers
                     
                     string productPrice = product.getPrice();
                     ResearchProduct rp = product.getOptionalProductsChosen();
-                    AzureConnection.insertReceiptData(familyID, receiptID, productID, productDescription, productQuantity, quantityFoundInDesc, productPrice, 0, true);
+                    DBConnection.insertReceiptData(familyID, receiptID, productID, productDescription, productQuantity, quantityFoundInDesc, productPrice, 0, true);
                     //if chosen - delete all except chosen
                     if (rp != null)
-                        AzureConnection.deleteOptionalData(receiptToUpdate.marketID, product.getsID(), rp.sID);
+                        DBConnection.deleteOptionalData(receiptToUpdate.marketID, product.getsID(), rp.sID);
 
                     //not chosen - delete all up to 5 optionals
                     else if (rp == null)
                     {
-                        AzureConnection.deleteOptionalData(receiptToUpdate.marketID, product.getsID(), product.sID);
+                        DBConnection.deleteOptionalData(receiptToUpdate.marketID, product.getsID(), product.sID);
 
                     }
                 }
-                AzureConnection.updateStatus(familyID, receiptID, "1");
+                DBConnection.updateStatus(familyID, receiptID, "1");
             }
             catch (Exception exception)
             {
@@ -407,7 +407,7 @@ namespace RRS_API.Controllers
         {
             Dictionary<string, ReceiptToReturn> allInfo = new Dictionary<string, ReceiptToReturn>();
             string queryStatusApproved = "SELECT fu.ReceiptID, fu.MarketID, fu.UploadTime, rd.ProductID, rd.Description, rd.Quantity, rd.DescriptionQuantity, rd.Price FROM FamilyUploads as fu JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID AND fu.ReceiptStatus = 1 WHERE fu.FamilyID='" + familyId + "'";
-            List<string> resultsStatusApproved = AzureConnection.SelectQuery(queryStatusApproved);
+            List<string> resultsStatusApproved = DBConnection.SelectQuery(queryStatusApproved);
             foreach (string record in resultsStatusApproved)
             {
                 string[] recordSplit = record.Split(',');
@@ -415,7 +415,7 @@ namespace RRS_API.Controllers
                 string marketID = recordSplit[1];
                 string uploadTime = recordSplit[2];
                 string productID = recordSplit[3];
-                List<string> nutrientsString = AzureConnection.SelectQuery("select * from Nutrients where Nutrients.SID = (select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "')");
+                List<string> nutrientsString = DBConnection.SelectQuery("select * from Nutrients where Nutrients.SID = (select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "')");
                 List<Nutrient> nutrients = new List<Nutrient>();
                 NutrientMngr nm = new NutrientMngr();
                 if (nutrientsString.Count != 0)
@@ -467,12 +467,12 @@ namespace RRS_API.Controllers
             }
 
             //First try execute originalSQL
-            List<String> productInfoFromDb = AzureConnection.SelectQuery(originalSQL);
+            List<String> productInfoFromDb = DBConnection.SelectQuery(originalSQL);
 
             //if no result, try execute newSQL 
             if (productInfoFromDb.Count == 0)
             {
-                productInfoFromDb = AzureConnection.SelectQuery(newSQL);
+                productInfoFromDb = DBConnection.SelectQuery(newSQL);
             }
 
             return productInfoFromDb;
@@ -483,7 +483,7 @@ namespace RRS_API.Controllers
          */
         public string GetTotalUploadsDetails()
         {
-            List<string> results = AzureConnection.SelectQuery("SELECT * FROM FamilyUploads WHERE NOT ReceiptStatus = 1");
+            List<string> results = DBConnection.SelectQuery("SELECT * FROM FamilyUploads WHERE NOT ReceiptStatus = 1");
             List<FamilyUploads> toReturn = new List<FamilyUploads>();
 
             foreach (string record in results)
@@ -511,7 +511,7 @@ namespace RRS_API.Controllers
                 string receiptID = getHash(rec.Value);
                 Image image = rec.Value;
 
-                if (!(AzureConnection.SelectQuery("SELECT * FROM FamilyUploads where ReceiptID='" + receiptID + "' AND NOT ReceiptStatus = -1").Count > 0))
+                if (!(DBConnection.SelectQuery("SELECT * FROM FamilyUploads where ReceiptID='" + receiptID + "' AND NOT ReceiptStatus = -1").Count > 0))
                 {
                     //means receipt not uploaded in the past - thus we add it
                     toReturn.Add(receiptID, image);
@@ -527,8 +527,8 @@ namespace RRS_API.Controllers
             if (productData.Count != 0)
             {
                 List<ResearchProduct> products = jwd.getTopFiveSimilarProducts(productData[0].Split(',')[1]);
-                if (products.Count != 0 && AzureConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "'").Count == 0)
-                    AzureConnection.insertOptionalProducts(marketID, productID, products);
+                if (products.Count != 0 && DBConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "'").Count == 0)
+                    DBConnection.insertOptionalProducts(marketID, productID, products);
                 toReturn.Add(productData, products);
             }
             return JsonConvert.SerializeObject(toReturn.ToList());
@@ -601,7 +601,7 @@ namespace RRS_API.Controllers
             EmailSender = null;
             receipts = null;
             MarkedImageSaver = null;
-            AzureConnection = null;
+            DBConnection = null;
         }
 
         /*
@@ -639,7 +639,7 @@ namespace RRS_API.Controllers
         {
             try
             {
-                AzureConnection.updateStatus(FamilyID, receipt.getName(), "0");
+                DBConnection.updateStatus(FamilyID, receipt.getName(), "0");
                 foreach (KeyValuePair<string, List<MetaData>> data in receipt.getIdToMetadata())
                 {
                     string productId = data.Key;
@@ -654,12 +654,12 @@ namespace RRS_API.Controllers
                         bool validProduct = values.ElementAt(0).getvalidProduct();
                         string marketId = receipt.getMarketID();
                         List<ResearchProduct> optionalProducts = values.ElementAt(0).getOptionalProducts();
-                        AzureConnection.insertReceiptData(FamilyID, receipt.getName(), productId, desc, quantitiy, "1", price, yCoordinate, validProduct);
+                        DBConnection.insertReceiptData(FamilyID, receipt.getName(), productId, desc, quantitiy, "1", price, yCoordinate, validProduct);
                         //foreach (ResearchProduct rp in optionalProducts)
                         //{
                         //AzureConnection.insertOptionalProducts(id, rp.SID, rp.Name);
-                        if (AzureConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketId + "' AND OP.ProductID ='" + productId + "'").Count == 0)
-                            AzureConnection.insertOptionalProducts(marketId, productId, optionalProducts);
+                        if (DBConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketId + "' AND OP.ProductID ='" + productId + "'").Count == 0)
+                            DBConnection.insertOptionalProducts(marketId, productId, optionalProducts);
                         //}
                     }
                 }
@@ -675,8 +675,8 @@ namespace RRS_API.Controllers
         {
             try
             {
-                AzureConnection.deleteReceiptData(receiptID);
-                AzureConnection.deleteReceiptFromFamily(receiptID);
+                DBConnection.deleteReceiptData(receiptID);
+                DBConnection.deleteReceiptFromFamily(receiptID);
                 return true;
             }
             catch (Exception e)
@@ -695,7 +695,7 @@ namespace RRS_API.Controllers
             //get exception if receipt allready been uploaded
             try
             {
-                AzureConnection.updateFamilyUploads(selectedFamilyID, marketID, imageName, status, UploadTime);
+                DBConnection.updateFamilyUploads(selectedFamilyID, marketID, imageName, status, UploadTime);
             }
             catch (Exception e)
             {
@@ -709,22 +709,22 @@ namespace RRS_API.Controllers
          public void ReturnToAccept(string familyID, ReceiptToReturn receiptToUpdate)
         {
             //first we update status to -1
-            AzureConnection.updateStatus(familyID, receiptToUpdate.receiptID, "-1");
+            DBConnection.updateStatus(familyID, receiptToUpdate.receiptID, "-1");
             string marketId = receiptToUpdate.marketID;
 
             //than we need to find similar products
             foreach (MetaData product in receiptToUpdate.products)
             {
                 string productId = product.getsID();
-                if (AzureConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketId + "' AND OP.ProductID ='" + productId + "'").Count == 0)
+                if (DBConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketId + "' AND OP.ProductID ='" + productId + "'").Count == 0)
                 {
                     List<ResearchProduct> optionalProducts = jwd.getTopFiveSimilarProducts(product.description);
-                    AzureConnection.insertOptionalProducts(marketId, productId, optionalProducts);
+                    DBConnection.insertOptionalProducts(marketId, productId, optionalProducts);
                 }
             }
 
             //after finished, set status to 0
-            AzureConnection.updateStatus(familyID, receiptToUpdate.receiptID, "0");
+            DBConnection.updateStatus(familyID, receiptToUpdate.receiptID, "0");
         }
 
         /*

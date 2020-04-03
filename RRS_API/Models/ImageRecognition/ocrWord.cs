@@ -1,6 +1,6 @@
 ﻿using System;
 
-public class ocrWord
+public class OcrWord
 {
     private double x;
     private double y;
@@ -9,7 +9,7 @@ public class ocrWord
 
     private String text;
 
-    public ocrWord(double x, double y, double width, double height, String text)
+    public OcrWord(double x, double y, double width, double height, String text)
     {
         this.x = x;
         this.y = y;

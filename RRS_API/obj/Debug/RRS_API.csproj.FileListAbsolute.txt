@@ -619,3 +619,6 @@ C:\Users\Maor\Desktop\DeployLastWorking\Backend 18.12\RRS-SERVER\RRS_API\bin\zh-
 C:\Users\Maor\Desktop\DeployLastWorking\Backend 18.12\RRS-SERVER\RRS_API\obj\Debug\RRS_API.csprojResolveAssemblyReference.cache
 C:\Users\Maor\Desktop\DeployLastWorking\Backend 18.12\RRS-SERVER\RRS_API\obj\Debug\RRS_API.dll
 C:\Users\Maor\Desktop\DeployLastWorking\Backend 18.12\RRS-SERVER\RRS_API\obj\Debug\RRS_API.pdb
+C:\Users\Maor\Desktop\DeployLastWorking\Backend 18.12\RRS-SERVER\RRS_API\bin\ExcelDataReader.dll
+C:\Users\Maor\Desktop\DeployLastWorking\Backend 18.12\RRS-SERVER\RRS_API\bin\ExcelDataReader.pdb
+C:\Users\Maor\Desktop\DeployLastWorking\Backend 18.12\RRS-SERVER\RRS_API\bin\ExcelDataReader.xml

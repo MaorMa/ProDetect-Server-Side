@@ -4,30 +4,21 @@ using System.Collections.Generic;
 
 namespace ImageRecognition.Objects
 {
+    //This class responsibe for represent all the metadata of each product
     public class MetaData
     {
+        //Fields
         public string sID;
-        public string description;//item description-name
+        public string description;
         public string quantity;
-        public string price;//per unit from DB
-        public Boolean validProduct;
+        public string price; //per unit
+        public bool validProduct;
         private double yCoordinate;
         public List<Nutrient> nutrients;
         public List<ResearchProduct> optionalProducts;
         public ResearchProduct optionalProductsChosen;
 
-        /*public MetaData(string sID, string description, string quantity, string price, double yCoordinate, bool validProduct, List<ResearchProduct> optionalProducts, ResearchProduct optionalProductsChosen)
-        {
-            this.description = description;
-            this.quantity = quantity;
-            this.price = price;
-            this.sID = sID;
-            this.yCoordinate = yCoordinate;
-            this.validProduct = validProduct;
-            this.optionalProducts = optionalProducts;
-            this.optionalProductsChosen = optionalProductsChosen;
-        }*/
-
+        //C'tor
         public MetaData(string sID, string description, string quantity, string price, double yCoordinate, bool validProduct)
         {
             this.description = description;
@@ -38,38 +29,14 @@ namespace ImageRecognition.Objects
             this.validProduct = validProduct;
         }
 
-        /*public MetaData(string sID,string description, string quantity, string price,double yCoordinate, bool validProduct, List<ResearchProduct> optionalProducts)
-        {
-            this.description = description;
-            this.quantity = quantity;
-            this.price = price;
-            this.sID = sID;
-            this.yCoordinate = yCoordinate;
-            this.validProduct = validProduct;
-            this.optionalProducts = optionalProducts;
-        }
+        // Getters
 
-        public MetaData(string sID, string description, string quantity, string price, double yCoordinate, bool validProduct, List<string> nutrients)
-        {
-            this.description = description;
-            this.quantity = quantity;
-            this.price = price;
-            this.sID = sID;
-            this.yCoordinate = yCoordinate;
-            this.validProduct = validProduct;
-                
-        }/*
-
-        /*
-         * Getters
-         */
-
-        public String getDescription()
+        public string getDescription()
         {
             return this.description;
         }
 
-        public String getQuantity()
+        public string getQuantity()
         {
             return this.quantity;
         }
@@ -99,21 +66,19 @@ namespace ImageRecognition.Objects
             return this.optionalProductsChosen;
         }
 
-        /*
-         * Setters
-         */
+        // Setters
 
-        public void setDescription(String description)
+        public void setDescription(string description)
         {
             this.description = description;
         }
 
-        public void setQuantity(String quantity)
+        public void setQuantity(string quantity)
         {
             this.quantity = quantity;
         }
 
-        public void setPrice(String price)
+        public void setPrice(string price)
         {
             this.price = price;
         }
@@ -142,10 +107,5 @@ namespace ImageRecognition.Objects
         {
             this.optionalProductsChosen = optionalProducts;
         }
-
-        /*public void setNutrients(List<string> nutrients)
-        {
-            this.nutrients = nutrients;
-        }*/
     }
 }

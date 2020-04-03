@@ -11,7 +11,7 @@ namespace RRS_API.Models.JWT
     {
         string secretKey { get; set; }
         string securityAlgorithm { get; set; }
-        int exprieTime { get; set; }
+        int expireTime { get; set; }
         Claim[] claims { get; set; }
     }
 }

@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>IronOcr.Hebrew</name>
+    </assembly>
+    <members>
+        <member name="T:IronOcr.Languages.Hebrew">
+            <summary>
+              Hebrew (العَرَעִבְרִית) Language Pack for IronOcr.  
+              <para> Requires IronOcr to be of value http://ironsoftware.com/csharp/ocr/ </para>
+              <example><code>IronOcr.Language = IronOcr.Languages.Hebrew.OcrLanguagePack</code></example>
+            </summary>
+        </member>
+        <member name="P:IronOcr.Languages.Hebrew.LanguageCode">
+            <exclude />
+        </member>
+        <member name="M:IronOcr.Languages.Hebrew.Deploy(System.String)">
+            <exclude />
+        </member>
+        <member name="M:IronOcr.Languages.Hebrew.ToString">
+            <exclude />
+        </member>
+        <member name="P:IronOcr.Languages.Hebrew.OcrLanguagePack">
+            Hebrew (heb) language pack.
+        </member>
+    </members>
+</doc>

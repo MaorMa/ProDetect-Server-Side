@@ -21,13 +21,9 @@ namespace RRS_API.Controllers
     {
         //private static readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private readonly ILog _logger = LogManager.GetLogger(typeof(UsersController));
-
-
-        TokenMngr TokenMngr = new TokenMngr();
         UsersMngr UsersMngr = new UsersMngr();
-        private PasswordMngr PasswordMngr = new PasswordMngr();
 
-        [Route("AddFamilyUser")]
+        [Route("AddFamily")]
         [HttpPost]
         public HttpResponseMessage addUser()
         {
@@ -38,22 +34,17 @@ namespace RRS_API.Controllers
                 string username = httpRequest.Form["username"];//2 arg
                 string password = httpRequest.Form["password"];//2
                 _logger.Debug($"Adding new family username: {username}");
-                var jwtToken = new JwtSecurityToken(token);
-                if (TokenMngr.isTokenValid(token)) //check if token is valid
+                //var jwtToken = new JwtSecurityToken(token);
+
+                //only global admin can add users
+                if (UsersMngr.IsGlobalAdmin(token))
                 {
-                    //only admin can add users
-                    if (TokenMngr.isAdmin(token))
-                    {
-                        UsersMngr.AddNewFamilyUser(username, password);
-                        _logger.Info($"Succesful new family username: {username}");
-                        return Request.CreateResponse(HttpStatusCode.Created);
-                    }
-                    //return forbidden
-                    else
-                    {
-                        return Request.CreateResponse(HttpStatusCode.Forbidden);
-                    }
+                    UsersMngr.AddNewFamilyUser(username, password);
+                    _logger.Info($"Succesful new family username: {username}");
+                    return Request.CreateResponse(HttpStatusCode.Created);
                 }
+
+                //return forbidden
                 else
                 {
                     return Request.CreateResponse(HttpStatusCode.Forbidden);
@@ -66,12 +57,13 @@ namespace RRS_API.Controllers
             }
         }
 
+
+        /*
+        * given username, password
+        * return token if valid
+        */
         [Route("tokenIsValid")]
         [HttpPost]
-        /*
-         * given username, password
-         * return token if valid
-         */
         public HttpResponseMessage tokenIsValid()
         {
             //get data from UI
@@ -79,62 +71,81 @@ namespace RRS_API.Controllers
             {
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Form["token"];
-                bool isValid = TokenMngr.isTokenValid(token.Trim());
+                bool isValid = UsersMngr.IsUserTokenValid(token.Trim());
                 return Request.CreateResponse(HttpStatusCode.OK, isValid);
             }
             catch (Exception)
             {
-                return Request.CreateResponse(HttpStatusCode.Forbidden);
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
             }
         }
 
+
+        /*
+        * given username, password
+        * return token if valid
+        */
         [Route("Login")]
         [HttpPost]
-        /*
-         * given username, password
-         * return token if valid
-         */
         public HttpResponseMessage Login()
         {
-            //return Request.CreateResponse(HttpStatusCode.OK, "123123yaniv");
-
             //get data from UI
             var username = HttpContext.Current.Request.Form["username"];
             _logger.Debug($"{username} is trying to login");
             var password = HttpContext.Current.Request.Form["password"];
-            var salt_value = DBConnection.getInstance().getSaltValue(username);
-            var salt_bytes = Encoding.UTF8.GetBytes(salt_value);
-            var password_bytes = Encoding.UTF8.GetBytes(password);
-            string hashedPass = Convert.ToBase64String(PasswordMngr.ComputeHMAC_SHA256(password_bytes, salt_bytes));
             try
             {
-                string token = TokenMngr.generateToken(username, password, hashedPass);
+                string token = UsersMngr.CheckLoginCredentials(username, password);
+                _logger.Debug($"{username} connected sucessfully");
                 return Request.CreateResponse(HttpStatusCode.OK, token);
             }
             catch (Exception e)
             {
-                _logger.Error("Error login",e);
-                return Request.CreateResponse(HttpStatusCode.Forbidden);
+                _logger.Error("Error login", e);
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
             }
         }
 
-        [Route("isAdmin")]
-        [HttpPost]
         /*
-         * return true/false for a given valid token
-         */
-        public HttpResponseMessage isAdmin()
+        * return true if admin, otherwise false according to given token
+        */
+        [Route("isGlobalAdmin")]
+        [HttpPost]
+
+        public HttpResponseMessage isGlobalAdmin()
         {
-            _logger.Debug("Check if isAdmin");
+            //_logger.Debug("Check if isGlobalAdmin");
             try
             {
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Form["token"];
-                return Request.CreateResponse(HttpStatusCode.OK, TokenMngr.isAdmin(token));
+                return Request.CreateResponse(HttpStatusCode.OK, UsersMngr.IsGlobalAdmin(token));
             }
             catch (Exception e)
             {
-                _logger.Error("Error isAdmin",e);
+                //_logger.Error("Error isGlobalAdmin", e);
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        /*
+        * return true if admin, otherwise false according to given token
+        */
+        [Route("isAdmin")]
+        [HttpPost]
+
+        public HttpResponseMessage isAdmin()
+        {
+            //_logger.Debug("Check if isLocalAdmin");
+            try
+            {
+                var httpRequest = HttpContext.Current.Request;
+                string token = httpRequest.Form["token"];
+                return Request.CreateResponse(HttpStatusCode.OK, UsersMngr.IsGlobalAdmin(token) || UsersMngr.IsLocalAdmin(token));
+            }
+            catch (Exception e)
+            {
+                //_logger.Error("Error isLocalAdmin", e);
                 return Request.CreateResponse(HttpStatusCode.InternalServerError);
             }
         }

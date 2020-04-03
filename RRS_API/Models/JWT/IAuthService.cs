@@ -9,8 +9,7 @@ namespace RRS_API.Models.JWT
     public interface IAuthService
     {
         string secretKey { get; set; }
-        bool isTokenValid(string token);
-        string generateToken(IAuthContainerModel model);
-        IEnumerable<Claim> GetTokenClaims(string token);
+        bool IsTokenValid(string token);
+        string GenerateToken(IAuthContainerModel model);
     }
 }

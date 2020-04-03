@@ -12,6 +12,7 @@ using System.Web;
 using System.Web.Http;
 using log4net;
 using System.Reflection;
+using RRS_API.Models.Mangagers;
 
 namespace RRS_API.Controllers
 {
@@ -19,80 +20,28 @@ namespace RRS_API.Controllers
     public class ReceiptController : ApiController
     {
         private ReceiptMngr ReceiptMngr = new ReceiptMngr();
-        private TokenMngr TokenMngr = new TokenMngr();
+        private UsersMngr UsersMngr = new UsersMngr();
         private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         #region Get requests
-        /*[Route("GetTotalUploadsDetails")]
-        [HttpGet]
-        public HttpResponseMessage GetTotalUploadsDetails()
-        {
-            try
-            {
-                string result = ReceiptMngr.GetTotalUploadsDetails();
-                return Request.CreateResponse(HttpStatusCode.Created, result);
-            }
-            catch (Exception)
-            {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError);
-            }
-        }*/
-
-            /*
-        [Route("GetAllRecognizedData")]
+        [Route("GetAllFamiliesByReceiptStatus/{accView}")]
         [HttpPost]
-        public HttpResponseMessage GetAllRecognizedData()
+        public HttpResponseMessage GetAllFamiliesByReceiptStatus(string accView)
         {
-            _logger.Debug("GetAllRecognizedData started");
+            if(accView.Equals("Acc"))
+                _logger.Debug("GetAllFamiliesByReceiptStatus started. [Navigate to: receipt accept page]");
             try
             {
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Headers["Authorization"];
-                if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
+                if (UsersMngr.IsUserTokenValid(token))
                 {
-                    _logger.Info("Succesful GetAllRecognizedData");
-                    return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllRecognizedData());
-                }
-                else
-                {
-                    _logger.Debug("GetAllRecognizedData Forbidden");
-                    return Request.CreateResponse(HttpStatusCode.Forbidden);
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.Error("Error - GetAllRecognizedData", e);
-                return Request.CreateResponse(HttpStatusCode.InternalServerError);
-            }
-        }
-        */
-
-        [Route("GetAllFamilies/{accView}")]
-        [HttpPost]
-        public HttpResponseMessage GetAllFamilies(string accView)
-        {
-
-            _logger.Debug("GetAllFamilies started");
-            try
-            {
-                var httpRequest = HttpContext.Current.Request;
-                string token = httpRequest.Headers["Authorization"];
-                if (TokenMngr.isTokenValid(token) /*&& TokenMngr.isAdmin(token)*/)
-                {
+                    var jwtToken = new JwtSecurityToken(token);
+                    object username = "";
+                    jwtToken.Payload.TryGetValue("unique_name", out username);
                     _logger.Info("Succesful GetAllFamilies");
-                    //if admin
-                    if (TokenMngr.isAdmin(token))
-                    {
-                        return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllFamilies(accView, "", true));
-                    }
-                    //user
-                    else
-                    {
-                        var jwtToken = new JwtSecurityToken(token);
-                        object username = "";
-                        jwtToken.Payload.TryGetValue("unique_name", out username);
-                        return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllFamilies(accView, username.ToString(), false));
-                    }
+                    return Request.CreateResponse(HttpStatusCode.OK, ReceiptMngr.GetAllFamiliesByReceiptStatus(accView, username.ToString(), UsersMngr.IsGlobalAdmin(token), UsersMngr.IsLocalAdmin(token)));
+
                 }
                 else
                 {
@@ -116,10 +65,12 @@ namespace RRS_API.Controllers
             {
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Headers["Authorization"];
-                if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
+
+                //just global or local admin can approve receipts 
+                if (UsersMngr.IsGlobalAdmin(token) || UsersMngr.IsLocalAdmin(token))
                 {
                     _logger.Info("Succesful GetAllFamilyData");
-                    return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllFamilyData(familyID));
+                    return Request.CreateResponse(HttpStatusCode.OK, ReceiptMngr.GetAllNotApprovedFamilyData(familyID));
                 }
                 else
                 {
@@ -134,6 +85,32 @@ namespace RRS_API.Controllers
             }
         }
 
+        [Route("UpsertSimilarProducts/{description}/{marketID}/{sID}")]
+        [HttpPost]
+        public HttpResponseMessage UpsertSimilarProducts(string description,string marketID,string sID)
+        {
+            _logger.Debug("UpsertSimilarProducts started");
+            try
+            {
+                var httpRequest = HttpContext.Current.Request;
+                string token = httpRequest.Headers["Authorization"];
+                if (UsersMngr.IsGlobalAdmin(token) || UsersMngr.IsLocalAdmin(token))
+                {
+                    _logger.Info("Succesful UpsertSimilarProducts");
+                    return Request.CreateResponse(HttpStatusCode.OK, ReceiptMngr.GetAndInsertOptionalNames(description,marketID,sID));
+                }
+                else
+                {
+                    _logger.Debug("UpsertSimilarProducts Forbidden");
+                    return Request.CreateResponse(HttpStatusCode.Forbidden);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error - UpsertSimilarProducts", e);
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
+            }
+        }
 
         [Route("DeleteReceipt/{receiptID}")]
         [HttpPost]
@@ -144,10 +121,10 @@ namespace RRS_API.Controllers
             {
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Headers["Authorization"];
-                if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
+                if (UsersMngr.IsGlobalAdmin(token) || UsersMngr.IsLocalAdmin(token))
                 {
                     _logger.Info("Succesful DeleteReceipt");
-                    return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.DeleteReceipt(receiptID));
+                    return Request.CreateResponse(HttpStatusCode.OK, ReceiptMngr.DeleteReceipt(receiptID));
                 }
                 else
                 {
@@ -166,15 +143,15 @@ namespace RRS_API.Controllers
         [HttpPost]
         public HttpResponseMessage GetAllApprovedData(string familyId)
         {
-            _logger.Debug("GetAllApprovedData started");
+            _logger.Debug("GetAllApprovedData started. [Navigate to: receipt view page]");
             try
             {
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Headers["Authorization"];
-                if (TokenMngr.isTokenValid(token))
+                if (UsersMngr.IsUserTokenValid(token))
                 {
                     _logger.Info("Succesful GetAllApprovedData");
-                    return Request.CreateResponse(HttpStatusCode.Created, ReceiptMngr.GetAllApprovedData(familyId));
+                    return Request.CreateResponse(HttpStatusCode.OK, ReceiptMngr.GetAllApprovedFamilyData(familyId));
                 }
                 else
                 {
@@ -189,6 +166,23 @@ namespace RRS_API.Controllers
             }
         }
 
+        [Route("GetSimilarProductsByDesc/{Description}")]
+        [HttpGet]
+        public HttpResponseMessage GetSimilarProductsByDesc(string Description)
+        {
+            _logger.Debug($"GetSimilarProductsByDesc started, Description: {Description}");
+            try
+            {
+                _logger.Info("Succesful GetProductInfo");
+                return Request.CreateResponse(HttpStatusCode.OK, ReceiptMngr.GetOptionalNames(Description));
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Error - GetSimilarProductsByDesc", e);
+                return Request.CreateResponse(HttpStatusCode.InternalServerError);
+            }
+        }
+
         [Route("GetProductInfo/{marketID}/{productID}")]
         [HttpGet]
         public HttpResponseMessage GetProductInfo(string marketID, string productID)
@@ -197,7 +191,6 @@ namespace RRS_API.Controllers
             try
             {
                 _logger.Info("Succesful GetProductInfo");
-                //var data = ReceiptMngr.GetProductInfo(productID, marketID);
                 return Request.CreateResponse(HttpStatusCode.OK, ReceiptMngr.GetProductDataWithOptionalNames(productID, marketID));
             }
             catch (Exception e)
@@ -221,7 +214,7 @@ namespace RRS_API.Controllers
             {
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Headers["Authorization"];
-                if (TokenMngr.isTokenValid(token))
+                if (UsersMngr.IsUserTokenValid(token))
                 {
                     Dictionary<String, Image> imgNameAndImg = new Dictionary<string, Image>();
                     try
@@ -241,7 +234,7 @@ namespace RRS_API.Controllers
                         }
                         new System.Threading.Tasks.Task(() =>
                         {
-                            this.ReceiptMngr.processPhotos(selectedFamilyID, selectedMarket, imgNameAndImg);
+                            this.ReceiptMngr.ProcessReceipts(selectedFamilyID, selectedMarket, imgNameAndImg);
                         }).Start();
                         return Request.CreateResponse(HttpStatusCode.Created);
                     }
@@ -273,7 +266,7 @@ namespace RRS_API.Controllers
             {
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Headers["Authorization"];
-                if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
+                if (UsersMngr.IsGlobalAdmin(token) || UsersMngr.IsLocalAdmin(token))
                 {
                     ReceiptMngr.UpdateReceiptData(familyID, receiptToUpdate);
                     return Request.CreateResponse(HttpStatusCode.OK);
@@ -299,9 +292,9 @@ namespace RRS_API.Controllers
             {
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Headers["Authorization"];
-                if (TokenMngr.isTokenValid(token) && TokenMngr.isAdmin(token))
+                if (UsersMngr.IsGlobalAdmin(token) || UsersMngr.IsLocalAdmin(token))
                 {
-                    ReceiptMngr.ReturnToAccept(familyID, receipt);
+                    ReceiptMngr.ReturnReceiptToAccept(familyID, receipt);
                     return Request.CreateResponse(HttpStatusCode.OK);
                 }
                 else

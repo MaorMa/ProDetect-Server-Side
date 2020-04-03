@@ -53,6 +53,10 @@
     <Reference Include="AForge.Math, Version=2.2.5.0, Culture=neutral, PublicKeyToken=abba2e25397ee8c9, processorArchitecture=MSIL">
       <HintPath>..\packages\AForge.Math.2.2.5\lib\AForge.Math.dll</HintPath>
     </Reference>
+    <Reference Include="ExcelDataReader, Version=3.6.0.0, Culture=neutral, PublicKeyToken=93517dbe6a4012fa, processorArchitecture=MSIL">
+      <HintPath>..\packages\ExcelDataReader.3.6.0\lib\net45\ExcelDataReader.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="IronOcr, Version=4.4.0.21181, Culture=neutral, PublicKeyToken=5f366048dc436899, processorArchitecture=MSIL">
       <HintPath>..\packages\IronOcr.4.4.0\lib\net40\IronOcr.dll</HintPath>
       <Private>True</Private>
@@ -129,6 +133,7 @@
       <HintPath>..\packages\System.IdentityModel.Tokens.Jwt.5.5.0\lib\net461\System.IdentityModel.Tokens.Jwt.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.7\lib\net45\System.Net.Http.Formatting.dll</HintPath>
@@ -182,21 +187,19 @@
     <Compile Include="Models\EmailSender.cs" />
     <Compile Include="Models\ImageRecognition\MarkedImageSaver.cs" />
     <Compile Include="Models\ImageRecognition\MarksDrawing.cs" />
-    <Compile Include="Models\ImageRecognition\ocrResult.cs" />
+    <Compile Include="Models\ImageRecognition\OcrProcessing.cs" />
     <Compile Include="Models\JWT\IAuthContainerModel.cs" />
     <Compile Include="Models\JWT\IAuthService.cs" />
     <Compile Include="Models\JWT\JWTContainer.cs" />
     <Compile Include="Models\JWT\JWTService.cs" />
-    <Compile Include="Models\Mangagers\AMngr.cs" />
-    <Compile Include="Models\Mangagers\NutrientMngr.cs" />
-    <Compile Include="Models\Mangagers\PasswordMngr.cs" />
-    <Compile Include="Models\Mangagers\StatisticsMngr.cs" />
-    <Compile Include="Models\Mangagers\UsersMngr.cs" />
-    <Compile Include="Models\Objects\FamilyUploads.cs" />
-    <Compile Include="Models\ImageRecognition\ImageProccessing.cs" />
-    <Compile Include="Models\ImageRecognition\ocrWord.cs" />
-    <Compile Include="Models\Mangagers\TokenMngr.cs" />
-    <Compile Include="Models\Mangagers\ReceiptMngr.cs" />
+    <Compile Include="Models\Managers\NutrientMngr.cs" />
+    <Compile Include="Models\Managers\PasswordMngr.cs" />
+    <Compile Include="Models\Managers\StatisticsMngr.cs" />
+    <Compile Include="Models\Managers\UsersMngr.cs" />
+    <Compile Include="Models\ImageRecognition\PreProcessing.cs" />
+    <Compile Include="Models\ImageRecognition\OcrWord.cs" />
+    <Compile Include="Models\Managers\TokenMngr.cs" />
+    <Compile Include="Models\Managers\ReceiptMngr.cs" />
     <Compile Include="Controllers\ReceiptController.cs" />
     <Compile Include="Controllers\SettingsController.cs" />
     <Compile Include="Global.asax.cs">
@@ -207,11 +210,11 @@
     <Compile Include="Models\Objects\Nutrient.cs" />
     <Compile Include="Models\Objects\Receipt.cs" />
     <Compile Include="Models\Objects\ReceiptToReturn.cs" />
-    <Compile Include="Models\Mangagers\SettingsMngr.cs" />
+    <Compile Include="Models\Managers\SettingsMngr.cs" />
     <Compile Include="Models\Objects\ResearchProduct.cs" />
     <Compile Include="Models\Parsers\ProductDescriptionParser.cs" />
     <Compile Include="Models\StringSimilarityAlgorithms\JaroWinklerDistance.cs" />
-    <Compile Include="Models\Parsers\TextParser.cs" />
+    <Compile Include="Models\Parsers\OcrTextParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

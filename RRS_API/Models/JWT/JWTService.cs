@@ -19,26 +19,7 @@ namespace RRS_API.Models.JWT
             this.secretKey = secretKey;
         }
 
-        public bool IsTokenValid(string token)
-        {
-            if (string.IsNullOrEmpty(token))
-                throw new ArgumentException("Given token is null or empty.");
-
-            TokenValidationParameters tokenValidationParameters = GetTokenValidationParameters();
-
-            JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-            try
-            {
-                ClaimsPrincipal tokenValid = jwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters, out validToken);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        public string generateToken(IAuthContainerModel model)
+        public string GenerateToken(IAuthContainerModel model)
         {
             if (model == null || model.claims == null || model.claims.Length == 0)
                 throw new ArgumentException("Arguments to create token are not valid.");
@@ -46,7 +27,7 @@ namespace RRS_API.Models.JWT
             SecurityTokenDescriptor securityTokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(model.claims),
-                Expires = DateTime.UtcNow.AddMinutes(Convert.ToInt32(model.exprieTime)),
+                Expires = DateTime.UtcNow.AddMinutes(Convert.ToInt32(model.expireTime)),
                 SigningCredentials = new SigningCredentials(GetSymmetricSecurityKey(), model.securityAlgorithm)
             };
 
@@ -73,25 +54,8 @@ namespace RRS_API.Models.JWT
             return new SymmetricSecurityKey(symmetricKey);
         }
 
-        public IEnumerable<Claim> GetTokenClaims(string token)
-        {
-            if (string.IsNullOrEmpty(token))
-                throw new ArgumentException("Given token is null or empty.");
-            TokenValidationParameters tokenValidationParameters = GetTokenValidationParameters();
 
-            JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-            try
-            {
-                ClaimsPrincipal tokenValid = jwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters, out validToken);
-                return tokenValid.Claims;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        public bool isTokenValid(string token)
+        public bool IsTokenValid(string token)
         {
             if (string.IsNullOrEmpty(token))
                 throw new ArgumentException("Given token is null or empty.");

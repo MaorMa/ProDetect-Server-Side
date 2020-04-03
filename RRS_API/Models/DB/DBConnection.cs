@@ -14,11 +14,11 @@ namespace RRS_API.Models
     public class DBConnection
     {
         private SqlConnectionStringBuilder builder;
-        private static DBConnection INSTANCE = new DBConnection();
+        private static DBConnection INSTANCE;
         private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         /*
-         * create connection to azure database
+         * create connection to database
          * implements singelton design pattern
          */
         private DBConnection()
@@ -26,7 +26,7 @@ namespace RRS_API.Models
             try
             {
                 _logger.Debug("Trying to create connection to SQL Server");
-                builder = new SqlConnectionStringBuilder(ConfigurationManager.ConnectionStrings["AzureConnection"].ToString());
+                builder = new SqlConnectionStringBuilder(ConfigurationManager.ConnectionStrings["DBConnection"].ToString());
                 _logger.Info("Succesful connection to SQL Server");
             }
             catch (Exception e)
@@ -36,8 +36,12 @@ namespace RRS_API.Models
             }
         }
 
-        public static DBConnection getInstance()
+        public static DBConnection GetInstance()
         {
+            if(INSTANCE == null)
+            {
+                INSTANCE = new DBConnection();
+            }
             return INSTANCE;
         }
 
@@ -46,7 +50,7 @@ namespace RRS_API.Models
          * return List contains query result
          * seperated by comma 
          */
-        public List<String> SelectQuery(String query)
+        public List<string> SelectQuery(string query)
         {
             //_logger.Debug($"Running select query {query}");
             List<String> result = new List<string>();
@@ -91,7 +95,7 @@ namespace RRS_API.Models
          * change status from 0 to 1 
          * 0 - means need to be approved , 1 - means already approved 
          */
-        public void updateStatus(string FamilyID, string ReceiptID, string status)
+        public void UpdateStatus(string FamilyID, string ReceiptID, string status)
         {
             _logger.Debug($"Updating receipt status, familyID: {FamilyID}, ReceiptID: {ReceiptID}, status: {status}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
@@ -128,7 +132,7 @@ namespace RRS_API.Models
         /*
          * insert data for a given family
          */
-        public void updateFamilyUploads(string selectedFamilyID, string MarketID, string imageName, int status, string UploadTime)
+        public void UpdateFamilyUploads(string selectedFamilyID, string MarketID, string imageName, int status, string UploadTime)
         {
             _logger.Debug($"Updating family uploads, familyID: {selectedFamilyID}, MarketID: {MarketID}, imageName: {imageName} status: {status}, upload time: {UploadTime}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
@@ -165,7 +169,7 @@ namespace RRS_API.Models
             }
         }
 
-        public void insertReceiptData(string familyID, string receiptID, string productID, string productDescription, string productQuantity, string productDescriptionQuantity, string productPrice, double yCoordinate, bool validProduct)
+        public void InsertReceiptData(string familyID, string receiptID, string productID, string productDescription, string productQuantity, string productDescriptionQuantity, string productPrice, double yCoordinate, bool validProduct)
         {
             _logger.Debug($"Inserting receipt data, familyID: {familyID}, receiptID: {receiptID}, productID: {productID}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
@@ -208,7 +212,7 @@ namespace RRS_API.Models
         /*
          * delete products of given receipt
          */
-        public void deleteReceiptData(string receiptID)
+        public void DeleteReceiptData(string receiptID)
         {
             _logger.Debug($"Deleting receipt data, receiptID: {receiptID}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
@@ -244,7 +248,7 @@ namespace RRS_API.Models
         /*
          * delete products of given receipt
          */
-        public void deleteReceiptFromFamily(string receiptID)
+        public void DeleteFamilyReceipt(string receiptID)
         {
             _logger.Debug($"Deleting receipt from family, receiptID: {receiptID}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
@@ -277,10 +281,10 @@ namespace RRS_API.Models
             }
         }
 
-        /**
-         * Before inderting the chosen product, delete all optional products
+        /*
+         * delete all optional Data
          */
-        public void deleteOptionalData(string marketId, string productID, string sID)
+        public void DeleteOptionalData(string marketId, string productID)
         {
             _logger.Debug($"Deleting optional data, marketID:{marketId} productID: {productID}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
@@ -293,10 +297,9 @@ namespace RRS_API.Models
                 {
                     command.Connection = connection;
                     command.CommandType = CommandType.Text;
-                    command.CommandText = "DELETE FROM OptionalProducts WHERE MarketID = @MarketID AND ProductID = @ProductID AND NOT SID = @SID";
+                    command.CommandText = "DELETE FROM OptionalProducts WHERE MarketID = @MarketID AND ProductID = @ProductID";
                     command.Parameters.AddWithValue("@MarketID", marketId);
                     command.Parameters.AddWithValue("@ProductID", productID);
-                    command.Parameters.AddWithValue("@SID", sID);
                     try
                     {
                         command.ExecuteNonQuery();
@@ -315,7 +318,7 @@ namespace RRS_API.Models
             }
         }
 
-        public string getSaltValue(string username)
+        public string GetSaltValue(string username)
         {
             _logger.Debug($"Getting salt value, username: {username}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
@@ -355,7 +358,8 @@ namespace RRS_API.Models
                 }
             }
         }
-        public bool checkedUsernameAndPassword(string username, string password)
+
+        public bool CheckUsernameAndPassword(string username, string password)
         {
             _logger.Debug($"Checking username and password, username: {username}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
@@ -401,7 +405,7 @@ namespace RRS_API.Models
             }
         }
 
-        public string getGroupID(string username)
+        public string GetGroupID(string username)
         {
             _logger.Debug($"Getting groupId, username: {username}");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
@@ -442,7 +446,7 @@ namespace RRS_API.Models
             }
         }
 
-        public List<string> getFamilies()
+        public List<string> GetFamilies()
         {
             _logger.Debug($"Getting families");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
@@ -455,7 +459,7 @@ namespace RRS_API.Models
                 {
                     command.Connection = connection;
                     command.CommandType = CommandType.Text;
-                    command.CommandText = "SELECT DISTINCT UserName FROM AuthorizedUsers";
+                    command.CommandText = "SELECT UserName FROM AuthorizedUsers";
                     try
                     {
                         List<string> Families = new List<string>();
@@ -482,7 +486,7 @@ namespace RRS_API.Models
             }
         }
 
-        public List<string> getFamiliesWithApprovedData()
+        public List<string> GetFamiliesWithApprovedData()
         {
             _logger.Debug($"Getting families");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
@@ -559,7 +563,7 @@ namespace RRS_API.Models
         }
 
 
-        public Dictionary<string, string> getSimiliarProductNames(string productName)
+        public Dictionary<string, string> GetSimiliarProductNames(string productName)
         {
             _logger.Debug($"Getting SimiliarProductNames");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
@@ -572,7 +576,8 @@ namespace RRS_API.Models
                 {
                     command.Connection = connection;
                     command.CommandType = CommandType.Text;
-                    command.CommandText = "SELECT SID, Description FROM Nutrients WHERE Description LIKE N'%" + productName + " %' OR Description LIKE N'%" + productName + "%' OR Description=N'" + productName + "'";
+                    command.CommandText = "SELECT SID, Description FROM Nutrients WHERE Description LIKE N'%' + @Description + ' %' OR Description LIKE N'%' + @Description + '%' OR Description=N' + @Description + '";
+                    command.Parameters.AddWithValue("@Description", productName);
                     try
                     {
                         Dictionary<string, string> similiarProductNames = new Dictionary<string, string>();
@@ -580,8 +585,7 @@ namespace RRS_API.Models
                         {
                             while (reader.Read())
                             {
-                                //var i0 = reader[0];
-                                //var i1 = reader[1];
+
                                 if (!similiarProductNames.ContainsKey(reader[0].ToString()))
                                     similiarProductNames.Add(reader[0].ToString(), reader[1].ToString());
                             }
@@ -607,10 +611,10 @@ namespace RRS_API.Models
         * Insert top 5 similar products to OptionalProducts table
         */
         //public void insertOptionalProducts(string productId, string SID, string OptionalName)
-        public void insertOptionalProducts(string marketId, string productId, List<ResearchProduct> optionalProducts)
+        public void InsertOptionalProducts(string marketId, string productId, List<ResearchProduct> optionalProducts)
         {
             _logger.Debug($"Inserting optional products for ProductId: {productId}");
-            if (productExistsInOptionalProducts(marketId, productId))
+            if (ProductExistsInOptionalProducts(marketId, productId))
                 return;
             foreach (ResearchProduct rp in optionalProducts)
             {
@@ -646,10 +650,164 @@ namespace RRS_API.Models
             }
         }
 
+        public void InsertOptionalProduct(string marketId, string productId, ResearchProduct optionalProduct)
+        {
+            _logger.Debug($"Inserting optional products for ProductId: {productId}");
+            if (ProductExistsInOptionalProducts(marketId, productId))
+                return;
+            using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+            {
+                if (!(connection.State == System.Data.ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = CommandType.Text;
+
+                    command.CommandText = "INSERT into OptionalProducts(MarketID, ProductID, SID, OptionalName, Similarity) VALUES(@MarketID, @ProductID, @SID, @OptionalName, @Similarity)";
+                    command.Parameters.AddWithValue("@MarketID", marketId);
+                    command.Parameters.AddWithValue("@ProductID", productId);
+                    command.Parameters.AddWithValue("@SID", optionalProduct.sID);
+                    command.Parameters.AddWithValue("@OptionalName", optionalProduct.name);
+                    command.Parameters.AddWithValue("@Similarity", optionalProduct.similarity);
+                    try
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    catch (Exception sqlException)
+                    {
+                        connection.Close();
+                        throw new Exception("526", sqlException);
+                    }
+                }
+                connection.Close();
+            }
+        }
+
+
+        //delete old nutrients data
+        public void DeleteNutrientsData()
+        {
+            using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+            {
+                if (!(connection.State == System.Data.ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = "DELETE FROM Test";
+                    try
+                    {
+                        command.ExecuteNonQuery();
+                        _logger.Info($"Succesful Deleting Nutrients");
+                    }
+                    catch (Exception sqlException)
+                    {
+                        _logger.Debug($"Error while Deleting Nutrients", sqlException);
+                        throw new Exception("671", sqlException);
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+        }
+
+        //insert new nutrient
+        public void InsertNewNutrient(string foodCode,string foodName, string nutrients)
+        {
+            using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+            {
+                if (!(connection.State == System.Data.ConnectionState.Open))
+                {
+                    connection.Open();
+                }
+                using (SqlCommand command = new SqlCommand())
+                {
+                    command.Connection = connection;
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = "INSERT into Test(SID, Description, nut203, nut204,nut205,nut208,nut221,nut255,nut291,nut301,nut303,nut304,nut305,nut306,nut307,nut309,nut312,nut318,nut320,nut321,nut323,nut401,nut404,nut405,nut406,nut415,nut417,nut418,nut601,nut606,nut607,nut608,nut609,nut610,nut611,nut612,nut613,nut614,nut617,nut618,nut619,nut620,nut621,nut622,nut623,nut628,nut625,nut630,nut631,nut645,nut646,nut324,nut269,nut605) VALUES(@SID, @Description,@nut203, @nut204,@nut205,@nut208,@nut221,@nut255,@nut291,@nut301,@nut303,@nut304,@nut305,@nut306,@nut307,@nut309,@nut312,@nut318,@nut320,@nut321,@nut323,@nut401,@nut404,@nut405,@nut406,@nut415,@nut417,@nut418,@nut601,@nut606,@nut607,@nut608,@nut609,@nut610,@nut611,@nut612,@nut613,@nut614,@nut617,@nut618,@nut619,@nut620,@nut621,@nut622,@nut623,@nut628,@nut625,@nut630,@nut631,@nut645,@nut646,@nut324,@nut269,@nut605)";
+                    string[] splittedLine = nutrients.Split(',');
+                    command.Parameters.AddWithValue("@SID", foodCode);
+                    command.Parameters.AddWithValue("@Description", foodName);
+                    command.Parameters.AddWithValue("@nut203", splittedLine[0]);
+                    command.Parameters.AddWithValue("@nut204", splittedLine[1]);
+                    command.Parameters.AddWithValue("@nut205", splittedLine[2]);
+                    command.Parameters.AddWithValue("@nut208", splittedLine[3]);
+                    command.Parameters.AddWithValue("@nut221", splittedLine[4]);
+                    command.Parameters.AddWithValue("@nut255", splittedLine[5]);
+                    command.Parameters.AddWithValue("@nut291", splittedLine[6]);
+                    command.Parameters.AddWithValue("@nut301", splittedLine[7]);
+                    command.Parameters.AddWithValue("@nut303", splittedLine[8]);
+                    command.Parameters.AddWithValue("@nut304", splittedLine[9]);
+                    command.Parameters.AddWithValue("@nut305", splittedLine[10]);
+                    command.Parameters.AddWithValue("@nut306", splittedLine[11]);
+                    command.Parameters.AddWithValue("@nut307", splittedLine[12]);
+                    command.Parameters.AddWithValue("@nut309", splittedLine[13]);
+                    command.Parameters.AddWithValue("@nut312", splittedLine[14]);
+                    command.Parameters.AddWithValue("@nut318", splittedLine[15]);
+                    command.Parameters.AddWithValue("@nut320", splittedLine[16]);
+                    command.Parameters.AddWithValue("@nut321", splittedLine[17]);
+                    command.Parameters.AddWithValue("@nut323", splittedLine[18]);
+                    command.Parameters.AddWithValue("@nut401", splittedLine[19]);
+                    command.Parameters.AddWithValue("@nut404", splittedLine[20]);
+                    command.Parameters.AddWithValue("@nut405", splittedLine[21]);
+                    command.Parameters.AddWithValue("@nut406", splittedLine[22]);
+                    command.Parameters.AddWithValue("@nut415", splittedLine[23]);
+                    command.Parameters.AddWithValue("@nut417", splittedLine[24]);
+                    command.Parameters.AddWithValue("@nut418", splittedLine[25]);
+                    command.Parameters.AddWithValue("@nut601", splittedLine[26]);
+                    command.Parameters.AddWithValue("@nut606", splittedLine[27]);
+                    command.Parameters.AddWithValue("@nut607", splittedLine[28]);
+                    command.Parameters.AddWithValue("@nut608", splittedLine[29]);
+                    command.Parameters.AddWithValue("@nut609", splittedLine[30]);
+                    command.Parameters.AddWithValue("@nut610", splittedLine[31]);
+                    command.Parameters.AddWithValue("@nut611", splittedLine[32]);
+                    command.Parameters.AddWithValue("@nut612", splittedLine[33]);
+                    command.Parameters.AddWithValue("@nut613", splittedLine[34]);
+                    command.Parameters.AddWithValue("@nut614", splittedLine[35]);
+                    command.Parameters.AddWithValue("@nut617", splittedLine[36]);
+                    command.Parameters.AddWithValue("@nut618", splittedLine[37]);
+                    command.Parameters.AddWithValue("@nut619", splittedLine[38]);
+                    command.Parameters.AddWithValue("@nut620", splittedLine[39]);
+                    command.Parameters.AddWithValue("@nut621", splittedLine[40]);
+                    command.Parameters.AddWithValue("@nut622", splittedLine[41]);
+                    command.Parameters.AddWithValue("@nut623", splittedLine[42]);
+                    command.Parameters.AddWithValue("@nut628", splittedLine[43]);
+                    command.Parameters.AddWithValue("@nut625", splittedLine[44]);
+                    command.Parameters.AddWithValue("@nut630", splittedLine[45]);
+                    command.Parameters.AddWithValue("@nut631", splittedLine[46]);
+                    command.Parameters.AddWithValue("@nut645", splittedLine[47]);
+                    command.Parameters.AddWithValue("@nut646", splittedLine[48]);
+                    command.Parameters.AddWithValue("@nut324", splittedLine[49]);
+                    command.Parameters.AddWithValue("@nut269", splittedLine[50]);
+                    command.Parameters.AddWithValue("@nut605", splittedLine[51]);
+                    try
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    catch (Exception exception)
+                    {
+                        throw new Exception("724", exception);
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+        }
+
         /*
          * Checks if product already exists in OptionalProducts table (was already selected in the past)
          */
-        private bool productExistsInOptionalProducts(string marketId, string productId)
+        private bool ProductExistsInOptionalProducts(string marketId, string productId)
         {
             _logger.Debug($"Checking if productId: {productId} exists in OptionalProducts");
             using (SqlConnection connection = new SqlConnection(builder.ConnectionString))

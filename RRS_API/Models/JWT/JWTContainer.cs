@@ -10,7 +10,7 @@ namespace RRS_API.Models.JWT
             get; set;
         }
 
-        public int exprieTime
+        public int expireTime
         {
             get; set;
         } = 1440;

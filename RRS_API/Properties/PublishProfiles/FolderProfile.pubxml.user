@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
 This file is used by the publish/package process of your Web project. You can customize the behavior of this process
 by editing this MSBuild file. In order to learn more about this please visit https://go.microsoft.com/fwlink/?LinkID=208121. 
@@ -6,7 +6,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <TimeStampOfAssociatedLegacyPublishXmlFile />
-    <_PublishTargetUrl>C:\RR\RRS-SERVER\RRS_API\bin\Release\Publish</_PublishTargetUrl>
+    <_PublishTargetUrl>C:\Users\Maor\Desktop\DeployLastWorking\Backend 18.12\RRS-SERVER\RRS_API\bin\Release\Publish</_PublishTargetUrl>
   </PropertyGroup>
   <ItemGroup>
     <File Include="ApplicationInsights.config">
@@ -38,6 +38,9 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     </File>
     <File Include="bin/es/ZedGraph.resources.dll">
       <publishTime>09/19/2015 15:28:04</publishTime>
+    </File>
+    <File Include="bin/ExcelDataReader.dll">
+      <publishTime>05/02/2019 04:39:52</publishTime>
     </File>
     <File Include="bin/fr/ZedGraph.resources.dll">
       <publishTime>09/19/2015 15:28:04</publishTime>
@@ -145,7 +148,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>10/30/2019 07:22:38</publishTime>
     </File>
     <File Include="bin/RRS_API.dll">
-      <publishTime>11/19/2019 19:00:06</publishTime>
+      <publishTime>04/01/2020 18:43:02</publishTime>
     </File>
     <File Include="bin/RRS_API.pdb">
       <publishTime>11/19/2019 19:00:06</publishTime>
@@ -238,10 +241,10 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>10/30/2019 07:22:32</publishTime>
     </File>
     <File Include="packages.config">
-      <publishTime>11/13/2019 14:56:22</publishTime>
+      <publishTime>02/19/2020 18:08:24</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>11/13/2019 15:04:01</publishTime>
+      <publishTime>04/01/2020 18:46:01</publishTime>
     </File>
   </ItemGroup>
 </Project>

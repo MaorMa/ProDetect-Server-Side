@@ -4,99 +4,104 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
+
+//This class represents receipt object
 public class Receipt
 {
+    //Fields
+    private string name;
     private int width;
     private int height;
-    private string name;
     private string date;
     private double xAverage;
     private double yAverage;
-    private Dictionary<String, List<ocrWord>> words;
-    private Dictionary<String, List<MetaData>> idToMetadata;
-    private List<String> rows;
-    private Image ManipulatedImage;
-    private Image OriginalImage;
+    private Dictionary<string, List<OcrWord>> words;
+    private Dictionary<string, List<MetaData>> idToMetadata;
+    private List<string> rows;
+    private Image manipulatedImage;
+    private Image originalImage;
     private string marketID;
 
-    public Receipt(int width, int height, string name, Image ManipulatedImage, Image OriginalImage)
+    //C'tor
+    public Receipt(int width, int height, string name, Image manipulatedImage, Image originalImage)
     {
         this.width = width;
         this.height = height;
         this.name = name;
-        this.words = new Dictionary<String, List<ocrWord>>();
-        this.idToMetadata = new Dictionary<String, List<MetaData>>();
-        this.ManipulatedImage = ManipulatedImage;
-        this.OriginalImage = OriginalImage;
+        this.words = new Dictionary<string, List<OcrWord>>();
+        this.idToMetadata = new Dictionary<string, List<MetaData>>();
+        this.manipulatedImage = manipulatedImage;
+        this.originalImage = originalImage;
         this.rows = new List<string>();
     }
 
-    public void setAverageCoordinates(double xAverage, double yAverage)
+    //Setters and Getters
+    public void SetAverageCoordinates(double xAverage, double yAverage)
     {
         this.xAverage = xAverage;
         this.yAverage = yAverage;
     }
 
-    public string getMarketID()
+    public string GetMarketID()
     {
         return this.marketID;
     }
 
-    public void setMarketID(string marketID)
+    public void SetMarketID(string marketID)
     {
         this.marketID = marketID;
     }
 
-    public double getXAverage()
+    public double GetXAverage()
     {
         return this.xAverage;
     }
 
-    public double getYAverage()
+    public double GetYAverage()
     {
         return this.yAverage;
     }
 
-    public void addWord(ocrWord word)
+    public void AddWord(OcrWord word)
     {
         if (!words.Keys.Contains(word.getText()))
         {
-            this.words[word.getText()] = new List<ocrWord>();
+            this.words[word.getText()] = new List<OcrWord>();
         }
         this.words[word.getText()].Add(word);
     }
 
-    public void addRow(string rows)
+    public void AddRow(string rows)
     {
         this.rows.Add(rows);
     }
 
-    public List<ocrWord> getWord(String word)
+    public List<OcrWord> GetWord(string word)
     {
         return words[word];
     }
 
-    public List<String> getRows()
+    public List<string> getRows()
     {
         return rows;
     }
 
-    public Dictionary<String, List<ocrWord>> getWordsList()
+    public Dictionary<string, List<OcrWord>> GetWordsList()
     {
         return this.words;
     }
 
-    public int getHeight()
+    public int GetHeight()
     {
         return this.height;
     }
 
-    public int getWidth()
+    public int GetWidth()
     {
         return this.width;
     }
 
-    public void setDate(string date)
+    public void SetDate(string date)
     {
         this.date = date;
     }
@@ -105,27 +110,27 @@ public class Receipt
         return this.date;
     }
 
-    public Dictionary<String, List<MetaData>> getIdToMetadata()
+    public Dictionary<string, List<MetaData>> GetIdToMetadata()
     {
         return this.idToMetadata;
     }
 
-    public void setIdToMetadata(Dictionary<String, List<MetaData>> idToMetadata)
+    public void SetIdToMetadata(Dictionary<string, List<MetaData>> idToMetadata)
     {
         this.idToMetadata = idToMetadata;
     }
 
-    public Image getOriginalImage()
+    public Image GetOriginalImage()
     {
-        return this.OriginalImage;
+        return this.originalImage;
     }
 
-    public Image getManipulatedImage()
+    public Image GetManipulatedImage()
     {
-        return this.ManipulatedImage;
+        return this.manipulatedImage;
     }
 
-    public String getName()
+    public string GetName()
     {
         return this.name;
     }

@@ -8,9 +8,11 @@ namespace RRS_API.Models.StringSimilarityAlgorithms
 {
     public class JaroWinklerDistance
     {
-        protected DBConnection DBConnection = DBConnection.getInstance();
-        protected HashSet<string> wordsToIgnoreInProductDesc = new HashSet<string>();
+        //Fields
+        private DBConnection DBConnection = DBConnection.GetInstance();
+        private HashSet<string> wordsToIgnoreInProductDesc = new HashSet<string>();
 
+        //C'tor
         public JaroWinklerDistance()
         {
             this.wordsToIgnoreInProductDesc.Add("גרם");
@@ -24,18 +26,12 @@ namespace RRS_API.Models.StringSimilarityAlgorithms
             this.wordsToIgnoreInProductDesc.Add("יח'");
             this.wordsToIgnoreInProductDesc.Add("יחידה");
             this.wordsToIgnoreInProductDesc.Add("ק\"ג");
+            this.wordsToIgnoreInProductDesc.Add("חצי");
         }
-        private readonly double mWeightThreshold = 0.7;
 
-        /* Size of the prefix to be concidered by the Winkler modification. 
-         * Winkler's paper used a default value of 4
-         */
-        private readonly int mNumChars = 4;
 
-        /*
-         * Return top 5 similar products (List of ResearchProduct objects) to productName
-         */
-        public List<ResearchProduct> getTopFiveSimilarProducts(string productName)
+        // Return top 5 similar products (List of ResearchProduct objects) to productName
+        public List<ResearchProduct> GetTopFiveSimilarProducts(string productName)
         {
             string[] words = productName.Split(' ', '.', '-');
             List<string> newProductName = new List<string>();
@@ -52,27 +48,34 @@ namespace RRS_API.Models.StringSimilarityAlgorithms
                 secondWord = words[1];
             }
             //Dictionary<ResearchProduct, double> topProductDic = new Dictionary<ResearchProduct, double>();
-            HashSet<ResearchProduct> topProductSet= new HashSet<ResearchProduct>();
+            HashSet<ResearchProduct> topProductSet = new HashSet<ResearchProduct>();
             foreach (string word in newProductName)
             {
                 if (this.wordsToIgnoreInProductDesc.Contains(word))
                     continue;
-                Dictionary<string, string> similarProducts = DBConnection.getSimiliarProductNames(word);
+                Dictionary<string, string> similarProducts = DBConnection.GetSimiliarProductNames(word);
+                if (similarProducts.Count == 0)
+                {
+                    if (word.Length > 4)
+                    {
+                        similarProducts = DBConnection.GetSimiliarProductNames(word.Substring(0, word.Length - 2));
+                    }
+                }
                 foreach (KeyValuePair<string, string> entry in similarProducts)
                 {
                     double bonus = 0;
-                    if (checkIfContainsWord(entry.Value,firstWord) || checkIfContainsWord(entry.Value, secondWord))
+                    if (CheckIfContainsWord(entry.Value,firstWord) || CheckIfContainsWord(entry.Value, secondWord))
                     {
-                        if (checkIfContainsWord(entry.Value, firstWord))
+                        if (CheckIfContainsWord(entry.Value, firstWord))
                         {
                             bonus += 0.3;
                         }
 
-                        if (!secondWord.Equals("") && checkIfContainsWord(entry.Value, secondWord))
+                        if (!secondWord.Equals("") && CheckIfContainsWord(entry.Value, secondWord))
                         {
                             bonus += 0.2;
                         }
-                        double similarity = jaroWinklerDistance(productName, entry.Value) + bonus;
+                        double similarity = CalculateSimilarity(productName, entry.Value) + bonus;
                         var rp = new ResearchProduct(entry.Key, entry.Value, similarity+"");
                         if (topProductSet.Contains(rp) || similarity < 0.55)
                             continue;
@@ -83,38 +86,25 @@ namespace RRS_API.Models.StringSimilarityAlgorithms
             List<ResearchProduct> topProductList = topProductSet.ToList();
             topProductList.Sort((element1,element2) => Double.Parse(element2.similarity).CompareTo(Double.Parse(element1.similarity)));
             List<ResearchProduct> toReturn = new List<ResearchProduct>();
-            for (int i = 0; i < Math.Min(5, topProductList.Count); i++)
+            for (int i = 0; i < Math.Min(10, topProductList.Count); i++)
             {
                 toReturn.Add(topProductList.ElementAt(i));
             }
             return toReturn;
         }
 
-
-        private bool checkIfContainsWord(string value,string word)
+        // Check if value contains word 
+        private bool CheckIfContainsWord(string value,string word)
         {
-            /*
-            string[] seperated = value.Split(' ');
-            foreach(string s in seperated)
-            {
-                if (s.Equals(word))
-                {
-                    return true;
-                }
-            }
-            return false;
-            */
             return value.Contains(word);
         }
 
-
-        public double jaroWinklerDistance(string string1, string string2)
+        // Implementation of JaroWinkler algorithm
+        private double CalculateSimilarity(string firstString, string secondString)
         {
-            return proximity(string1, string2);
-        }
+            double mWeightThreshold = 0.7;
+            int mNumChars = 4;
 
-        public double proximity(string firstString, string secondString)
-        {
             //get length of strings
             int firstStringLength = firstString.Length;
             int secondStringLength = secondString.Length;

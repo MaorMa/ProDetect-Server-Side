@@ -3,11 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Reflection;
+using log4net;
+
 
 namespace RRS_API.Models.JWT
 {
     public class JWTService : IAuthService
     {
+        private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         SecurityToken validToken;
         public string secretKey
         {

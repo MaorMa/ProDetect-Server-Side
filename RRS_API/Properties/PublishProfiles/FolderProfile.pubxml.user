@@ -6,7 +6,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <TimeStampOfAssociatedLegacyPublishXmlFile />
-    <_PublishTargetUrl>C:\Users\Maor\Desktop\DeployLastWorking\Backend 18.12\RRS-SERVER\RRS_API\bin\Release\Publish</_PublishTargetUrl>
+    <_PublishTargetUrl>C:\Users\Maor\Desktop\FinalProject\28.04.20\RRS-SERVER\RRS_API\bin\Release\Publish</_PublishTargetUrl>
   </PropertyGroup>
   <ItemGroup>
     <File Include="ApplicationInsights.config">
@@ -148,7 +148,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>10/30/2019 07:22:38</publishTime>
     </File>
     <File Include="bin/RRS_API.dll">
-      <publishTime>04/01/2020 18:43:02</publishTime>
+      <publishTime>05/07/2020 10:26:29</publishTime>
     </File>
     <File Include="bin/RRS_API.pdb">
       <publishTime>11/19/2019 19:00:06</publishTime>
@@ -244,7 +244,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/19/2020 18:08:24</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>04/01/2020 18:46:01</publishTime>
+      <publishTime>04/30/2020 00:45:23</publishTime>
     </File>
   </ItemGroup>
 </Project>

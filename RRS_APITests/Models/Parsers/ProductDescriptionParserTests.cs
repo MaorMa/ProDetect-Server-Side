@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 
 namespace RRS_API.Models.Parsers.Tests
 {
@@ -15,6 +16,7 @@ namespace RRS_API.Models.Parsers.Tests
         public void GetQuantityFromDescriptionGramsTest()
         {
             ProductDescriptionParser pdp = new ProductDescriptionParser();
+            
             Assert.AreEqual(pdp.GetQuantityFromDescription("200 גרם"), "200");
             Assert.AreEqual(pdp.GetQuantityFromDescription("200 ג"), "200");
             Assert.AreEqual(pdp.GetQuantityFromDescription("200 גר"), "200");
@@ -33,14 +35,14 @@ namespace RRS_API.Models.Parsers.Tests
             Assert.AreEqual(pdp.GetQuantityFromDescription("עוגת בראוניס כשלפ430גרם"), "430");
             Assert.AreEqual(pdp.GetQuantityFromDescription("חטיפי טוויקס 4+1 50*5ג	"), "250");
             Assert.AreEqual(pdp.GetQuantityFromDescription("גבינה עיזים גדעז 20% גד (180 גרם)"), "180");
-
-
         }
 
         [TestMethod()]
         public void GetQuantityFromDescriptionKGTest()
         {
             ProductDescriptionParser pdp = new ProductDescriptionParser();
+            Assert.AreEqual(pdp.GetQuantityFromDescription("מלח מטבח גס ארזינא (1 קג)פיקוח"), "1000");
+            Assert.AreEqual(pdp.GetQuantityFromDescription("1 ק\"ג"), "1000");
             Assert.AreEqual(pdp.GetQuantityFromDescription("1 ק\"ג"), "1000");
             Assert.AreEqual(pdp.GetQuantityFromDescription("1 ק`ג"), "1000");
             Assert.AreEqual(pdp.GetQuantityFromDescription("1ק\"ג"), "1000");
@@ -64,11 +66,17 @@ namespace RRS_API.Models.Parsers.Tests
             Assert.AreEqual(pdp.GetQuantityFromDescription("4 יח`"), "400");
         }
 
+
         [TestMethod()]
         public void GetQuantityFromDescriptionMLTest()
         {
             ProductDescriptionParser pdp = new ProductDescriptionParser();
+            Assert.AreEqual(pdp.GetQuantityFromDescription("ביצים 15*60 גרם"), "900");
+            Assert.AreEqual(pdp.GetQuantityFromDescription("שמנת חמוצה 15% מהדרין תנובה (200 מל)"), "200");
+            Assert.AreEqual(pdp.GetQuantityFromDescription("מים מינרלים עין גדי (2x6 ליטר)"), "12000");
+            Assert.AreEqual(pdp.GetQuantityFromDescription("ערק 40% 700 מל"), "700");
             Assert.AreEqual(pdp.GetQuantityFromDescription("100 מ\"ל"), "100");
+            Assert.AreEqual(pdp.GetQuantityFromDescription("טובורג רד שישייה 6*330 מל"), "1980");
             Assert.AreEqual(pdp.GetQuantityFromDescription("100 מל"), "100");
             Assert.AreEqual(pdp.GetQuantityFromDescription("שמנת לקצפת השף 250 מל 32 % *"), "250");
             Assert.AreEqual(pdp.GetQuantityFromDescription("לחם שיפון פרוס כפרי אחדות (750 גרם)"), "750");
@@ -78,6 +86,7 @@ namespace RRS_API.Models.Parsers.Tests
             Assert.AreEqual(pdp.GetQuantityFromDescription("1 ל"), "1000");
             Assert.AreEqual(pdp.GetQuantityFromDescription("1 ל'"), "1000");
             Assert.AreEqual(pdp.GetQuantityFromDescription("1 ל`"), "1000");
+            Assert.AreEqual(pdp.GetQuantityFromDescription("מים מינרלים עין גדי (2x6 ליטר)"), "12000");
             Assert.AreEqual(pdp.GetQuantityFromDescription("1ליטר"), "1000");
             Assert.AreEqual(pdp.GetQuantityFromDescription("1ל'"), "1000");
             Assert.AreEqual(pdp.GetQuantityFromDescription("1ל`"), "1000");

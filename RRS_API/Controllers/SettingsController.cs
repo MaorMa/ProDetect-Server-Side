@@ -39,6 +39,8 @@ namespace RRS_API.Controllers
                 //if token valid
                 if (UsersMngr.IsUserTokenValid(token))
                 {
+                    string username = UsersMngr.getUsernameByToken(token);
+                    _logger.Info($"USER:{username}     |ACTION: GetFamilies     |NAVIGATION: Receipts Upload Page");
                     //if global admin
                     if (UsersMngr.IsGlobalAdmin(token))
                     {
@@ -47,12 +49,9 @@ namespace RRS_API.Controllers
                     //user
                     else
                     {
-                        var jwtToken = new JwtSecurityToken(token);
-                        object username = "";
-                        jwtToken.Payload.TryGetValue("unique_name", out username);
                         Families.Add(username.ToString());
                     }
-                    _logger.Debug("[Navigate to: Upload Receipt Page]");
+                    //_logger.Debug("[Navigate to: Upload Receipt Page]");
                     return Request.CreateResponse(HttpStatusCode.OK, Families);
                 }
                 else

@@ -8,10 +8,19 @@ using System.Web;
 
 namespace RRS_API.Models.ImageRecognition
 {
+    /// <summary>
+    /// This class responsible for saving the marked image in server. (images folder)
+    /// </summary>
     public class MarkedImageSaver
     {
         private string MarkedImagesPath = System.Web.HttpContext.Current.Server.MapPath("~/Images/");
 
+        /// <summary>
+        /// This method save marked image in the server.
+        /// using toStream auxilary method.
+        /// </summary>
+        /// <param name="receipt"></param>
+        /// <param name="selectedFamilyID"></param>
         public void SaveMarkedImage(Receipt receipt, string selectedFamilyID)
         {
             Image markedImage = receipt.GetOriginalImage();
@@ -30,7 +39,12 @@ namespace RRS_API.Models.ImageRecognition
             bm.Save(path + "\\" + receipt.GetName());
         }
 
-        //move to another class
+        /// <summary>
+        /// This method create stream from image object.
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="format"></param>
+        /// <returns></returns>
         private Stream ToStream(Image image, ImageFormat format)
         {
             var stream = new System.IO.MemoryStream();

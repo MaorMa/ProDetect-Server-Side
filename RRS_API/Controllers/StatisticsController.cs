@@ -26,12 +26,13 @@ namespace RRS_API.Controllers
         {
             try
             {
-                _logger.Debug("[Navigate to: Statistics Page. GetAllPricesByCategories]");
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Headers["Authorization"];
                 //if token valid
                 if (UsersMngr.IsUserTokenValid(token))
                 {
+                    string username = UsersMngr.getUsernameByToken(token);
+                    _logger.Info($"USER:{username}     |ACTION: GetAllPricesByCategories     |NAVIGATION: Statistics Page");
                     return Request.CreateResponse(HttpStatusCode.OK, StatisticsMngr.GetAllPricesByCategories(familyID));   
                 }
                 else
@@ -52,13 +53,14 @@ namespace RRS_API.Controllers
         {
             try
             {
-                _logger.Debug("[Navigate to: Statistics Page. GetAllQuantitiesByCategories]");
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Headers["Authorization"];
                 //if token valid
                 //TokenMngr.isTokenValid(token)
                 if (UsersMngr.IsUserTokenValid(token))
                 {
+                    string username = UsersMngr.getUsernameByToken(token);
+                    _logger.Info($"USER:{username}     |ACTION: GetAllQuantitiesByCategories     |NAVIGATION: Statistics Page");
                     return Request.CreateResponse(HttpStatusCode.OK, StatisticsMngr.GetAllQuantitiesByCategories(familyID));
                 }
                 else
@@ -78,12 +80,13 @@ namespace RRS_API.Controllers
         {
             try
             {
-                _logger.Debug("[Navigate to: Statistics Page. GetCompareByCost]");
                 var httpRequest = HttpContext.Current.Request;
                 string token = httpRequest.Headers["Authorization"];
                 //if token valid
                 if (UsersMngr.IsUserTokenValid(token))
                 {
+                    string username = UsersMngr.getUsernameByToken(token);
+                    _logger.Info($"USER:{username}     |ACTION: GetCompareByCost     |NAVIGATION: Statistics Page");
                     return Request.CreateResponse(HttpStatusCode.OK, StatisticsMngr.GetCompareByCost(familyID));
                 }
                 else

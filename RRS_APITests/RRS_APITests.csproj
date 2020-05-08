@@ -36,7 +36,25 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.IdentityModel.JsonWebTokens, Version=6.5.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.JsonWebTokens.6.5.1\lib\net461\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Logging, Version=6.5.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.Logging.6.5.1\lib\net461\Microsoft.IdentityModel.Logging.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Tokens, Version=6.5.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.Tokens.6.5.1\lib\net461\Microsoft.IdentityModel.Tokens.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=6.5.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IdentityModel.Tokens.Jwt.6.5.1\lib\net461\System.IdentityModel.Tokens.Jwt.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -51,6 +69,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Models\DB\DBConnectionTests.cs" />
+    <Compile Include="Models\ImageRecognition\OcrProcessingTests.cs" />
+    <Compile Include="Models\JWT\JWTServiceTests.cs" />
+    <Compile Include="Models\Managers\ReceiptMngrTests.cs" />
+    <Compile Include="Models\Managers\SettingsMngrTests.cs" />
+    <Compile Include="Models\Managers\UsersMngrTests.cs" />
+    <Compile Include="Models\Parsers\OcrTextParserTests.cs" />
     <Compile Include="Models\Parsers\ProductDescriptionParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -59,6 +84,10 @@
       <Project>{CE1AE8B2-2229-40E8-9EAE-8806844ACE74}</Project>
       <Name>RRS_API</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

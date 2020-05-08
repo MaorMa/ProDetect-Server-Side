@@ -5,7 +5,10 @@ using System.Web;
 
 namespace RRS_API.Models.Objects
 {
-    //This class represent nutrient, each nutrient contains code and value
+    /// <summary>
+    /// This class represent nutrient, each nutrient contains code and value
+    /// </summary>
+    /// 
     public class Nutrient
     {
         private string code;

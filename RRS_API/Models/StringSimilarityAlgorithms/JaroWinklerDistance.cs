@@ -6,6 +6,9 @@ using System.Web;
 
 namespace RRS_API.Models.StringSimilarityAlgorithms
 {
+    /// <summary>
+    /// This class responsilbe for find the similarity between strings using Jaro winkler algorithm.
+    /// </summary>
     public class JaroWinklerDistance
     {
         //Fields
@@ -29,8 +32,11 @@ namespace RRS_API.Models.StringSimilarityAlgorithms
             this.wordsToIgnoreInProductDesc.Add("חצי");
         }
 
-
-        // Return top 5 similar products (List of ResearchProduct objects) to productName
+        /// <summary>
+        /// This method return top 6 similar products (List of ResearchProduct objects) to productName.
+        /// </summary>
+        /// <param name="productName"></param>
+        /// <returns></returns>
         public List<ResearchProduct> GetTopFiveSimilarProducts(string productName)
         {
             string[] words = productName.Split(' ', '.', '-');
@@ -86,7 +92,7 @@ namespace RRS_API.Models.StringSimilarityAlgorithms
             List<ResearchProduct> topProductList = topProductSet.ToList();
             topProductList.Sort((element1,element2) => Double.Parse(element2.similarity).CompareTo(Double.Parse(element1.similarity)));
             List<ResearchProduct> toReturn = new List<ResearchProduct>();
-            for (int i = 0; i < Math.Min(10, topProductList.Count); i++)
+            for (int i = 0; i < Math.Min(6, topProductList.Count); i++)
             {
                 toReturn.Add(topProductList.ElementAt(i));
             }
@@ -99,7 +105,12 @@ namespace RRS_API.Models.StringSimilarityAlgorithms
             return value.Contains(word);
         }
 
-        // Implementation of JaroWinkler algorithm
+        /// <summary>
+        /// This method implements JaroWinkler algorithm.
+        /// </summary>
+        /// <param name="firstString"></param>
+        /// <param name="secondString"></param>
+        /// <returns></returns>
         private double CalculateSimilarity(string firstString, string secondString)
         {
             double mWeightThreshold = 0.7;

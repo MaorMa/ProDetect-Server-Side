@@ -7,10 +7,18 @@ using System.Web;
 
 namespace RRS_API.Models.Mangagers
 {
+    /// <summary>
+    /// This class responsible to create statistics based on family data
+    /// </summary>
     public class StatisticsMngr
     {
         private DBConnection DBConnection = DBConnection.GetInstance();
 
+        /// <summary>
+        /// This method create statistics of prices in each food category
+        /// </summary>
+        /// <param name="familyID"></param>
+        /// <returns>Json of category to price</returns>
         public string GetAllPricesByCategories(string familyID)
         {
             //query get marketID,ProductID,Price
@@ -46,6 +54,12 @@ namespace RRS_API.Models.Mangagers
             return JsonConvert.SerializeObject(categoryAndPrices.ToList());
         }
 
+
+        /// <summary>
+        /// This method create statistics of quantites in each food category
+        /// </summary>
+        /// <param name="familyID"></param>
+        /// <returns>Json of category to quantity</returns>
         public string GetAllQuantitiesByCategories(string familyID)
         {
             Dictionary<string, Double> categoryAndQuantities = new Dictionary<string, Double>();
@@ -79,50 +93,11 @@ namespace RRS_API.Models.Mangagers
             return JsonConvert.SerializeObject(categoryAndQuantities.ToList());
         }
 
-        /*
-        public string GetAllQuantitiesByNutrients(string familyID)
-        {
-            //string - nutrient
-            //Double - quantity
-            Dictionary<string, Double> nutrientAndQuantity = new Dictionary<string, Double>();
-            string queryStatusApproved = "SELECT fu.MarketID, rd.ProductID, rd.Quantity, rd.DescriptionQuantity FROM FamilyUploads as fu JOIN ReceiptData as rd ON fu.ReceiptID = rd.ReceiptID AND fu.ReceiptStatus = 1 WHERE fu.FamilyID='" + familyID + "'";
-            List<string> resultsStatusApproved = DBConnection.SelectQuery(queryStatusApproved);
-            foreach (string record in resultsStatusApproved)
-            {
-                string[] recordSplit = record.Split(',');
-                string marketID = recordSplit[0];
-                string productID = recordSplit[1];
-                double quantity = double.Parse(recordSplit[2]);
-                double descriptionQuantity = double.Parse(recordSplit[3]);
-                double totalQuantity = quantity * descriptionQuantity;
-                List<string> nutrientsString = DBConnection.SelectQuery("select * from Nutrients where Nutrients.SID = (select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "')");
-                List<Nutrient> nutrients = new List<Nutrient>();
-                NutrientMngr nm = new NutrientMngr();
-                if (nutrientsString.Count != 0)
-                    nutrients = nm.toNutList(nutrientsString.ElementAt(0).Split(',').ToList());
-                double calculatedQuantity = (quantity * descriptionQuantity);
-                for (int i = 0; i < nutrients.Count; i++)
-                {
-                    nutrients[i].Value = nutrients.ElementAt(i).Value * calculatedQuantity * 10;
-
-                    if (nutrientAndQuantity.ContainsKey(nutrients[i].Code))
-                    {
-                        nutrientAndQuantity[nutrients[i].Code] += nutrients[i].Value;
-                    }
-
-                    //category not exists - add category and price
-                    else
-                    {
-                        nutrientAndQuantity.Add(nutrients[i].Code, nutrients[i].Value);
-                    }
-                }
-
-            }
-            return JsonConvert.SerializeObject(nutrientAndQuantity.ToList());
-        }
-        */
-
-
+        /// <summary>
+        /// This method create statistics of prices in each category in compare to other families
+        /// </summary>
+        /// <param name="familyID"></param>
+        /// <returns>Json of compare between familyID and other families in each category </returns>
         public string GetCompareByCost(string familyID)
         {
             //{"category":{"myValue","otherValue"}},{"category":{"myValue","otherValue"}}...
@@ -201,6 +176,12 @@ namespace RRS_API.Models.Mangagers
             return JsonConvert.SerializeObject(FamilyPriceCompareCategories.ToList());
         }
 
+
+        /// <summary>
+        /// This method return the category of optional product by his prefix
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>category</returns>
         private string GetCategoryByID(string id)
         {
 

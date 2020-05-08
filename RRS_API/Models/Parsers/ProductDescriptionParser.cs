@@ -5,6 +5,9 @@ using System.Text.RegularExpressions;
 
 namespace RRS_API.Models.Parsers
 {
+    /// <summary>
+    /// This class responsilbe for extracting product quantity from  product description.
+    /// </summary>
     public class ProductDescriptionParser
     {
         //Fields
@@ -24,6 +27,7 @@ namespace RRS_API.Models.Parsers
             this.Regexes.Add(new Regex(@"\d+\*+\d+ג"));
             this.Regexes.Add(new Regex(@"\d+\*+\d+ ג"));
             this.Regexes.Add(new Regex(@"\d+\*+\d+ גר"));
+            this.Regexes.Add(new Regex(@"\d+\*+\d+גרם"));
             this.Regexes.Add(new Regex(@"\d+\*+\d+ גרם"));
             this.Regexes.Add(new Regex(@"\d+ \* +\d+ גרם"));
             this.Regexes.Add(new Regex(@"\d+ג"));
@@ -40,7 +44,9 @@ namespace RRS_API.Models.Parsers
             this.Regexes.Add(new Regex(@"\d+ " + "קג'"));
             this.Regexes.Add(new Regex(@"\d+ " + "ק`ג"));
             this.Regexes.Add(new Regex(@"\d+ " + "ק\""));
+            this.Regexes.Add(new Regex(@"\d+  קג"));
             this.Regexes.Add(new Regex(@"\d+ קג"));
+            this.Regexes.Add(new Regex(@"(\d+ קג)"));
             this.Regexes.Add(new Regex(@"\d+\* +\d+\.+\d+ לי"));
             this.Regexes.Add(new Regex(@"\d+" + "ק\"ג"));
             this.Regexes.Add(new Regex(@"\d+\.+\d" + " ל"));
@@ -54,11 +60,15 @@ namespace RRS_API.Models.Parsers
             this.Regexes.Add(new Regex(@"\d+\*+\d+ ל"));
             this.Regexes.Add(new Regex(@"\d+\* +\d+" + "מל"));
             this.Regexes.Add(new Regex(@"\d+\*+\d+"+"מל"));
+            this.Regexes.Add(new Regex(@"\d+\*+\d+" + " מל"));
             this.Regexes.Add(new Regex(@"\d+\*+\d+"+"מ\"ל"));
+            this.Regexes.Add(new Regex(@"\d+\*+\d+" + " מ\"ל"));
             this.Regexes.Add(new Regex(@"\d+ " + "מ\"ל"));
+            this.Regexes.Add(new Regex(@"\d+ " + "מל"));
             this.Regexes.Add(new Regex(@"\d+" + "מל"));
             this.Regexes.Add(new Regex(@"\d+\.+\d+\d" + "ליטר"));
             this.Regexes.Add(new Regex(@"\d+\.+\d" + "ליטר"));
+            this.Regexes.Add(new Regex(@"\d+x+\d+ " + "ליטר"));
             this.Regexes.Add(new Regex(@"\d" + " ליטר"));
             this.Regexes.Add(new Regex(@"\d" + "ליטר"));
             this.Regexes.Add(new Regex(@"\d" + "ל"));
@@ -71,7 +81,11 @@ namespace RRS_API.Models.Parsers
             this.Regexes.Add(new Regex(@"\d+"));
         }
 
-        // This function return the quantity of a given product includes in his description in grams
+        /// <summary>
+        /// This method return the quantity of a given product includes in his description in grams.
+        /// </summary>
+        /// <param name="productDescription"></param>
+        /// <returns></returns>
         public string GetQuantityFromDescription(string productDescription)
         {
             string toReturnInGrams = "";
@@ -94,7 +108,7 @@ namespace RRS_API.Models.Parsers
                         return Double.Parse(Regex.Replace(toReturnInGrams, "[^0-9.]", "")) * 100 + "";
                     }
                     //if is kg/liter
-                    if (!toReturnInGrams.Contains("*") && (toReturnInGrams.Contains("קג") || toReturnInGrams.Contains("ק") || toReturnInGrams.Contains("ק\"ג") || toReturnInGrams.Contains("ק`ג") || toReturnInGrams.Contains("ק\"") || toReturnInGrams.Contains("ליטר") || ((toReturnInGrams.Contains("ל") || toReturnInGrams.Contains("ליטר") || toReturnInGrams.Contains("ל'") || toReturnInGrams.Contains("ל`")) && (!toReturnInGrams.Contains("מל") && !toReturnInGrams.Contains("מ\"ל")))))
+                    if (!toReturnInGrams.Contains("*") && !toReturnInGrams.Contains("x") && (toReturnInGrams.Contains("קג") || toReturnInGrams.Contains("ק") || toReturnInGrams.Contains("ק\"ג") || toReturnInGrams.Contains("ק`ג") || toReturnInGrams.Contains("ק\"") || toReturnInGrams.Contains("ליטר") || ((toReturnInGrams.Contains("ל") || toReturnInGrams.Contains("ליטר") || toReturnInGrams.Contains("ל'") || toReturnInGrams.Contains("ל`")) && (!toReturnInGrams.Contains("מל") && !toReturnInGrams.Contains("מ\"ל")))))
                     {
                         //if contains "." than we need to multiple by 1000 to get correct result
                         if (toReturnInGrams.Contains("."))

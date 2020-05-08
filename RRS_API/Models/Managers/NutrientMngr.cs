@@ -8,6 +8,9 @@ using System.Web;
 
 namespace RRS_API.Models.Mangagers
 {
+    /// <summary>
+    /// This class responsible for manage nutrients.
+    /// </summary>
     public class NutrientMngr
     {
         private string[] codes = {"nut203","nut204","nut205","nut208","nut221","nut255","nut291","nut301","nut303","nut304",
@@ -16,6 +19,11 @@ namespace RRS_API.Models.Mangagers
         "nut617","nut618","nut619","nut620","nut621","nut622","nut623","nut628","nut625","nut630","nut631","nut645","nut646",
         "nut324","nut269","nut605"};
 
+        /// <summary>
+        /// This method create list of nutrients from given list of string.
+        /// </summary>
+        /// <param name="nuts"></param>
+        /// <returns> List of Nutrients. </returns>
         public List<Nutrient> ToNutList(List<string> nuts)
         {
             List<Nutrient> toReturn = new List<Nutrient>();

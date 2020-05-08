@@ -9,9 +9,9 @@ using System.Linq;
 
 namespace RRS_API.Models
 {
-    /*
-     * This class responsible for image quality improvments
-     */
+     /// <summary>
+     /// This class responsilbe for image pre processing to optimize products detection by ocr. 
+     /// </summary>
     public class PreProcessing
     {
         private Bitmap imgInNewResolution;
@@ -24,12 +24,14 @@ namespace RRS_API.Models
             try
             {
                 modes = new List<Bitmap>();
-                Bitmap Bitimage = new Bitmap(Flip(image));
-                this.imgInNewResolution = ImproveResolution(Bitimage);
+                Flip(image);
+                this.imgInNewResolution = ImproveResolution(image);
                 modes.Add(ConvertToGrayscale(new Bitmap(image)));
+                modes.Add(BinarizeAndDilation(imgInNewResolution, true));
+                modes.Add(BinarizeAndDilation(new Bitmap(image), false));
+                modes.Add(PosterizationAndBinarize(new Bitmap(image)));
+                modes.Add(Binarize(new Bitmap(image)));
                 modes.Add(Sharpen(new Bitmap(image)));
-                modes.Add(BinarizeAndDilation(new Bitmap(image)));
-                modes.Add(BinarizeWithoutDilation(new Bitmap(image)));
             }
             catch (Exception e)
             {
@@ -37,60 +39,30 @@ namespace RRS_API.Models
             }
         }
 
-        /*
-         * This method improve image resolution to 300X300
-         */
-        private Bitmap ImproveResolution(Bitmap image)
+        /// <summary>
+        /// This method improve image resolution to 300X300.
+        /// </summary>
+        /// <param name="image"></param>
+        /// <returns></returns>
+        private Bitmap ImproveResolution(Image image)
         {
             //improve resolution
             Bitmap b = new Bitmap(image);
             b.SetResolution(300, 300);
             Median median = new Median();
             median.ApplyInPlace(b);
+            //b.Save(@"C:\Users\Maor\Desktop\mode\ImproveResolution.jpeg");
             return b;
         }
 
-        /*
-         * mode 1
-         */ 
-        private Bitmap BinarizeAndDilation(Image image)
-        {
-            Bitmap a = new Bitmap(image);
-
-            int[,] kernel = {
-            { -2, -1,  0 },
-            { -1,  1,  1 },
-            {  0,  1,  2 } };
-            // create filter
-            Convolution Convolution = new Convolution(kernel);
-            // apply the filter
-            Convolution.ApplyInPlace(a);
-
-            var bmp8bpp = Grayscale.CommonAlgorithms.BT709.Apply(a);
-
-            //Median median = new Median();
-            //median.ApplyInPlace(bmp8bpp);
-
-            Invert invert = new Invert();
-            invert.ApplyInPlace(bmp8bpp);
-
-            Dilatation dilatation = new Dilatation();
-            dilatation.ApplyInPlace(bmp8bpp);
-
-            invert.ApplyInPlace(bmp8bpp);
-
-            OtsuThreshold OtsuThreshold = new OtsuThreshold();
-            OtsuThreshold.ApplyInPlace(bmp8bpp);
-
-            return bmp8bpp;
-        }
-
-        /*
-         * mode 2
-         */
+        /// <summary>
+        /// This method convert image to grayscale.
+        /// </summary>
+        /// <param name="image"></param>
+        /// <returns></returns>
         private Bitmap ConvertToGrayscale(Bitmap image)
         {
-            Bitmap grayScale = new Bitmap(image.Width, image.Height);
+            Bitmap grayScale = new Bitmap(image);
 
             for (Int32 y = 0; y < grayScale.Height; y++)
                 for (Int32 x = 0; x < grayScale.Width; x++)
@@ -101,12 +73,92 @@ namespace RRS_API.Models
 
                     grayScale.SetPixel(x, y, Color.FromArgb(gs, gs, gs));
                 }
+            grayScale.Save(@"C:\Users\Maor\Desktop\mode\grayScale.jpeg");
             return grayScale;
         }
 
+        /// <summary>
+        /// This method binarize dnd dilate image.
+        /// </summary>
+        /// <param name="image"></param>
+        /// <returns></returns>
+        private Bitmap BinarizeAndDilation(Bitmap image, bool withMedian)
+        {
+            int[,] kernel = {
+            { -2, -1,  0 },
+            { -1,  1,  1 },
+            {  0,  1,  2 } };
+            // create filter
+            Convolution Convolution = new Convolution(kernel);
+            // apply the filter
+            Convolution.ApplyInPlace(image);
+
+            var bmp8bpp = Grayscale.CommonAlgorithms.BT709.Apply(image);
+
+            Invert invert = new Invert();
+            invert.ApplyInPlace(bmp8bpp);
+
+            Dilatation dilatation = new Dilatation();
+            dilatation.ApplyInPlace(bmp8bpp);
+
+            invert.ApplyInPlace(bmp8bpp);
+
+            if (withMedian)
+            {
+                Median median = new Median();
+                median.ApplyInPlace(bmp8bpp);
+            }
+
+            Closing closing = new Closing();
+            closing.ApplyInPlace(bmp8bpp);
+
+            OtsuThreshold OtsuThreshold = new OtsuThreshold();
+            OtsuThreshold.ApplyInPlace(bmp8bpp);
+            bmp8bpp.Save(@"C:\Users\Maor\Desktop\mode\BinarizeAndDilation.jpeg");
+            return bmp8bpp;
+        }
+
+        /// <summary>
+        /// This method posterize and binarize image.
+        /// </summary>
+        /// <param name="image"></param>
+        /// <returns></returns>
+        private Bitmap PosterizationAndBinarize(Bitmap image)
+        {
+            image = SimplePosterization(image);
+            image = BinarizeAndDilation(image, true);
+            image.Save(@"C:\Users\Maor\Desktop\mode\PosterizationAndBinarize.jpeg");
+            return image;
+        }
+
+        /// <summary>
+        /// This method binarize image.
+        /// </summary>
+        /// <param name="image"></param>
+        /// <returns></returns>
+        private Bitmap Binarize(Bitmap image)
+        {
+            Median median = new Median();
+            median.ApplyInPlace(image);
+
+            var bmp8bpp = Grayscale.CommonAlgorithms.BT709.Apply(image);
+
+            OtsuThreshold OtsuThreshold = new OtsuThreshold();
+            OtsuThreshold.ApplyInPlace(bmp8bpp);
+            //bmp8bpp.Save(@"C:\Users\Maor\Desktop\mode\BinarizeWithoutDilation.jpeg");
+
+            Closing closing = new Closing();
+            closing.ApplyInPlace(bmp8bpp);
+            return bmp8bpp;
+        }
+
+        /// <summary>
+        /// This method shrpen image.
+        /// </summary>
+        /// <param name="image"></param>
+        /// <returns></returns>
         private Bitmap Sharpen(Bitmap image)
         {
-
             Bitmap sharpenImage = (Bitmap)image.Clone();
 
             int filterWidth = 3;
@@ -181,41 +233,31 @@ namespace RRS_API.Models
             System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, pbits.Scan0, bytes);
             // Release image bits.
             sharpenImage.UnlockBits(pbits);
+            //sharpenImage.Save(@"C:\Users\Maor\Desktop\mode\sharpenImage.jpeg");
             return sharpenImage;
         }
 
-        private Bitmap BinarizeWithoutDilation(Image image)
+        private Bitmap SimplePosterization(Bitmap image)
         {
-            Bitmap a = new Bitmap(image);
-
-            Median median = new Median();
-            median.ApplyInPlace(a);
-
-            var bmp8bpp = Grayscale.CommonAlgorithms.BT709.Apply(a);
-
-            OtsuThreshold OtsuThreshold = new OtsuThreshold();
-            OtsuThreshold.ApplyInPlace(bmp8bpp);
-
-            return bmp8bpp;
+            SimplePosterization filter = new SimplePosterization();
+            // process image
+            filter.ApplyInPlace(image);
+            return image;
         }
 
-        /*
-         * flip image if needed (uploaded from phone)
-         */
-        private Image Flip(Image image)
+        /// <summary>
+        /// This method flip image if needed. (uploaded from phone)
+        /// </summary>
+        /// <param name="image"></param>
+        /// <returns></returns>
+        public Image Flip(Image image)
         {
             const int exifOrientationID = 0x112; //274
             if (!image.PropertyIdList.Contains(exifOrientationID))
             {
-                /*
-                if(image.Width > image.Height)
-                {
-                    image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                }
-                */
-
                 return image;
             }
+
             //change rotation manually
             else
             {
@@ -239,36 +281,38 @@ namespace RRS_API.Models
             return image;
         }
 
-        /*
-         * get first mode
-         */
+        /// <summary>
+        /// Getters
+        /// </summary>
+        /// <returns></returns>
         public Bitmap GetMode1()
         {
             return this.modes[0];
         }
 
-        /*
-         * get second mode
-         */
         public Bitmap GetMode2()
         {
             return this.modes[1];
         }
 
-        /*
-         * get third mode
-         */
         public Bitmap GetMode3()
         {
             return this.modes[2];
         }
 
-        /*
-         * get 4th mode
-         */
         public Bitmap GetMode4()
         {
             return this.modes[3];
+        }
+
+        public Bitmap GetMode5()
+        {
+            return this.modes[4];
+        }
+
+        public Bitmap GetMode6()
+        {
+            return this.modes[5];
         }
 
         public Bitmap GetImageInNewResolution()

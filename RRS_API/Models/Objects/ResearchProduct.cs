@@ -5,6 +5,9 @@ using System.Web;
 
 namespace RRS_API.Models.Objects
 {
+    /// <summary>
+    /// This class represents Research product (optional product for given product). 
+    /// </summary>
     public class ResearchProduct
     {
         //Fields

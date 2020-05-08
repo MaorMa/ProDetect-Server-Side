@@ -11,23 +11,25 @@ using RRS_API.Models.Objects;
 namespace RRS_API.Models
 {
 
+    /// <summary>
+    /// This class responsilbe to fetch data from db.
+    /// </summary>
     public class DBConnection
     {
         private SqlConnectionStringBuilder builder;
         private static DBConnection INSTANCE;
         private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        /*
-         * create connection to database
-         * implements singelton design pattern
-         */
+        /// <summary>
+        /// create connection to database
+        /// </summary>
         private DBConnection()
         {
             try
             {
                 _logger.Debug("Trying to create connection to SQL Server");
                 builder = new SqlConnectionStringBuilder(ConfigurationManager.ConnectionStrings["DBConnection"].ToString());
-                _logger.Info("Succesful connection to SQL Server");
+                _logger.Debug("Succesful connection to SQL Server");
             }
             catch (Exception e)
             {
@@ -45,11 +47,12 @@ namespace RRS_API.Models
             return INSTANCE;
         }
 
-        /*
-         * generic select query 
-         * return List contains query result
-         * seperated by comma 
-         */
+        /// <summary>
+        /// This method generic select query 
+        /// seperated by comma.
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns>return List contains query result</returns>
         public List<string> SelectQuery(string query)
         {
             //_logger.Debug($"Running select query {query}");
@@ -114,7 +117,7 @@ namespace RRS_API.Models
                     try
                     {
                         command.ExecuteNonQuery();
-                        _logger.Info($"Succesful Updating receipt status, familyID: {FamilyID}, ReceiptID: {ReceiptID}");
+                        _logger.Debug($"Succesful Updating receipt status, familyID: {FamilyID}, ReceiptID: {ReceiptID}");
                     }
                     catch (Exception sqlException)
                     {
@@ -154,7 +157,7 @@ namespace RRS_API.Models
                     try
                     {
                         command.ExecuteNonQuery();
-                        _logger.Info($"Succesful Updating family uploads, familyID: {selectedFamilyID}, MarketID: {MarketID}, imageName: {imageName} status: {status}, upload time: {UploadTime}");
+                        _logger.Debug($"Succesful Updating family uploads, familyID: {selectedFamilyID}, MarketID: {MarketID}, imageName: {imageName} status: {status}, upload time: {UploadTime}");
                     }
                     catch (Exception sqlException)
                     {
@@ -194,7 +197,7 @@ namespace RRS_API.Models
                     try
                     {
                         command.ExecuteNonQuery();
-                        _logger.Info($"Succesful Inserting receipt data, familyID: {familyID}, receiptID: {receiptID}, productID: {productID}");
+                        _logger.Debug($"Succesful Inserting receipt data, familyID: {familyID}, receiptID: {receiptID}, productID: {productID}");
                     }
                     catch (Exception sqlException)
                     {
@@ -230,7 +233,7 @@ namespace RRS_API.Models
                     try
                     {
                         command.ExecuteNonQuery();
-                        _logger.Info($"Succesful Deleting receipt data, receiptID: {receiptID}");
+                        _logger.Debug($"Succesful Deleting receipt data, receiptID: {receiptID}");
                     }
                     catch (Exception sqlException)
                     {
@@ -246,7 +249,7 @@ namespace RRS_API.Models
         }
 
         /*
-         * delete products of given receipt
+         * delete receipt
          */
         public void DeleteFamilyReceipt(string receiptID)
         {
@@ -266,7 +269,7 @@ namespace RRS_API.Models
                     try
                     {
                         command.ExecuteNonQuery();
-                        _logger.Info($"Succesful Deleting receipt from family, receiptID: {receiptID}");
+                        _logger.Debug($"Succesful Deleting receipt from family, receiptID: {receiptID}");
                     }
                     catch (Exception e)
                     {
@@ -303,7 +306,7 @@ namespace RRS_API.Models
                     try
                     {
                         command.ExecuteNonQuery();
-                        _logger.Info($"Succesful Deleting optional data, marketID:{marketId} ProductID: {productID}");
+                        _logger.Debug($"Succesful Deleting optional data, marketID:{marketId} ProductID: {productID}");
                     }
                     catch (Exception sqlException)
                     {
@@ -342,7 +345,7 @@ namespace RRS_API.Models
                             {
                                 salt += reader[0];
                             }
-                            _logger.Info($"Succesful Getting salt value, username: {username}");
+                            //_logger.Debug($"Succesful Getting salt value, username: {username}");
                             return salt;
                         }
                     }
@@ -381,13 +384,13 @@ namespace RRS_API.Models
                         {
                             if (reader.HasRows)
                             {
-                                _logger.Info($"Valid Username: {username} and password");
+                                //_logger.Info($"Valid Username: {username} and password");
                                 return true;
                             }
 
                             else
                             {
-                                _logger.Debug($"Invalid Username: {username} and password");
+                                //_logger.Debug($"Invalid Username: {username} and password");
                                 return false;
                             }
                         }
@@ -429,7 +432,7 @@ namespace RRS_API.Models
                             {
                                 groupID += reader[0];
                             }
-                            _logger.Info($"Succesful Getting groupId {groupID} for username: {username}");
+                            //_logger.Info($"Succesful Getting groupId {groupID} for username: {username}");
                             return groupID;
                         }
                     }
@@ -469,7 +472,7 @@ namespace RRS_API.Models
                             {
                                 Families.Add(reader[0].ToString());
                             }
-                            _logger.Info($"Succesful Getting families");
+                            //_logger.Info($"Succesful Getting families");
                             return Families;
                         }
                     }
@@ -509,7 +512,7 @@ namespace RRS_API.Models
                             {
                                 Families.Add(reader[0].ToString());
                             }
-                            _logger.Info($"Succesful Getting families");
+                            //_logger.Info($"Succesful Getting families");
                             return Families;
                         }
                     }
@@ -547,7 +550,7 @@ namespace RRS_API.Models
                     try
                     {
                         command.ExecuteNonQuery();
-                        _logger.Info($"Succesful Adding new family: {username}, groupID: {groupID}");
+                        //_logger.Info($"Succesful Adding new family: {username}, groupID: {groupID}");
                     }
                     catch (Exception exception)
                     {
@@ -589,7 +592,7 @@ namespace RRS_API.Models
                                 if (!similiarProductNames.ContainsKey(reader[0].ToString()))
                                     similiarProductNames.Add(reader[0].ToString(), reader[1].ToString());
                             }
-                            _logger.Info($"Succesful Getting SimiliarProductNames");
+                            _logger.Debug($"Succesful Getting SimiliarProductNames");
                             return similiarProductNames;
                         }
                     }
@@ -610,7 +613,6 @@ namespace RRS_API.Models
         /*
         * Insert top 5 similar products to OptionalProducts table
         */
-        //public void insertOptionalProducts(string productId, string SID, string OptionalName)
         public void InsertOptionalProducts(string marketId, string productId, List<ResearchProduct> optionalProducts)
         {
             _logger.Debug($"Inserting optional products for ProductId: {productId}");
@@ -704,7 +706,7 @@ namespace RRS_API.Models
                     try
                     {
                         command.ExecuteNonQuery();
-                        _logger.Info($"Succesful Deleting Nutrients");
+                        _logger.Debug($"Succesful Deleting Nutrients");
                     }
                     catch (Exception sqlException)
                     {
@@ -829,7 +831,7 @@ namespace RRS_API.Models
                         {
                             if (reader.HasRows)
                             {
-                                _logger.Info($"productId: {productId} exists");
+                                _logger.Debug($"productId: {productId} exists");
                                 return true;
                             }
 

@@ -7,15 +7,16 @@ using System.Text.RegularExpressions;
 
 namespace OcrProject.Parser
 {
-    //This class responsible for parsing the text of ocr result for a given receipt 
-
-    class OcrTextParser
+    /// <summary>
+    /// This class responsible for parsing the text of ocr result for a given receipt
+    /// </summary>
+    public class OcrTextParser
     {
 
-        /*
-         * This function responsible for parsing the given receipt object
-         * using addSid function
-         */
+        /// <summary>
+        /// This method responsible for parsing the given receipt object
+        /// </summary>
+        /// <param name="receipt"></param>
         public void Parsing(Receipt receipt)
         {
             List<string> lines = receipt.getRows();
@@ -50,7 +51,7 @@ namespace OcrProject.Parser
                 {
                     string id = num.ToString();
 
-                    if (id.Length == 13 && id.StartsWith("7") && !id.StartsWith("729"))
+                    if (id.Length == 13 && (id.StartsWith("7") || id.StartsWith("129")) && !id.StartsWith("780") && !id.StartsWith("761") && !id.StartsWith("762") && !id.StartsWith("729"))
                     {
                         id = id.Substring(Math.Max(0, id.Length - 10));
                     }
@@ -97,7 +98,11 @@ namespace OcrProject.Parser
             receipt.SetIdToMetadata(receiptsIdToMetadata);
         }
 
-        //Check if line contains Hebrew KG word or *
+        /// <summary>
+        /// Check if line contains Hebrew KG word or *
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
         private bool HasKG(string line)
         {
             bool containsDot = false;
@@ -120,6 +125,12 @@ namespace OcrProject.Parser
             return containsDot && containsKG;
         }
 
+
+        /// <summary>
+        /// This method get quantity of product from line.
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
         private string GetQuantity(string line)
         {
             string[] seperate = line.Split(' '); //split
@@ -170,11 +181,16 @@ namespace OcrProject.Parser
             return "1";
         }
 
-        //Check if line has Integer
+        /// <summary>
+        /// This method checks if line contains integer.
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
         private int HasInt(string line)
         {
-            int check;
+            int check,num = 1;
             string[] seperate = line.Split(' ');
+            int count = 0;
             foreach (string word in seperate)
             {
                 if (!word.StartsWith("0"))
@@ -183,14 +199,27 @@ namespace OcrProject.Parser
                     if (int.TryParse(word, out check))
                     {
                         if (check <= 10 && check != 1)
-                            return check;
+                        {
+                            num = check;
+                            count++;
+                        }
+
                     }
                 }
+            }
+
+            if(count == 1)
+            {
+                return num;
             }
             return 1;
         }
 
-        //Check if line has Integer
+        /// <summary>
+        /// This method checks if line contains decimal number.
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
         private decimal HasDecimalNumber(string line)
         {
             decimal toReturn = 1;
@@ -199,32 +228,29 @@ namespace OcrProject.Parser
             string[] seperate = line.Split(' ');
             foreach (string word in seperate)
             {
-                if (!word.StartsWith("0"))
-                {
                     if (word.Replace(",", ".").Contains("."))
                     {
                         if (decimal.TryParse(word, out check))
                         {
                             count++;
-                            if (check < toReturn)
-                            {
-                                toReturn = check;
-                            }
-                            if (count == 2)
-                            {
-                                return check;
-                            }
+                            toReturn = check;
                         }
                     }
-                }
             }
-            return toReturn;
+
+            if (count == 2)
+            {
+                return toReturn;
+            }
+            return 1;
         }
 
-        /*
-         * Returns the qunatity of a product in the line with the KG word in it 
-         * if not found, default number is 1
-         */
+        /// <summary>
+        /// This method returns the qunatity of a product in the line with the KG word in it 
+        /// if not found, default number is 1
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
         private string GetSmaller(string line)
         {
             string[] seperate = line.Split(' ');

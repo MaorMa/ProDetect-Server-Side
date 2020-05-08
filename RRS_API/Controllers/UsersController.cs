@@ -40,7 +40,7 @@ namespace RRS_API.Controllers
                 if (UsersMngr.IsGlobalAdmin(token))
                 {
                     UsersMngr.AddNewFamilyUser(username, password);
-                    _logger.Info($"Succesful new family username: {username}");
+                    _logger.Debug($"Succesful new family username: {username}");
                     return Request.CreateResponse(HttpStatusCode.Created);
                 }
 
@@ -91,12 +91,12 @@ namespace RRS_API.Controllers
         {
             //get data from UI
             var username = HttpContext.Current.Request.Form["username"];
-            _logger.Debug($"{username} is trying to login");
+            _logger.Debug($"USER:{username}     |ACTION: is trying to login     |NAVIGATION:");
             var password = HttpContext.Current.Request.Form["password"];
             try
             {
                 string token = UsersMngr.CheckLoginCredentials(username, password);
-                _logger.Debug($"{username} connected sucessfully");
+                _logger.Info($"USER:{username}     |ACTION: connected sucessfully     |NAVIGATION:");
                 return Request.CreateResponse(HttpStatusCode.OK, token);
             }
             catch (Exception e)

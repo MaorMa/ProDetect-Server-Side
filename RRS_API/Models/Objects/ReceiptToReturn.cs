@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace RRS_API.Models
 {
+    /// <summary>
+    /// This class represents receipt object that forwarded between the server and the client.
+    /// </summary>
     public class ReceiptToReturn
     {
         //Fields

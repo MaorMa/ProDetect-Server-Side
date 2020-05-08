@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
-
-//This class represents receipt object
+/// <summary>
+/// This class represents receipt object
+/// </summary>
 public class Receipt
 {
     //Fields

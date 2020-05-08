@@ -13,17 +13,17 @@ using System.Text.RegularExpressions;
 
 namespace Server
 {
-    /*
-     * This class responsible for ocr proccessing
-     */
+    /// <summary>
+    /// This method responsible for running ocr processing.
+    /// Running 6 OCR tasks in pararell.
+    /// </summary>
 
-    class OcrProcessing
+    public class OcrProcessing
     {
         private AdvancedOcr ocr; //ocr object
         private List<Receipt> receipts;
         private static Mutex mutex = new Mutex();
         private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-
 
         public OcrProcessing()
         {
@@ -46,53 +46,42 @@ namespace Server
             this.receipts = new List<Receipt>();
         }
 
-        /*
-         * This method responsible for iterate over all the receipts and send to initReceiptsList method
-         * imgList - A Dictionary with image names and the image itself
-         * using threads
-         */
+        /// <summary>
+        /// This method responsible for iterate over all the receipts and send to initReceiptsList method.
+        /// </summary>
+        /// <param name="imgList"> A Dictionary with image names and the image itself </param>
+        /// <returns></returns>
         public List<Receipt> FromImagesToText(Dictionary<string, Image> imgList)
         {
             _logger.Debug($"fromImagesToText started with list of size {imgList.Keys.Count}");
             //List<Thread> threadsPool = new List<Thread>();
             foreach (KeyValuePair<string, Image> pair in imgList)
             {
-                InitReceiptsList(pair.Key, pair.Value);
-                /*
-                //run each convertion in seperate thread
-                Thread t = new Thread(() =>
+                try
                 {
-                    Thread.CurrentThread.IsBackground = true;
-                    initReceiptsList(pair.Key, pair.Value);
-                });
-                threadsPool.Add(t);
-                t.Start();
-                */
-
+                    InitReceiptsList(pair.Key, pair.Value);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error($"Error - InitReceiptsList", e);
+                }
             }
 
             return this.receipts;
-
-            //threads
-
-            /*
-            foreach (Thread t in threadsPool)
-            {
-                t.Join();
-            }
-            */
         }
 
-
         /*
-         * This method responsible for calling detectWords methond with all the three modes
+         * This method responsible for calling detectWords method
          */
+         /// <summary>
+         /// This method running 6 ocr process in pararell to detect ids in the receipt.
+         /// </summary>
+         /// <param name="imgName"></param>
+         /// <param name="img"></param>
         private void InitReceiptsList(string imgName, Image img)
         {
             _logger.Debug($"Initializing Receipt list imgName: {imgName}");
             PreProcessing preProccessing = new PreProcessing(img);
-            Bitmap imgInNewResolution = preProccessing.GetImageInNewResolution();
-
             OcrResult ocrResults = null;
             try
             {
@@ -101,7 +90,6 @@ namespace Server
                 try
                 {
                     ocrResults = ocr.Read(preProccessing.GetMode1());
-                    _logger.Info($"OcrRead Result: {ocrResults.Pages.Count}");
                 }
                 catch (Exception e)
                 {
@@ -109,31 +97,18 @@ namespace Server
                 }
                 if (ocrResults.Pages.Count > 0)
                 {
-                    Receipt receipt = new Receipt(ocrResults.Pages[0].Width, ocrResults.Pages[0].Height, imgName, imgInNewResolution, ConvertTo24bpp(img));//create receipt object with sizes and name
+                    Receipt receipt = new Receipt(ocrResults.Pages[0].Width, ocrResults.Pages[0].Height, imgName, preProccessing.GetImageInNewResolution(), ConvertTo24bpp(img));//create receipt object with sizes and name
                     DetectWords(ocrResults, receipt);
-                    var newResolution = new Task(() =>
-                    {
-                        try
-                        {
-                            _logger.Debug($"OcrRead imgName: {imgName} - New Resolution");
-                            DetectWords(ocr.Read(imgInNewResolution), receipt);
-                        }
-                        catch (Exception e)
-                        {
-                            _logger.Error($"Error - OcrRead imgName: {imgName} - New Resolution", e);
-                        }
-                    });
-
                     var mode2 = new Task(() =>
                     {
                         try
                         {
-                            _logger.Debug($"OcrRead imgName: {imgName} - Mode2");
+                            _logger.Debug($"OcrRead imgName: {imgName} - New Resolution");
                             DetectWords(ocr.Read(preProccessing.GetMode2()), receipt);
                         }
                         catch (Exception e)
                         {
-                            _logger.Error($"Error - OcrRead imgName: {imgName} - Mode2", e);
+                            _logger.Error($"Error - OcrRead imgName: {imgName} - New Resolution", e);
                         }
                     });
 
@@ -163,15 +138,46 @@ namespace Server
                         }
                     });
 
-                    newResolution.Start();
+                    var mode5 = new Task(() =>
+                    {
+                        try
+                        {
+                            _logger.Debug($"OcrRead imgName: {imgName} - Mode5");
+                            DetectWords(ocr.Read(preProccessing.GetMode5()), receipt);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Error($"Error - OcrRead imgName: {imgName} - Mode5", e);
+                        }
+                    });
+
+                    var mode6 = new Task(() =>
+                    {
+                        try
+                        {
+                            _logger.Debug($"OcrRead imgName: {imgName} - Mode6");
+                            DetectWords(ocr.Read(preProccessing.GetMode6()), receipt);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Error($"Error - OcrRead imgName: {imgName} - Mode6", e);
+                        }
+                    });
+
+                    
+                    
                     mode2.Start();
                     mode3.Start();
                     mode4.Start();
-
-                    newResolution.Wait();
+                    mode5.Start();
+                    mode6.Start();
+                    
                     mode2.Wait();
                     mode3.Wait();
                     mode4.Wait();
+                    mode5.Wait();
+                    mode6.Wait();
+                    
 
                     //add receipt after trying all modes
                     _logger.Debug($"Adding receipt {receipt.GetName()} to list of ready receits");
@@ -193,9 +199,11 @@ namespace Server
             return bmp;
         }
 
-        /*
-         * This function is the most important - detecting all words using ocr engine
-         */
+         /// <summary>
+         /// This method detects words (ids) in ocr result with coordinates.
+         /// </summary>
+         /// <param name="ocrResults"></param>
+         /// <param name="receipt"></param>
         private void DetectWords(OcrResult ocrResults, Receipt receipt)
         {
             _logger.Debug($"Detecting words for receipt: {receipt.GetName()}");
@@ -216,19 +224,32 @@ namespace Server
                         {
                             double num;
                             string wordContent = word.Text;
-                            if (double.TryParse(wordContent, out num) && !wordContent.Contains(",") && !wordContent.StartsWith("0") )//if number
+                            if (double.TryParse(wordContent, out num) && !wordContent.Contains(",") && !wordContent.StartsWith("0"))//if number
                             {
                                 string id = num.ToString();
 
-                                if (id.Length == 13 && id.StartsWith("7") && !id.StartsWith("729"))
+                                if (id.Length == 13 && (id.StartsWith("7") || id.StartsWith("129")) && !id.StartsWith("780") && !id.StartsWith("761") && !id.StartsWith("762") && !id.StartsWith("729"))
                                 {
                                     id = id.Substring(Math.Max(0, id.Length - 10));
                                 }
 
+                                //not contains
                                 if (!receipt.GetWordsList().ContainsKey(id))
                                 {
                                     receipt.AddWord(new OcrWord(word.X, word.Y, word.Width, word.Height, id)); //add word to receipt object
                                 }
+
+                                //new
+                                //contains
+                                if (receipt.GetWordsList().ContainsKey(id))
+                                {
+                                    OcrWord result = receipt.GetWordsList()[id].Find(item => Math.Abs(item.getY() - word.Y) < 50);
+                                    if (result == null)
+                                    {
+                                        receipt.GetWordsList()[id].Add(new OcrWord(word.X, word.Y, word.Width, word.Height, id));
+                                    }
+                                }
+
                             }
                         }
                     }

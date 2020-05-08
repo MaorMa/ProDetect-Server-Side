@@ -8,6 +8,12 @@ using System.Reflection;
 
 namespace RRS_API.Models.Objects
 {
+    /// <summary>
+    /// This class responsilbe to manage tokens.
+    /// <remarks>
+    /// This class can generate token, check if token valid, extract user name from token.
+    /// </remarks>
+    /// </summary>
     public class TokenMngr
     {
         private readonly ILog _logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
@@ -15,9 +21,11 @@ namespace RRS_API.Models.Objects
         private IAuthService authService;
 
         #region Public Methods
-        /*
-         * generate a toekn for authorized user
-         */
+        /// <summary>
+        /// This method generate token for authorized user.
+        /// </summary>
+        /// <param name="username"> authorized user name</param>
+        /// <returns>Token</returns>
         public string GenerateToken(string username)
         {
             //_logger.Debug($"Generating token for username: {username}");
@@ -27,10 +35,11 @@ namespace RRS_API.Models.Objects
             return authService.GenerateToken(model);
         }
 
-        /*
-         * if token is valid - return true
-         * else return false
-         */
+         /// <summary>
+         /// This method check if given token is valid.
+         /// </summary>
+         /// <param name="token"></param>
+         /// <returns>True - it token is valid, otherwise False</returns>
         public bool IsTokenValid(string token)
         {
             //_logger.Debug($"Checking if token is valid");
@@ -45,6 +54,19 @@ namespace RRS_API.Models.Objects
                 //_logger.Info($"Token is invalid");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// This method extract username from given token.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns>user name</returns>
+        public string getUsernameByToken(string token)
+        {
+            var jwtToken = new JwtSecurityToken(token);
+            object username = "";
+            jwtToken.Payload.TryGetValue("unique_name", out username);
+            return username.ToString();
         }
 
         private JWTContainer GetJWTContainerModel(string username)

@@ -10,7 +10,6 @@ using Newtonsoft.Json;
 using System.Linq;
 using RRS_API.Models.ImageRecognition;
 using RRS_API.Models.Mangagers;
-using System.Text;
 using System.Security.Cryptography;
 using log4net;
 using System.Reflection;
@@ -20,7 +19,12 @@ using RRS_API.Models.Parsers;
 
 namespace RRS_API.Controllers
 {
-    //This class responsible for the main scenario
+    /// <summary>
+    /// This class responsilbe to mangage the main scenario - upload receipts.
+    /// <remarks>
+    /// This class can handle upload receipts, 
+    /// </remarks>
+    /// </summary>
     public class ReceiptMngr
     {
         #region fields
@@ -37,7 +41,12 @@ namespace RRS_API.Controllers
         #endregion
 
         #region public Methods
-        // Handle single POST request of photos 
+        /// <summary>
+        /// This methond handle single POST request of receipts.
+        /// </summary>
+        /// <param name="selectedFamilyID"></param>
+        /// <param name="selectedMarket"></param>
+        /// <param name="imgNameAndImg"></param>
         public void ProcessReceipts(string selectedFamilyID, string selectedMarket, Dictionary<string, Image> imgNameAndImg)
         {
             _logger.Debug($"ProcessPhotos started, selectedFamilyID: {selectedFamilyID}, selectedMarket: {selectedMarket}");
@@ -54,21 +63,29 @@ namespace RRS_API.Controllers
                     DBConnection.UpdateFamilyUploads(selectedFamilyID, selectedMarket, pair.Key, -1, uploadTime.ToString());
                 }
                 //call ocr proccessing
-                List<Receipt> receipts = ocrProcessing.FromImagesToText(imgNameAndImg);
-                //parsing ocr result
-                receipts = ocrTextParser.GetAllRecieptsData(receipts);
-                CompleteInfoAndMarks(receipts, selectedMarket);
+                try
+                {
+                    List<Receipt> receipts = ocrProcessing.FromImagesToText(imgNameAndImg);
+                    //parsing ocr result
+                    receipts = ocrTextParser.GetAllRecieptsData(receipts);
+                    CompleteInfoAndMarks(receipts, selectedMarket);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error($"Error - ProcessPhotos", e);
+                }
             }
         }
 
-        /*
-        * Return all existing families from db
-        * acc - view unapproved receipts
-        * not acc - view approved receipts
-        * if admin - can see all the families
-        * if not admin - can see only his family
-        */
-        public string GetAllFamiliesByReceiptStatus(string accView,string username, bool isGlobalAdmin, bool isLocalAdmin)
+        /// <summary>
+        /// This method return families by given filters.
+        /// </summary>
+        /// <param name="accView"> Approved/unapproved receipts</param>
+        /// <param name="username"></param>
+        /// <param name="isGlobalAdmin"></param>
+        /// <param name="isLocalAdmin"></param>
+        /// <returns>list of familes</returns>
+        public string GetAllFamiliesByReceiptStatus(string accView, string username, bool isGlobalAdmin, bool isLocalAdmin)
         {
             List<string> familiesList = new List<string>();
             string queryStatusWorking;
@@ -102,9 +119,11 @@ namespace RRS_API.Controllers
             return JsonConvert.SerializeObject(familiesList);
         }
 
-        /*
-        * return all specific families data from db
-        */
+        /// <summary>
+        /// This method return not approved family data.
+        /// </summary>
+        /// <param name="familyID">Given family ID</param>
+        /// <returns> Sorted Json of family Daya by ycoordinate</returns>
         public string GetAllNotApprovedFamilyData(string familyID)
         {
             string queryStatusWorking = "SELECT * FROM FamilyUploads WHERE ReceiptStatus = -1 AND FamilyID = '" + familyID + "'";
@@ -185,10 +204,13 @@ namespace RRS_API.Controllers
             return JsonConvert.SerializeObject(sorted);
         }
 
-        /*
-         * First we delete all products of given receipt
-         * Then we add all products of updated receipt
-         */
+        /// <summary>
+        /// This method update reciept data after saving receipt.
+        /// First delete all products of given receipt.
+        /// Then add all products of updated receipt.
+        /// </summary>
+        /// <param name="familyID">family the receipt belongs to</param>
+        /// <param name="receiptToUpdate">receipt we need to update</param>
         public void UpdateReceiptData(string familyID, ReceiptToReturn receiptToUpdate)
         {
             try
@@ -228,16 +250,17 @@ namespace RRS_API.Controllers
                     //found quantity in description
                     else
                     {
-                        if(double.TryParse(pdp.GetQuantityFromDescription(productDescription), out quantityInDesc))
+                        if (double.TryParse(pdp.GetQuantityFromDescription(productDescription), out quantityInDesc))
                         {
                             quantityFoundInDesc = (quantityInDesc / 1000) + "";
                         }
                     }
-                    
+
                     string productPrice = product.getPrice();
                     ResearchProduct rp = product.getOptionalProductsChosen();
                     DBConnection.InsertReceiptData(familyID, receiptID, productID, productDescription, productQuantity, quantityFoundInDesc, productPrice, 0, true);
-                    if (rp != null) {
+                    if (rp != null)
+                    {
                         DBConnection.DeleteOptionalData(receiptToUpdate.marketID, product.getsID()); //delete all optional exists
                         DBConnection.InsertOptionalProduct(receiptToUpdate.marketID, product.getsID(), rp);
                     }
@@ -257,9 +280,11 @@ namespace RRS_API.Controllers
             }
         }
 
-        /*
-        * Return receipt to accept
-        */
+        /// <summary>
+        /// This method return receipt to accept.
+        /// </summary>
+        /// <param name="familyID">family the receipt belongs to</param>
+        /// <param name="receiptToUpdate">receipt we need to return to accept</param>
         public void ReturnReceiptToAccept(string familyID, ReceiptToReturn receiptToUpdate)
         {
             //first we update status to -1
@@ -281,6 +306,11 @@ namespace RRS_API.Controllers
             DBConnection.UpdateStatus(familyID, receiptToUpdate.receiptID, "0");
         }
 
+        /// <summary>
+        /// This method return approved family data.
+        /// </summary>
+        /// <param name="familyID">Given family ID</param>
+        /// <returns> Sorted Json of family Daya by ycoordinate</returns>
         public string GetAllApprovedFamilyData(string familyId)
         {
             //nm.updateNutrients(@"C:\Users\Maor\Desktop\nutrients\mabat_foods_2013.xlsx");
@@ -324,10 +354,12 @@ namespace RRS_API.Controllers
             return JsonConvert.SerializeObject(toReturn);
         }
 
-        /*
-         * This method return product info 
-         * info: Description, price
-         */
+        /// <summary>
+        /// This method return product info (description,price) 
+        /// </summary>
+        /// <param name="productID"></param>
+        /// <param name="MarketID"></param>
+        /// <returns>List of product info</returns>
         public List<string> GetProductInfo(string productID, string MarketID)
         {
             string originalSQL = "SELECT * FROM " + MarketID + " WHERE sID='" + productID + "'";
@@ -353,27 +385,63 @@ namespace RRS_API.Controllers
                 productInfoFromDb = DBConnection.SelectQuery(newSQL);
             }
 
+            //cut prefix till the first digit not zero
+
+            /*
+            if(productInfoFromDb.Count == 0)
+            {
+                int indexOfZero = productID.IndexOf("0");
+                if (indexOfZero != -1)
+                {
+                    productID = productID.Substring(indexOfZero);
+                    int numOfZeroAtBegining = productID.Length - productID.TrimStart('0').Length;
+                    if(numOfZeroAtBegining > 2)
+                    {
+                        productID = productID.TrimStart(new Char[] { '0' });
+                        string newSid = prefix + getZero(productID) + productID;
+                        newSQL = "SELECT * FROM " + MarketID + " WHERE sID='" + newSid + "'";
+                        productInfoFromDb = DBConnection.SelectQuery(newSQL);
+                    }
+
+                }
+            }
+            */
+
+
             return productInfoFromDb;
         }
 
+        /// <summary>
+        /// This method return product data(Description,price) and optional Product's names
+        /// </summary>
+        /// <param name="productID"></param>
+        /// <param name="marketID"></param>
+        /// <returns></returns>
         public string GetProductDataWithOptionalNames(string productID, string marketID)
         {
             Dictionary<List<string>, List<ResearchProduct>> toReturn = new Dictionary<List<string>, List<ResearchProduct>>();
             List<string> productData = GetProductInfo(productID, marketID);
             if (productData.Count != 0)
             {
-                List<ResearchProduct> products = GetAndInsertOptionalNames(productData[0].Split(',')[1],marketID, productID);
+                List<ResearchProduct> products = GetAndInsertOptionalNames(productData[0].Split(',')[1], marketID, productID);
                 toReturn.Add(productData, products);
             }
             return JsonConvert.SerializeObject(toReturn.ToList());
         }
 
+        /// <summary>
+        /// This method return optional products of given product name and insert them to db if not exists.
+        /// </summary>
+        /// <param name="prudctName"></param>
+        /// <param name="marketID"></param>
+        /// <param name="productID"></param>
+        /// <returns></returns>
         public List<ResearchProduct> GetAndInsertOptionalNames(string prudctName, string marketID, string productID)
         {
             List<ResearchProduct> products;
             if (DBConnection.SelectQuery("select SID from OptionalProducts AS OP WHERE OP.MarketID='" + marketID + "' AND OP.ProductID ='" + productID + "'").Count == 0)
             {
-                products = jwd.GetTopFiveSimilarProducts(prudctName); 
+                products = jwd.GetTopFiveSimilarProducts(prudctName);
                 DBConnection.InsertOptionalProducts(marketID, productID, products);
             }
             else
@@ -383,6 +451,12 @@ namespace RRS_API.Controllers
             return products;
         }
 
+
+        /// <summary>
+        /// This method return optional namge of given product name.
+        /// </summary>
+        /// <param name="prudctName"></param>
+        /// <returns>List of optional names. </returns>
         public List<ResearchProduct> GetOptionalNames(string prudctName)
         {
             List<ResearchProduct> products;
@@ -390,6 +464,12 @@ namespace RRS_API.Controllers
             return products;
         }
 
+
+        /// <summary>
+        /// This method delete given receipt from DB.
+        /// </summary>
+        /// <param name="receiptID"></param>
+        /// <returns>True - if deleted sucessfully, otherwise False. </returns>
         public bool DeleteReceipt(string receiptID)
         {
             try
@@ -404,15 +484,16 @@ namespace RRS_API.Controllers
                 return false;
             }
         }
-
         #endregion
 
         #region private Methods
 
-        /*
-        * return hash (sha1) for a given image
-        * same images get the same hash 
-        */
+        /// <summary>
+        /// This method generate hash code (using sha1) for given receipt image.
+        /// same receipt image get the same hash code.
+        /// </summary>
+        /// <param name="image"></param>
+        /// <returns></returns>
         private string GetReceiptHashCode(Image image)
         {
             using (var ms = new MemoryStream())
@@ -423,9 +504,11 @@ namespace RRS_API.Controllers
             }
         }
 
-        /*
-        * Return list of researchProduct for productId - for approval
-        */
+        /// <summary>
+        /// This method create research product list for given product names
+        /// </summary>
+        /// <param name="optionalName"></param>
+        /// <returns>List of reaearch product</returns>
         private List<ResearchProduct> CreateResearchProductListForProduct(List<string> optionalName)
         {
             List<ResearchProduct> researchProduct = new List<ResearchProduct>();
@@ -436,11 +519,13 @@ namespace RRS_API.Controllers
             }
             return researchProduct;
         }
-        
-        /*
-         * This method check if the receipt uploaded in the past
-         * if uploaded, we need to remove it from the dictionary
-         */
+
+        /// <summary>
+        /// This method check if the receipt uploaded in the past
+        ///  if uploaded, we need to remove it from the dictionary
+        /// </summary>
+        /// <param name="imgNameAndImg">image of receipt and name of receipt</param>
+        /// <returns>Dictionary of receipts without multiplicity</returns>
         private Dictionary<string, Image> DetectReceiptMultiplicty(Dictionary<string, Image> imgNameAndImg)
         {
             Dictionary<string, Image> toReturn = new Dictionary<string, Image>();
@@ -458,10 +543,12 @@ namespace RRS_API.Controllers
             return toReturn;
         }
 
-        /*
-         * update info for each product
-         * then mark and save
-         */
+         /// <summary>
+         /// This method complete info for each detected product in each receipt.
+         /// Devide prudcts to buckets, get dominant bucket, mark image with detected products and save data to db.
+         /// </summary>
+         /// <param name="receipts"></param>
+         /// <param name="selectedMarket"></param>
         private void CompleteInfoAndMarks(List<Receipt> receipts, string selectedMarket)
         {
             //iterate over all the receipts
@@ -470,22 +557,20 @@ namespace RRS_API.Controllers
                 receipt.SetMarketID(selectedMarket);
                 List<OcrWord> wordsToDraw = new List<OcrWord>();
                 List<OcrWord> tmpWords;
+                //create buckets
+                Dictionary<int, int> buckets = GetBucketsDivide(receipt.GetOriginalImage(), 5);
                 double averageX = 0, averageY = 0, numOfWords = 0, normalizedX, normalizedWidth;
 
                 //iterate over all the item in receipt
-                foreach (KeyValuePair<string, List<MetaData>> sid in receipt.GetIdToMetadata())
+                Dictionary<string, List<MetaData>> idToMetaData = receipt.GetIdToMetadata();
+                for (int i = 0; i < idToMetaData.Count; i++)
                 {
-                    if (sid.Key.Length < 13 && receipt.GetIdToMetadata().ContainsKey("729" + sid.Key))
+                    KeyValuePair<string, List<MetaData>> current = idToMetaData.ElementAt(i);
+                    if (current.Key.Length < 13 && idToMetaData.ContainsKey("729" + current.Key))
                         continue;
-                    foreach (MetaData obj in sid.Value)
+                    foreach (MetaData obj in current.Value)
                     {
-                        /*
-                        using (var tw = new StreamWriter(@"C:\Users\Maor\Desktop\test.txt", true))
-                        {
-                            tw.WriteLine(sid.Key);
-                        }
-                        */
-                        List<string> productInfoFromDb = GetProductInfo(sid.Key, selectedMarket);
+                        List<string> productInfoFromDb = GetProductInfo(current.Key, selectedMarket);
                         //if there are results for originalSQL/newSQL, update description and price
                         if (productInfoFromDb.Count > 0)
                         {
@@ -502,7 +587,18 @@ namespace RRS_API.Controllers
                                 }
                             }
 
-                            tmpWords = receipt.GetWord(sid.Key);
+                            tmpWords = receipt.GetWord(current.Key);
+                            if (!obj.getQuantity().Contains(".") && obj.getQuantity().Equals("1"))
+                            {
+                                obj.setQuantity(tmpWords.Count.ToString());
+                            }
+
+                            /*
+                            if (obj.getQuantity().Contains(".") && tmpWords.Count > 1)
+                            {
+                                obj.setvalidProduct(false);
+                            }
+                            */
                             foreach (OcrWord word in tmpWords)
                             {
                                 numOfWords += 1;
@@ -516,10 +612,14 @@ namespace RRS_API.Controllers
                         }
                     }
                 }
+                //get dominant words
+                List<OcrWord> DominantWords = GetDominantWords(wordsToDraw, buckets, receipt);
+                RemoveNotRelevantWords(receipt, DominantWords);
+
                 receipt.SetAverageCoordinates(averageX, averageY);
                 //draw marks on images -> save them -> insert detected products to db -> send email to researcher
-                SetReceiptValidProducts(receipt);
-                marksDrawing.Draw(wordsToDraw, receipt);
+                //SetReceiptValidProducts(receipt);
+                marksDrawing.Draw(DominantWords, receipt);
                 MarkedImageSaver.SaveMarkedImage(receipt, selectedFamilyID);
                 SaveReceiptDataToDB(selectedFamilyID, receipt);
 
@@ -536,35 +636,12 @@ namespace RRS_API.Controllers
             DBConnection = null;
         }
 
-        /*
-         * if word is False Positive - IsFP = true, else IsFP = False
-         */
-        private void SetReceiptValidProducts(Receipt receipt)
-        {
-            double normalizedX, normalizedWidth;
-            bool xRuleDeviation;
-            double averageX = receipt.GetXAverage();
 
-            foreach (KeyValuePair<string, List<MetaData>> sid in receipt.GetIdToMetadata())
-            {
-                foreach (MetaData obj in sid.Value)
-                {
-                    if (obj.description != "")
-                    {
-                        List<OcrWord> tmpWords = receipt.GetWord(sid.Key);
-                        foreach (OcrWord word in tmpWords)
-                        {
-                            normalizedX = (int)((word.getX() / receipt.GetWidth()) * receipt.GetOriginalImage().Width);
-                            normalizedWidth = (int)((word.getWidth() / receipt.GetWidth()) * receipt.GetOriginalImage().Width + 14);
-                            xRuleDeviation = Math.Abs(normalizedX + normalizedWidth - (receipt.GetXAverage())) < 0.08 * receipt.GetWidth();
-                            obj.setvalidProduct(xRuleDeviation);
-                        }
-                    }
-
-                }
-            }
-        }
-
+        /// <summary>
+        /// This method save receipt data to db, includes optional products for each product.
+        /// </summary>
+        /// <param name="FamilyID"></param>
+        /// <param name="receipt"></param>
         private void SaveReceiptDataToDB(string FamilyID, Receipt receipt)
         {
             try
@@ -608,20 +685,102 @@ namespace RRS_API.Controllers
             return zeros;
         }
 
-        /*
-        private bool checkIfFamilyExists(string familyID, List<FamilyUploads> toReturn)
+        /// <summary>
+        /// This method divide image to buckets ranges by x coordinate.
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="numOfBuckets"> number of buckets to divide.</param>
+        /// <returns> Dictionary of bucket, each bucket has start x coordinate and end x coordinate. </returns>
+        private Dictionary<int, int> GetBucketsDivide(Image image, int numOfBuckets)
         {
-            foreach (var element in toReturn)
+            Dictionary<int, int> buckets = new Dictionary<int, int>();
+            int step = image.Width / numOfBuckets;
+            int startCoordinate = 0;
+            int endCoordinate = 0;
+            for (int i = 0; i < numOfBuckets; i++)
             {
-                if (element.familyID.Equals(familyID))
+                endCoordinate = startCoordinate + step;
+                buckets.Add(startCoordinate, endCoordinate);
+                startCoordinate = endCoordinate;
+            }
+            return buckets;
+        }
+
+        /// <summary>
+        /// This method remove the products which not remained after get dominant bucket.
+        /// </summary>
+        /// <param name="receipt">the specified receipt</param>
+        /// <param name="wordsToDraw">the remaind products after get dominant bucket</param>
+        private void RemoveNotRelevantWords(Receipt receipt, List<OcrWord> dominantWords)
+        {
+            try
+            {
+                if (dominantWords != null)
                 {
-                    element.count += 1;
-                    return true;
+                    Dictionary<string, List<MetaData>> idsToMetadata = receipt.GetIdToMetadata();
+                    Dictionary<string, List<MetaData>> cleanIdsToMetadata = new Dictionary<string, List<MetaData>>();
+                    for (int i = 0; i < dominantWords.Count; i++)
+                    {
+                        string word = dominantWords.ElementAt(i).getText();
+                        if (idsToMetadata.ContainsKey(word) && !cleanIdsToMetadata.ContainsKey(word))
+                        {
+                            cleanIdsToMetadata.Add(word, idsToMetadata[word]);
+                        }
+                    }
+                    receipt.SetIdToMetadata(cleanIdsToMetadata);
+                }
+            }catch(Exception e)
+            {
+                _logger.Error($"Error: Exeption {e}");
+            }
+        }
+
+        /// <summary>
+        /// This method insert the products to buckets, find the dominant bucket (the one with the biggest number of products)
+        /// </summary>
+        /// <param name="words"></param>
+        /// <param name="buckets"></param>
+        /// <param name="receipt"></param>
+        /// <returns>The words in the dominant bucket. </returns>
+        private List<OcrWord> GetDominantWords(List<OcrWord> words, Dictionary<int, int> buckets, Receipt receipt)
+        {
+            Dictionary<int, List<OcrWord>> bucketAndCount = new Dictionary<int, List<OcrWord>>();
+            int normalizedX = 0, normalizedWidth = 0, endCoordinate = 0;
+            foreach (OcrWord word in words)
+            {
+                foreach (KeyValuePair<int, int> bucket in buckets)
+                {
+                    normalizedX = (int)((word.getX() / receipt.GetWidth()) * receipt.GetOriginalImage().Width);
+                    normalizedWidth = (int)((word.getWidth() / receipt.GetWidth()) * receipt.GetOriginalImage().Width);
+                    endCoordinate = normalizedX + normalizedWidth;
+                    if (bucket.Key <= endCoordinate && endCoordinate <= bucket.Value)
+                    {
+                        if (!bucketAndCount.ContainsKey(bucket.Key))
+                        {
+                            bucketAndCount.Add(bucket.Key, new List<OcrWord>());
+                            bucketAndCount[bucket.Key].Add(word);
+                        }
+                        else
+                        {
+                            bucketAndCount[bucket.Key].Add(word);
+                        }
+                    }
                 }
             }
-            return false;
+
+            List<OcrWord> toReturn = null;
+            int max = 0;
+            foreach (KeyValuePair<int, List<OcrWord>> pair in bucketAndCount)
+            {
+                if (pair.Value.Count >= max)
+                {
+                    max = pair.Value.Count;
+                    toReturn = pair.Value;
+                }
+            }
+
+            return toReturn;
         }
-        */
     }
     #endregion
 }

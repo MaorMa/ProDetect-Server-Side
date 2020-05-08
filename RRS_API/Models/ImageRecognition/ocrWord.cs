@@ -1,5 +1,8 @@
 ﻿using System;
 
+/// <summary>
+/// This class represents ocr word.
+/// </summary>
 public class OcrWord
 {
     private double x;

@@ -4,7 +4,9 @@ using System.Collections.Generic;
 
 namespace ImageRecognition.Objects
 {
-    //This class responsibe for represent all the metadata of each product
+    /// <summary>
+    /// This class responsibe for represent all the metadata of each product
+    /// </summary>
     public class MetaData
     {
         //Fields
@@ -30,7 +32,6 @@ namespace ImageRecognition.Objects
         }
 
         // Getters
-
         public string getDescription()
         {
             return this.description;
@@ -67,7 +68,6 @@ namespace ImageRecognition.Objects
         }
 
         // Setters
-
         public void setDescription(string description)
         {
             this.description = description;

@@ -72,11 +72,14 @@
     <Compile Include="Models\DB\DBConnectionTests.cs" />
     <Compile Include="Models\ImageRecognition\OcrProcessingTests.cs" />
     <Compile Include="Models\JWT\JWTServiceTests.cs" />
+    <Compile Include="Models\Managers\PasswordMngrTests.cs" />
     <Compile Include="Models\Managers\ReceiptMngrTests.cs" />
     <Compile Include="Models\Managers\SettingsMngrTests.cs" />
+    <Compile Include="Models\Managers\StatisticsMngrTests.cs" />
     <Compile Include="Models\Managers\UsersMngrTests.cs" />
     <Compile Include="Models\Parsers\OcrTextParserTests.cs" />
     <Compile Include="Models\Parsers\ProductDescriptionParserTests.cs" />
+    <Compile Include="Models\StringSimilarityAlgorithms\JaroWinklerDistanceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

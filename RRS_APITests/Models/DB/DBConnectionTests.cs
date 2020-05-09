@@ -17,9 +17,9 @@ namespace RRS_API.Models.Tests
         [TestMethod()]
         public void UpdateStatusTest()
         {
-            DB.UpdateStatus("Maor", "2ABA57762954858E0557085981F3FC4C7024B1E8", "-1");
-            DB.UpdateStatus("Maor", "2ABA57762954858E0557085981F3FC4C7024B1E8", "0");
-            List<string> updatedStatus = DB.SelectQuery("select ReceiptStatus from FamilyUploads where ReceiptID='2ABA57762954858E0557085981F3FC4C7024B1E8'");
+            DB.UpdateStatus("Maor", "357C7744F08363DC3D36B78B1BF1A10DD52C8451", "-1");
+            DB.UpdateStatus("Maor", "357C7744F08363DC3D36B78B1BF1A10DD52C8451", "0");
+            List<string> updatedStatus = DB.SelectQuery("select ReceiptStatus from FamilyUploads where ReceiptID='357C7744F08363DC3D36B78B1BF1A10DD52C8451'");
             Assert.AreEqual("0", updatedStatus[0]);
         }
 

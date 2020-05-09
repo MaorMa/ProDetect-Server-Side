@@ -39,6 +39,10 @@ namespace RRS_API.Models.StringSimilarityAlgorithms
         /// <returns></returns>
         public List<ResearchProduct> GetTopFiveSimilarProducts(string productName)
         {
+            if (productName == null)
+            {
+                return new List<ResearchProduct>();
+            }
             string[] words = productName.Split(' ', '.', '-');
             List<string> newProductName = new List<string>();
 
@@ -97,6 +101,7 @@ namespace RRS_API.Models.StringSimilarityAlgorithms
                 toReturn.Add(topProductList.ElementAt(i));
             }
             return toReturn;
+
         }
 
         // Check if value contains word 

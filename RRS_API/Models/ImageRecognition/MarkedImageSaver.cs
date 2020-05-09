@@ -13,8 +13,8 @@ namespace RRS_API.Models.ImageRecognition
     /// </summary>
     public class MarkedImageSaver
     {
-        private string MarkedImagesPath = System.Web.HttpContext.Current.Server.MapPath("~/Images/");
-
+        //private string MarkedImagesPath = System.Web.HttpContext.Current.Server.MapPath("~/Images/");
+        private string MarkedImagesPath = "";
         /// <summary>
         /// This method save marked image in the server.
         /// using toStream auxilary method.

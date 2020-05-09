@@ -28,7 +28,7 @@ namespace Server
         public OcrProcessing()
         {
             IronOcr.License.LicenseKey = "IRONOCR-331669D230-119164-85AA56-6D1E880DDB-7AC6351-UEx46DE8D12FEFC7D8-BENGURIONUNIVERSITY.IRO190324.4912.54129.PRO.1DEV.1YR.SUPPORTED.UNTIL.24.MAR.2020";
-            IronOcrInstallation.InstallationPath = System.Web.HttpContext.Current.Server.MapPath("~/RequiredDLL/");
+            //IronOcrInstallation.InstallationPath = System.Web.HttpContext.Current.Server.MapPath("~/RequiredDLL/");
             this.ocr = new AdvancedOcr()
             {
                 Language = IronOcr.Languages.Hebrew.OcrLanguagePack,

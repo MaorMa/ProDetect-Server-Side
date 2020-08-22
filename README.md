@@ -1,5 +1,5 @@
 # RRS-SERVER
-<b>This project was written by Maor Maimon and Yaniv Knobel.</b>
+<b>This project was developed by Maor Maimon and Yaniv Knobel.</b>
 
 
 <b>Summary</b>

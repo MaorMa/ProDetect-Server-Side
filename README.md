@@ -1,4 +1,4 @@
-# RRS-SERVER
+# ProDetect - Server Side
 <b>This project was developed by Maor Maimon and Yaniv Knobel.</b>
 
 

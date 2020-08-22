@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RRS_API.Models;
+using RRS_API.Models.Mangagers;
 using System;
 using System.Collections;
 using System.Collections.Generic;

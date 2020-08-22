@@ -25,10 +25,10 @@ namespace RRS_API.Models
             {
                 modes = new List<Bitmap>();
                 Flip(image);
-                this.imgInNewResolution = ImproveResolution(image);
+                this.imgInNewResolution = ImproveResolution(new Bitmap(image));
                 modes.Add(ConvertToGrayscale(new Bitmap(image)));
-                modes.Add(BinarizeAndDilation(imgInNewResolution, true));
-                modes.Add(BinarizeAndDilation(new Bitmap(image), false));
+                modes.Add(BinarizeAndDilationWithMedian(new Bitmap(imgInNewResolution)));
+                modes.Add(BinarizeAndDilationNoMedian(new Bitmap(image)));
                 modes.Add(PosterizationAndBinarize(new Bitmap(image)));
                 modes.Add(Binarize(new Bitmap(image)));
                 modes.Add(Sharpen(new Bitmap(image)));
@@ -44,7 +44,7 @@ namespace RRS_API.Models
         /// </summary>
         /// <param name="image"></param>
         /// <returns></returns>
-        private Bitmap ImproveResolution(Image image)
+        private Bitmap ImproveResolution(Bitmap image)
         {
             //improve resolution
             Bitmap b = new Bitmap(image);
@@ -73,7 +73,7 @@ namespace RRS_API.Models
 
                     grayScale.SetPixel(x, y, Color.FromArgb(gs, gs, gs));
                 }
-            grayScale.Save(@"C:\Users\Maor\Desktop\mode\grayScale.jpeg");
+           //grayScale.Save(@"C:\Users\Maor\Desktop\mode\grayScale.jpeg");
             return grayScale;
         }
 
@@ -82,7 +82,7 @@ namespace RRS_API.Models
         /// </summary>
         /// <param name="image"></param>
         /// <returns></returns>
-        private Bitmap BinarizeAndDilation(Bitmap image, bool withMedian)
+        private Bitmap BinarizeAndDilationWithMedian(Bitmap image)
         {
             int[,] kernel = {
             { -2, -1,  0 },
@@ -103,18 +103,46 @@ namespace RRS_API.Models
 
             invert.ApplyInPlace(bmp8bpp);
 
-            if (withMedian)
-            {
-                Median median = new Median();
-                median.ApplyInPlace(bmp8bpp);
-            }
+            Median median = new Median();
+            median.ApplyInPlace(bmp8bpp);
 
             Closing closing = new Closing();
             closing.ApplyInPlace(bmp8bpp);
 
             OtsuThreshold OtsuThreshold = new OtsuThreshold();
             OtsuThreshold.ApplyInPlace(bmp8bpp);
-            bmp8bpp.Save(@"C:\Users\Maor\Desktop\mode\BinarizeAndDilation.jpeg");
+            //bmp8bpp.Save(@"C:\Users\Maor\Desktop\mode\BinarizeAndDilationWithMedian.jpeg");
+            return bmp8bpp;
+        }
+
+
+        private Bitmap BinarizeAndDilationNoMedian(Bitmap image)
+        {
+            int[,] kernel = {
+            { -2, -1,  0 },
+            { -1,  1,  1 },
+            {  0,  1,  2 } };
+            // create filter
+            Convolution Convolution = new Convolution(kernel);
+            // apply the filter
+            Convolution.ApplyInPlace(image);
+
+            var bmp8bpp = Grayscale.CommonAlgorithms.BT709.Apply(image);
+
+            Invert invert = new Invert();
+            invert.ApplyInPlace(bmp8bpp);
+
+            Dilatation dilatation = new Dilatation();
+            dilatation.ApplyInPlace(bmp8bpp);
+
+            invert.ApplyInPlace(bmp8bpp);
+
+            Closing closing = new Closing();
+            closing.ApplyInPlace(bmp8bpp);
+
+            OtsuThreshold OtsuThreshold = new OtsuThreshold();
+            OtsuThreshold.ApplyInPlace(bmp8bpp);
+            //bmp8bpp.Save(@"C:\Users\Maor\Desktop\mode\BinarizeAndDilationNoMedian.jpeg");
             return bmp8bpp;
         }
 
@@ -126,8 +154,8 @@ namespace RRS_API.Models
         private Bitmap PosterizationAndBinarize(Bitmap image)
         {
             image = SimplePosterization(image);
-            image = BinarizeAndDilation(image, true);
-            image.Save(@"C:\Users\Maor\Desktop\mode\PosterizationAndBinarize.jpeg");
+            image = BinarizeAndDilationWithMedian(image);
+            //image.Save(@"C:\Users\Maor\Desktop\mode\PosterizationAndBinarize.jpeg");
             return image;
         }
 

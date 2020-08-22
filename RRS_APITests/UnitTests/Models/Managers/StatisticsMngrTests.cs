@@ -26,11 +26,13 @@ namespace RRS_API.Models.Mangagers.Tests
             Assert.AreEqual("[]", result);
         }
 
+        /*
         [TestMethod()]
         public void GetCompareByCostTest()
         {
             string result = sm.GetCompareByCost(null);
             Assert.AreEqual("[]", result);
         }
+        */
     }
 }

@@ -55,6 +55,8 @@
       <HintPath>..\packages\System.IdentityModel.Tokens.Jwt.6.5.1\lib\net461\System.IdentityModel.Tokens.Jwt.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Web.Http, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -69,17 +71,20 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Models\DB\DBConnectionTests.cs" />
-    <Compile Include="Models\ImageRecognition\OcrProcessingTests.cs" />
-    <Compile Include="Models\JWT\JWTServiceTests.cs" />
-    <Compile Include="Models\Managers\PasswordMngrTests.cs" />
-    <Compile Include="Models\Managers\ReceiptMngrTests.cs" />
-    <Compile Include="Models\Managers\SettingsMngrTests.cs" />
-    <Compile Include="Models\Managers\StatisticsMngrTests.cs" />
-    <Compile Include="Models\Managers\UsersMngrTests.cs" />
-    <Compile Include="Models\Parsers\OcrTextParserTests.cs" />
-    <Compile Include="Models\Parsers\ProductDescriptionParserTests.cs" />
-    <Compile Include="Models\StringSimilarityAlgorithms\JaroWinklerDistanceTests.cs" />
+    <Compile Include="Controllers\ReceiptControllerTests.cs" />
+    <Compile Include="Models\ImageRecognition\PreProcessingTests.cs" />
+    <Compile Include="Models\Managers\NutrientMngrTests.cs" />
+    <Compile Include="UnitTests\Models\DB\DBConnectionTests.cs" />
+    <Compile Include="UnitTests\Models\ImageRecognition\OcrProcessingTests.cs" />
+    <Compile Include="UnitTests\Models\JWT\JWTServiceTests.cs" />
+    <Compile Include="UnitTests\Models\Managers\PasswordMngrTests.cs" />
+    <Compile Include="UnitTests\Models\Managers\ReceiptMngrTests.cs" />
+    <Compile Include="UnitTests\Models\Managers\SettingsMngrTests.cs" />
+    <Compile Include="UnitTests\Models\Managers\StatisticsMngrTests.cs" />
+    <Compile Include="UnitTests\Models\Managers\UsersMngrTests.cs" />
+    <Compile Include="UnitTests\Models\Parsers\OcrTextParserTests.cs" />
+    <Compile Include="UnitTests\Models\Parsers\ProductDescriptionParserTests.cs" />
+    <Compile Include="UnitTests\Models\StringSimilarityAlgorithms\JaroWinklerDistanceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -92,6 +97,7 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

@@ -17,9 +17,9 @@ namespace RRS_API.Models.Tests
         [TestMethod()]
         public void UpdateStatusTest()
         {
-            DB.UpdateStatus("Maor", "357C7744F08363DC3D36B78B1BF1A10DD52C8451", "-1");
-            DB.UpdateStatus("Maor", "357C7744F08363DC3D36B78B1BF1A10DD52C8451", "0");
-            List<string> updatedStatus = DB.SelectQuery("select ReceiptStatus from FamilyUploads where ReceiptID='357C7744F08363DC3D36B78B1BF1A10DD52C8451'");
+            DB.UpdateStatus("Maor", "123", "-1");
+            DB.UpdateStatus("Maor", "123", "0");
+            List<string> updatedStatus = DB.SelectQuery("select ReceiptStatus from FamilyUploads where ReceiptID='123'");
             Assert.AreEqual("0", updatedStatus[0]);
         }
 
@@ -31,7 +31,7 @@ namespace RRS_API.Models.Tests
             DB.UpdateFamilyUploads("Maor", "Shupersal", "111", -1, "2020-05-07 16:30:03.000");
             List<string> receipt = DB.SelectQuery("select ReceiptID from FamilyUploads where ReceiptID='111'");
 
-            Assert.AreEqual("111",receipt[0]);
+            Assert.AreEqual("111", receipt[0]);
         }
 
 
@@ -39,7 +39,7 @@ namespace RRS_API.Models.Tests
         public void InsertReceiptDataTest()
         {
             DB.DeleteReceiptData("111");
-            DB.InsertReceiptData("Maor","111","22","עגבניה","1","1","3.90",100,true);
+            DB.InsertReceiptData("Maor", "111", "22", "עגבניה", "1", "1", "3.90", 100, true);
             List<string> result = DB.SelectQuery("select ProductID from ReceiptData where ReceiptID='111'");
             Assert.AreEqual("22", result[0]);
         }
@@ -66,7 +66,7 @@ namespace RRS_API.Models.Tests
         public void InsertOptionalProductTest()
         {
             DB.SelectQuery("delete from OptionalProducts where ProductID='1'");
-            DB.InsertOptionalProduct("Shufersal","1", new Objects.ResearchProduct("22","עגבניה","1"));
+            DB.InsertOptionalProduct("Shufersal", "1", new Objects.ResearchProduct("22", "עגבניה", "1"));
             List<string> receipt = DB.SelectQuery("select ProductID from OptionalProducts where ProductID='1'");
             Assert.AreEqual(1, receipt.Count);
         }
@@ -90,99 +90,20 @@ namespace RRS_API.Models.Tests
         public void GetGroupIDTest()
         {
             string res = DB.GetGroupID("Test");
-            Assert.AreEqual("True",res);
-        }
-
-
-        /*
-        [TestMethod()]
-        public void GetInstanceTest()
-        {
-            Assert.Fail();
+            Assert.AreEqual("True", res);
         }
 
         [TestMethod()]
         public void SelectQueryTest()
         {
-            Assert.Fail();
+            var result = DB.SelectQuery("select FamilyID from FamilyUploads where ReceiptID='123'");
+            Assert.AreEqual("Maor", result[0]);
         }
-
-
-
-
-
-
-
-
-        [TestMethod()]
-        public void DeleteOptionalDataTest()
-        {
-            Assert.Fail();
-        }
-
-
-
-        [TestMethod()]
-        public void CheckUsernameAndPasswordTest()
-        {
-            Assert.Fail();
-        }
-
-
-
-        [TestMethod()]
-        public void GetFamiliesTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetFamiliesWithApprovedDataTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void AddNewFamilyUserTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetSimiliarProductNamesTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void InsertOptionalProductsTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void InsertOptionalProductTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void DeleteNutrientsDataTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void InsertNewNutrientTest()
-        {
-            Assert.Fail();
-        }
-        */
-
 
         /*
          * Integration
          */
+         /*
         [TestMethod()]
         public void CheckUsernameAndPasswordTest()
         {
@@ -192,6 +113,15 @@ namespace RRS_API.Models.Tests
             var password_bytes = Encoding.UTF8.GetBytes("Test666666");
             string hashedPass = pm.Sha256Encription(password_bytes, salt_bytes);
             bool t = DB.CheckUsernameAndPassword("Test", hashedPass);
+        }
+        */
+
+        [TestMethod()]
+        public void GetFamiliesTest()
+        {
+            var result = DB.GetFamilies();
+            List<string> expected = new List<string>() { "Family1", "Family2", "Liron","Maor","Sigal","Test","Test2","User"};
+            CollectionAssert.AreEqual(expected, result);
         }
     }
 }

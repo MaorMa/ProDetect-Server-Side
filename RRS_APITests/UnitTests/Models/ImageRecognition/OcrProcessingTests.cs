@@ -16,6 +16,7 @@ namespace Server.Tests
         [TestMethod()]
         public void FromImagesToTextTest()
         {
+
             OcrProcessing op = new OcrProcessing();
             Dictionary<string, Image> dic = new Dictionary<string, Image>();
             dic.Add("1", new Bitmap(@"C:\\Users\\Maor\\Desktop\\test\\test.png"));

@@ -6,7 +6,7 @@ using System.Security.Claims;
 using log4net;
 using System.Reflection;
 
-namespace RRS_API.Models.Objects
+namespace RRS_API.Models.Mangagers
 {
     /// <summary>
     /// This class responsilbe to manage tokens.

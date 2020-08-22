@@ -26,6 +26,7 @@ namespace RRS_API.Models.Mangagers.Tests
             }
         }
 
+        /*
         [TestMethod()]
         public void AddNewFamilyUserNotExistsTest()
         {
@@ -38,6 +39,7 @@ namespace RRS_API.Models.Mangagers.Tests
                 Assert.Fail();
             }
         }
+        */
 
     }
 }

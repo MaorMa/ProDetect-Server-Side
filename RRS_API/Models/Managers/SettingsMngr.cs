@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RRS_API.Models
+namespace RRS_API.Models.Mangagers
 {
     /// <summary>
     /// This class responsible to return basic settings.
@@ -16,7 +16,7 @@ namespace RRS_API.Models
         /// This method return all existing markets in db.
         /// </summary>
         /// <returns>List of Market's names</returns>
-        public List<String> GetMarkets()
+        public List<string> GetMarkets()
         {
             string query = "SELECT * FROM Markets";
             return DBConnection.SelectQuery(query);

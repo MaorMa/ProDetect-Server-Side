@@ -17,7 +17,7 @@ using RRS_API.Models.Objects;
 using RRS_API.Models.StringSimilarityAlgorithms;
 using RRS_API.Models.Parsers;
 
-namespace RRS_API.Controllers
+namespace RRS_API.Models.Mangagers
 {
     /// <summary>
     /// This class responsilbe to mangage the main scenario - upload receipts.

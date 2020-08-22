@@ -28,7 +28,8 @@ namespace Server
         public OcrProcessing()
         {
             IronOcr.License.LicenseKey = "IRONOCR-331669D230-119164-85AA56-6D1E880DDB-7AC6351-UEx46DE8D12FEFC7D8-BENGURIONUNIVERSITY.IRO190324.4912.54129.PRO.1DEV.1YR.SUPPORTED.UNTIL.24.MAR.2020";
-            //IronOcrInstallation.InstallationPath = System.Web.HttpContext.Current.Server.MapPath("~/RequiredDLL/");
+            IronOcrInstallation.InstallationPath = System.Web.HttpContext.Current.Server.MapPath("~/RequiredDLL/");
+
             this.ocr = new AdvancedOcr()
             {
                 Language = IronOcr.Languages.Hebrew.OcrLanguagePack,
@@ -43,6 +44,9 @@ namespace Server
                 Strategy = AdvancedOcr.OcrStrategy.Advanced,
                 InputImageType = AdvancedOcr.InputTypes.Snippet
             };
+
+
+
             this.receipts = new List<Receipt>();
         }
 
@@ -130,7 +134,8 @@ namespace Server
                         try
                         {
                             _logger.Debug($"OcrRead imgName: {imgName} - Mode4");
-                            DetectWords(ocr.Read(preProccessing.GetMode4()), receipt);
+                            var image = preProccessing.GetMode4();
+                            DetectWords(ocr.Read(new Bitmap(image)), receipt);
                         }
                         catch (Exception e)
                         {
@@ -143,7 +148,8 @@ namespace Server
                         try
                         {
                             _logger.Debug($"OcrRead imgName: {imgName} - Mode5");
-                            DetectWords(ocr.Read(preProccessing.GetMode5()), receipt);
+                            var image = preProccessing.GetMode5();
+                            DetectWords(ocr.Read(new Bitmap(image)), receipt);
                         }
                         catch (Exception e)
                         {
@@ -156,7 +162,8 @@ namespace Server
                         try
                         {
                             _logger.Debug($"OcrRead imgName: {imgName} - Mode6");
-                            DetectWords(ocr.Read(preProccessing.GetMode6()), receipt);
+                            var image = preProccessing.GetMode6();
+                            DetectWords(ocr.Read(new Bitmap(image)), receipt);
                         }
                         catch (Exception e)
                         {
@@ -165,22 +172,21 @@ namespace Server
                     });
 
                     
-                    
                     mode2.Start();
                     mode3.Start();
                     mode4.Start();
-                    mode5.Start();
-                    mode6.Start();
-                    
                     mode2.Wait();
                     mode3.Wait();
                     mode4.Wait();
+
+                    mode5.Start();
+                    mode6.Start();
                     mode5.Wait();
                     mode6.Wait();
                     
-
                     //add receipt after trying all modes
                     _logger.Debug($"Adding receipt {receipt.GetName()} to list of ready receits");
+
                     this.receipts.Add(receipt);
                 }
             }

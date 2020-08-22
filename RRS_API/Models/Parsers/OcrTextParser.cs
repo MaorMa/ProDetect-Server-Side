@@ -95,7 +95,7 @@ namespace OcrProject.Parser
                 */
             }
             //set the full dict' into the receipt
-            receipt.SetIdToMetadata(receiptsIdToMetadata);
+            //receipt.SetIdToMetadata(receiptsIdToMetadata);
         }
 
         /// <summary>
